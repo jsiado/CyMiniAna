@@ -214,6 +214,15 @@ class CMAProducer : public edm::EDProducer {
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetPhi;
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetE;
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetCharge; 
+
+    // MET
+    edm::Handle<std::vector<float>> h_metFullPhi;
+    edm::Handle<std::vector<float>> h_metFullPt;
+    edm::Handle<std::vector<float>> h_metFullPx;
+    edm::Handle<std::vector<float>> h_metFullPy;
+    edm::Handle<std::vector<float>> h_metFulluncorPhi;
+    edm::Handle<std::vector<float>> h_metFulluncorPt;
+    edm::Handle<std::vector<float>> h_metFulluncorSumEt;
 };
 
 #endif

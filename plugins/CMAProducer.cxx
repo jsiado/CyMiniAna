@@ -23,7 +23,7 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   m_useJets(iConfig.getParameter<bool>("useJets")),
   m_useLargeRJets(iConfig.getParameter<bool>("useLargeRJets")),
   m_useLeptons(iConfig.getParameter<bool>("useLeptons")),
-  m_useNeutrino(iConfig.getParameter<bool>("useNeutrino")),
+  m_useNeutrinos(iConfig.getParameter<bool>("useNeutrinos")),
   m_kinematicReco(iConfig.getParameter<bool>("kinematicReco")),
   m_metadataFile(iConfig.getParameter<bool>("metadataFile")){
     // EDModules
@@ -94,14 +94,14 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
         t_muNumberOfValidTrackerHits = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberOfValidTrackerHitsLabel"))), 
 
         if (m_useTruth){
-            t_muGenMuonE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenMuonELabel"))), 
-            t_muGenMuonEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenMuonEtaLabel"))), 
-            t_muGenMuonPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenMuonPhiLabel"))), 
-            t_muGenMuonPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenMuonPtLabel"))), 
-            t_muGenMuonCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenMuonChargeLabel"))), 
+            t_muGenE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenELabel"))), 
+            t_muGenEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenEtaLabel"))), 
+            t_muGenPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenPhiLabel"))), 
+            t_muGenPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenPtLabel"))), 
+            t_muGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenChargeLabel"))), 
         }
     }
-    if (m_useNeutrino && !m_kinematicReco){
+    if (m_useNeutrinos && !m_kinematicReco){
         // neutrinos reconstructed from MET
         t_nuPt  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPtLabel"))
         t_nuEta = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuEtaLabel"))
@@ -133,11 +133,11 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
         t_jetPartonFlavour  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetHadronFlavourLabel");
 
         if (m_useTruth){
-            t_jetGenJetPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenJetPtLabel"));
-            t_jetGenJetEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenJetEtaLabel"));
-            t_jetGenJetPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenJetPhiLabel"));
-            t_jetGenJetE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenJetELabel"));
-            t_jetGenJetCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenJetChargeLabel"));
+            t_jetGenPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPtLabel"));
+            t_jetGenEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenEtaLabel"));
+            t_jetGenPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPhiLabel"));
+            t_jetGenE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenELabel"));
+            t_jetGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenChargeLabel"));
         }
     }
     if (m_useLargeRJets){
@@ -183,23 +183,35 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
         t_ljet_subjetCMVA   = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetCMVALabel");
 
         if (m_useTruth){
-            t_ljetGenJetPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenJetPtLabel"));
-            t_ljetGenJetEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenJetEtaLabel"));
-            t_ljetGenJetPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenJetPhiLabel"));
-            t_ljetGenJetE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenJetELabel"));
-            t_ljetGenJetCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenJetChargeLabel"));
-            t_ljet_subjetGenJetPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenJetPtLabel");
-            t_ljet_subjetGenJetEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenJetEtaLabel");
-            t_ljet_subjetGenJetPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenJetPhiLabel");
-            t_ljet_subjetGenJetE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenJetELabel");
-            t_ljet_subjetGenJetCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenJetChargeLabel");
+            t_ljetGenPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPtLabel"));
+            t_ljetGenEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenEtaLabel"));
+            t_ljetGenPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPhiLabel"));
+            t_ljetGenE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenELabel"));
+            t_ljetGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenChargeLabel"));
+            t_ljet_subjetGenPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenPtLabel");
+            t_ljet_subjetGenEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenEtaLabel");
+            t_ljet_subjetGenPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenPhiLabel");
+            t_ljet_subjetGenE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenELabel");
+            t_ljet_subjetGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("ljet_subjetGenChargeLabel");
         }
     }
+
     if (m_useTriggers){
     }
+
     // MET
+    m_METPtMin = iConfig.getParameter<double>("METPtMin");
+    m_METPtMax = iConfig.getParameter<double>("METPtMax");
 
+    t_metFullPhi = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPhiLabel")),
+    t_metFullPt  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPtLabel")),
+    t_metFullPx  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPxLabel")),
+    t_metFullPy  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPhiLabel")),
+    t_metFulluncorPhi   = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPhiLabel")),
+    t_metFulluncorPt    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPtLabel")),
+    t_metFulluncorSumEt = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorSumEtLabel")),
 
+    // Generator information (parton-level)
     if (m_isMC){
     }
 
@@ -212,28 +224,45 @@ CMAProducer::~CMAProducer() {}
 
 void CMAProducer::beginJob(){
     /* Producer setup before the event loop */
+    m_electrons.clear();
+    m_muons.clear();
+    m_jets.clear();
+    m_ljets.clear();
+    m_neutrinos.clear();
+    m_met.clear();
+    m_HT = 0;
+    m_ST = 0;
+
     return;
 }
 
 
 void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
-    /* Get the values from the event */
+    /* Get the values from the event 
+       - Build the different physics objects
+       - Store for easy access in other EDModules
+    */
     edm::Handle<int> h_runno; 
     evt.getByToken(t_runno, h_runno);
     const int runno(*h_runno.product()) ; 
 
-
     // physics objects
+    // - pass 'evt' to each function to access handles
     if (m_useLeptons){
-        initialize_electrons(evt);
-        initialize_muons(evt);
+        initialize_electrons(evt);    // Electrons
+        initialize_muons(evt);        // Muons
     }
-    if (m_useNeutrino){
+    if (m_useNeutrinos){
+        initialize_neutrinos(evt);    // Neutrinos
     }
     if (m_useJets){
+        initialize_jets(evt);         // AK4 jets
     }
     if (m_useLargeRJets){
+        initialize_largeRjets(evt);   // AK8 jets
     }
+
+    initialize_kinematics(evt);       // MET, HT calculations
 
     return;
 }
@@ -246,7 +275,39 @@ void Event::endJob(){
 
 
 void initialize_kinematics(edm::Event& evt){
-    evt.getByToken (t_npv, h_npv);
+    /* Kinematic variables: MET, HT, and ST */
+    // MET
+    evt.getByLabel(t_metFullPhi, h_metFullPhi);
+    evt.getByLabel(t_metFullPt,  h_metFullPt);
+    evt.getByLabel(t_metFullPx,  h_metFullPx); // should be accessible using pT and phi
+    evt.getByLabel(t_metFullPy,  h_metFullPy); // should be accessible using pT and phi
+    evt.getByLabel(t_metFulluncorPhi,   h_metFulluncorPhi);
+    evt.getByLabel(t_metFulluncorPt,    h_metFulluncorPt);
+    evt.getByLabel(t_metFulluncorSumEt, h_metFulluncorSumEt);
+
+    double metFullPt = (h_metFullPt.product())->at(0);
+
+    m_MET = {};
+    m_MET.p4.SetPtEtaPhiM( metFullPt, 0, h_metFullPhi.product()->at(0), 0);
+    m_MET.uncorrPhi   = h_metFulluncorPt.product()->at(0);
+    m_MET.uncorrPt    = h_metFulluncorPhi.product()->at(0);
+    m_MET.uncorrSumEt = h_metFulluncorSumEt.product()->at(0);
+
+    // HT & ST
+    m_HT = 0;           // sum of jet pT
+    m_ST = metFullPt;   // sum of jet pT, lepton pT, MET
+    for (const auto& jet : m_jets){
+        m_HT += jet.p4.Pt();
+        m_ST += jet.p4.Pt();
+    }
+    for (const auto& el : m_electrons){
+        m_ST += el.p4.Pt();
+    }
+    for (const auto& mu : m_muons){
+        m_ST += mu.p4.Pt();
+    }
+
+    return;
 }
 
 
@@ -367,11 +428,11 @@ void initialize_muons(){
 
     m_truth_muons.clear();
     if (m_useTruth){
-        evt.getByToken(t_muGenMuonE,   h_muGenMuonE);
-        evt.getByToken(t_muGenMuonEta, h_muGenMuonEta);
-        evt.getByToken(t_muGenMuonPhi, h_muGenMuonPhi);
-        evt.getByToken(t_muGenMuonPt,  h_muGenMuonPt);
-        evt.getByToken(t_muGenMuonCharge, h_muGenMuonCharge);
+        evt.getByToken(t_muGenE,   h_muGenE);
+        evt.getByToken(t_muGenEta, h_muGenEta);
+        evt.getByToken(t_muGenPhi, h_muGenPhi);
+        evt.getByToken(t_muGenPt,  h_muGenPt);
+        evt.getByToken(t_muGenCharge, h_muGenCharge);
 
         for (unsigned int imu=0, size=(h_muGenMuonPt.product())->size(); imu<size; ++imu) {
             Muon tru_mu;
@@ -428,10 +489,19 @@ void initialize_jets(){
     // Generator jets
     m_truth_jets.clear()
     if (m_isMC && m_useTruth){
-    evt.getByToken (t_jetGenJetE,    h_jetGenJetE);
-    evt.getByToken (t_jetGenJetEta,  h_jetGenJetEta);
-    evt.getByToken (t_jetGenJetPt,   h_jetGenJetPt);
-    evt.getByToken (t_jetGenJetPhi,  h_jetGenJetPhi);
+        evt.getByToken(t_jetGenPt,  h_jetGenPt);
+        evt.getByToken(t_jetGenEta, h_jetGenEta);
+        evt.getByToken(t_jetGenPhi, h_jetGenPhi);
+        evt.getByToken(t_jetGenE,   h_jetGenE);
+
+        for (unsigned ijet=0, size=(h_jetGenPt.product())->size(); ijet<size; ++ijet) { 
+
+            Jet jet;
+            jet.p4.SetPtEtaPhiE( (h_jetGenPt.product())->at(ijet),  (h_jetGenPt.product())->at(ijet),
+                                 (h_jetGenPhi.product())->at(ijet), (h_jetGenE.product())->at(ijet));
+
+            m_truth_jets.push_back(jet);
+        }
     }
 
     return;
