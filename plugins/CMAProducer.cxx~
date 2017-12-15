@@ -1,0 +1,322 @@
+/*
+Created:        --
+Last Updated:   13 December 2017
+
+Dan Marley
+daniel.edison.marley@cernSPAMNOT.ch
+University of Michigan, Ann Arbor, MI 48109
+
+-----
+
+Event class
+ Contains all the objects (& structs) with event information
+ Runs in the EDM framework of CMSSW over EDMntuples
+*/
+#include "Analysis/CyMiniAna/interface/Event.h"
+
+// constructor
+CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
+  m_isMC(false){
+    m_isMC     = iConfig.getParameter<bool>("isMC");
+    m_LUMI     = iConfig.getParameter<bool>("isMC");
+    m_useFlags = iConfig.getParameter<bool>("isMC");
+    m_useTruth = iConfig.getParameter<bool>("isMC");
+    m_useJets  = iConfig.getParameter<bool>("isMC");
+    m_useLargeRJets = iConfig.getParameter<bool>("isMC");
+    m_useLeptons    = iConfig.getParameter<bool>("isMC");
+    m_useNeutrino   = iConfig.getParameter<bool>("isMC");
+    m_kinematicReco = iConfig.getParameter<bool>("isMC");
+    m_metadataFile  = iConfig.getParameter<bool>("isMC");
+
+    m_event = new cmaEvent();
+} // end constructor
+
+
+CMAProducer::~CMAProducer() {}
+
+
+void CMAProducer::beginJob(){
+
+    return;
+}
+
+
+void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
+    /* Get the values from the event */
+    cma::DEBUG("EVENT : Execute event " );
+
+    return;
+}
+
+
+void Event::endJob(){
+    // delete variables
+    cma::DEBUG("EVENT : Finalize() ");
+    delete m_lwnn;
+    delete m_eventNumber;
+    delete m_runNumber;
+//    delete m_mcChannelNumber;
+//    delete m_mu;
+//    delete m_lumiblock;
+    if (m_config->useLargeRJets()){
+      delete m_ljet_size;        // jetAK8CHS_size
+      delete m_ljet_pt;          // jetAK8CHS_Pt
+      delete m_ljet_eta;         // jetAK8CHS_Eta
+      delete m_ljet_phi;         // jetAK8CHS_Phi
+      delete m_ljet_e;           // jetAK8CHS_E
+      delete m_ljet_tau1_CHS;    // jetAK8CHS_tau1CHS
+      delete m_ljet_tau2_CHS;    // jetAK8CHS_tau1CHS
+      delete m_ljet_tau3_CHS;    // jetAK8CHS_tau1CHS
+      delete m_ljet_charge;      // jetAK8CHS_Charge
+      delete m_ljet_softDropMass_CHS;  // jetAK8CHS_softDropMassCHS
+      delete m_ljet_CSVv2;                   // jetAK8CHS_CSVv2
+      delete m_ljet_CMVAv2;                  // jetAK8CHS_CMVAv2
+      delete m_ljet_CvsL;                    // jetAK8CHS_CvsL
+      delete m_ljet_CvsB;                    // jetAK8CHS_CvsB
+      delete m_ljet_PartonFlavour;           // jetAK8CHS_PartonFlavour
+      delete m_ljet_HadronFlavour;           // jetAK8CHS_HadronFlavour
+      delete m_ljet_neutralMultiplicity;     // jetAK8CHS_neutralMultiplicity
+      delete m_ljet_neutralHadronEnergyFrac; // jetAK8CHS_neutralHadronEnergyFrac
+      delete m_ljet_neutralEmEnergyFrac;     // jetAK8CHS_neutralEmEnergyFrac
+      delete m_ljet_chargedHadronEnergyFrac; // jetAK8CHS_chargedHadronEnergyFrac
+      delete m_ljet_chargedEmEnergyFrac;     // jetAK8CHS_chargedEmEnergyFrac
+      delete m_ljet_chargedMultiplicity;     // jetAK8CHS_chargedMultiplicity
+      delete m_ljet_jecFactor0;              // jetAK8CHS_jecFactor0
+      delete m_ljet_jetArea;                 // jetAK8CHS_jetArea
+      delete m_ljet_jecUncertainty;          // jetAK8CHS_jecUncertainty
+      delete m_ljet_PtResolution;            // jetAK8CHS_PtResolution
+      delete m_ljet_JERSF;                   // jetAK8CHS_JERSF
+      delete m_ljet_JERSFUp;                 // jetAK8CHS_JERSFUp
+      delete m_ljet_JERSFDown;               // jetAK8CHS_JERSFDown
+      delete m_ljet_SmearedPt;               // jetAK8CHS_SmearedPt
+      delete m_ljet_vSubjetIndex0;           // jetAK8CHS_vSubjetIndex0
+      delete m_ljet_vSubjetIndex1;           // jetAK8CHS_vSubjetIndex1
+      delete m_ljet_keys;                    // jetAK8CHS_Keys
+      delete m_ljet_subjet_size;                    // subjetAK8CHS_size
+      delete m_ljet_subjet_pt;                      // subjetAK8CHS_Pt
+      delete m_ljet_subjet_eta;                     // subjetAK8CHS_Eta
+      delete m_ljet_subjet_phi;                     // subjetAK8CHS_Phi
+      delete m_ljet_subjet_e;                       // subjetAK8CHS_E
+      delete m_ljet_subjet_charge;                  // subjetAK8CHS_Charge
+      delete m_ljet_subjet_CSVv2;                   // subjetAK8CHS_CSVv2
+      delete m_ljet_subjet_CMVAv2;                  // subjetAK8CHS_CMVAv2
+      delete m_ljet_subjet_CvsL;                    // subjetAK8CHS_CvsL
+      delete m_ljet_subjet_CvsB;                    // subjetAK8CHS_CvsB
+      delete m_ljet_subjet_partonFlavour;           // subjetAK8CHS_PartonFlavour
+      delete m_ljet_subjet_hadronFlavour;           // subjetAK8CHS_HadronFlavour
+      delete m_ljet_subjet_neutralMultiplicity;     // subjetAK8CHS_neutralMultiplicity
+      delete m_ljet_subjet_neutralHadronEnergyFrac; // subjetAK8CHS_neutralHadronEnergyFrac
+      delete m_ljet_subjet_neutralEmEnergyFrac;     // subjetAK8CHS_neutralEmEnergyFrac
+      delete m_ljet_subjet_chargedHadronEnergyFrac; // subjetAK8CHS_chargedHadronEnergyFrac
+      delete m_ljet_subjet_chargedEmEnergyFrac;     // subjetAK8CHS_chargedEmEnergyFrac
+      delete m_ljet_subjet_chargedMultiplicity;     // subjetAK8CHS_chargedMultiplicity
+      delete m_ljet_subjet_jecFactor0;              // subjetAK8CHS_jecFactor0
+      delete m_ljet_subjet_jetArea;                 // subjetAK8CHS_jetArea
+      delete m_ljet_subjet_keys;                    // subjetAK8CHS_Keys
+    }
+    if (m_config->useLeptons()){
+      delete m_el_size;    // el_size
+      delete m_el_pt;             // el_Pt
+      delete m_el_eta;            // el_Eta
+      delete m_el_phi;            // el_Phi
+      delete m_el_e;              // el_E
+      delete m_el_charge;         // el_Charge
+      delete m_el_key;            // el_Key
+      delete m_el_iso03;          // el_Iso03
+      delete m_el_iso03db;        // el_Iso03db
+      delete m_el_miniIso;        // el_MiniIso
+      delete m_el_SCEta;          // el_SCEta
+      delete m_el_SCPhi;          // el_SCPhi
+      delete m_el_vidVeto;        // el_vidVeto
+      delete m_el_vidLoose;       // el_vidLoose
+      delete m_el_vidMedium;      // el_vidMedium
+      delete m_el_vidTight;       // el_vidTight
+      delete m_el_vidHEEP;        // el_vidHEEP
+      delete m_el_vidVetonoiso;   // el_vidVetonoiso
+      delete m_el_vidLoosenoiso;  // el_vidLoosenoiso
+      delete m_el_vidMediumnoiso; // el_vidMediumnoiso
+      delete m_el_vidTightnoiso;  // el_vidTightnoiso
+      delete m_el_vidHEEPnoiso;   // el_vidHEEPnoiso
+      delete m_el_vidMvaGPvalue;  // el_vidMvaGPvalue
+      delete m_el_vidMvaGPcateg;  // el_vidMvaGPcateg
+      delete m_el_vidMvaHZZvalue; // el_vidMvaHZZvalue
+      delete m_el_vidMvaHZZcateg; // el_vidMvaHZZcateg
+      delete m_el_veto_NoIsoID;     // el_IDVeto_NoIso
+      delete m_el_loose_NoIsoID;    // el_IDLoose_NoIso
+      delete m_el_medium_NoIsoID;   // el_IDMedium_NoIso
+      delete m_el_tight_NoIsoID;    // el_IDTight_NoIso
+      delete m_el_isoVeto;          // el_IsoVeto
+      delete m_el_isoLoose;         // el_IsoLoose
+      delete m_el_isoMedium;        // el_IsoMedium
+      delete m_el_isoTight;         // el_IsoTight
+      delete m_el_vetoID;           // el_IDVeto
+      delete m_el_looseID;          // el_IDLoose
+      delete m_el_mediumID;         // el_IDMedium
+      delete m_el_tightID;          // el_IDTight
+
+
+      delete m_mu_size;         // mu_size
+      delete m_mu_pt;         // mu_Pt
+      delete m_mu_eta;        // mu_Eta
+      delete m_mu_phi;        // mu_Phi
+      delete m_mu_e;          // mu_E
+      delete m_mu_charge;     // mu_Charge
+      delete m_mu_key;        // mu_Key
+      delete m_mu_iso04;      // mu_Iso04
+      delete m_mu_miniIso;    // mu_MiniIso
+      delete m_mu_soft;       // mu_IsSoftMuon
+      delete m_mu_loose;      // mu_IsLooseMuon
+      delete m_mu_medium;     // mu_IsMediumMuon
+      delete m_mu_medium2016; // mu_IsMediumMuon2016
+      delete m_mu_tight;      // mu_IsTightMuon
+      delete m_mu_hightPt;    // mu_IsHighPtMuon
+    }
+    if (m_config->useJets()){
+
+    }
+    delete m_met_size;  // met_size
+    delete m_met_met;          // met_Pt
+    delete m_met_phi;          // met_Phi
+    delete m_met_met_uncor;    // met_uncorPt
+    delete m_met_phi_uncor;    // met_uncorPhi
+
+    delete m_met_muCleanOnly_size;  // met_MuCleanOnly_size
+    delete m_met_muCleanOnly_met;          // met_MuCleanOnly_Pt
+    delete m_met_muCleanOnly_phi;          // met_MuCleanOnly_Phi
+    delete m_met_muCleanOnly_met_uncor;    // met_MuCleanOnly_uncorPt
+    delete m_met_muCleanOnly_phi_uncor;    // met_MuCleanOnly_uncorPhi
+
+    delete m_met_syst_size;  // metsyst_size
+    delete m_met_syst_met;          // metsyst_Pt
+    delete m_met_syst_phi;          // metsyst_Phi
+    delete m_met_syst_muCleanOnly_met;    // metsyst_MuCleanOnly_Pt
+    delete m_met_syst_muCleanOnly_phi;    // metsyst_MuCleanOnly_Phi
+
+    if (m_config->useFlags()){
+      delete m_Flag_BadPFMuonFilter;                    // Flag_BadPFMuonFilter
+      delete m_Flag_BadChargedCandidateFilter;          // Flag_BadChargedCandidateFilter
+      delete m_Flag_HBHENoiseFilter;                    // Flag_HBHENoiseFilter
+      delete m_Flag_HBHENoiseIsoFilter;                 // Flag_HBHENoiseIsoFilter
+      delete m_Flag_CSCTightHaloFilter;                 // Flag_CSCTightHaloFilter
+      delete m_Flag_CSCTightHaloTrkMuUnvetoFilter;      // Flag_CSCTightHaloTrkMuUnvetoFilter
+      delete m_Flag_CSCTightHalo2015Filter;             // Flag_CSCTightHalo2015Filter
+      delete m_Flag_globalTightHalo2016Filter;          // Flag_globalTightHalo2016Filter
+      delete m_Flag_globalSuperTightHalo2016Filter;     // Flag_globalSuperTightHalo2016Filter
+      delete m_Flag_HcalStripHaloFilter;                // Flag_HcalStripHaloFilter
+      delete m_Flag_hcalLaserEventFilter;               // Flag_hcalLaserEventFilter
+      delete m_Flag_EcalDeadCellTriggerPrimitiveFilter; // Flag_EcalDeadCellTriggerPrimitiveFilter
+      delete m_Flag_EcalDeadCellBoundaryEnergyFilter;   // Flag_EcalDeadCellBoundaryEnergyFilter
+      delete m_Flag_goodVertices;                       // Flag_goodVertices
+      delete m_Flag_eeBadScFilter;                      // Flag_eeBadScFilter
+      delete m_Flag_ecalLaserCorrFilter;                // Flag_ecalLaserCorrFilter
+      delete m_Flag_trkPOGFilters;                      // Flag_trkPOGFilters
+      delete m_Flag_chargedHadronTrackResolutionFilter; // Flag_chargedHadronTrackResolutionFilter
+      delete m_Flag_muonBadTrackFilter;                 // Flag_muonBadTrackFilter
+      delete m_Flag_trkPOG_manystripclus53X;            // Flag_trkPOG_manystripclus53X
+      delete m_Flag_trkPOG_toomanystripclus53X;         // Flag_trkPOG_toomanystripclus53X
+      delete m_Flag_trkPOG_logErrorTooManyClusters;     // Flag_trkPOG_logErrorTooManyClusters
+      delete m_Flag_METFilters;                         // Flag_METFilters
+      delete m_Flag_badMuons;                           // Flag_badMuons
+      delete m_Flag_duplicateMuons;                     // Flag_duplicateMuons
+      delete m_Flag_noBadMuons;                         // Flag_noBadMuons
+    }
+
+    // Event info 
+    delete m_eventNumber;          // evt_EventNumber
+    delete m_runNumber;            // evt_RunNumber
+    delete m_mu;
+    delete m_rho;               // evt_rho
+    delete m_lumiblock;            // evt_LumiBlock
+    delete m_treeXSection;       // evt_XSec
+    delete m_treeKFactor;
+    delete m_treeSumOfWeights;
+    delete m_NGoodVtx;             // evt_NGoodVtx
+    delete m_LHAPDF_ID;            // evt_LHA_PDF_ID
+    delete m_NIsoTrk;              // evt_NIsoTrk
+    delete m_pu_NtrueInt;          // pu_NtrueInt
+
+    delete m_HLT_Ele45_WPLoose_Gsf;          // HLT_Ele45_WPLoose_Gsf
+    delete m_HLT_Ele45_WPLoose_Gsf_prescale; // HLT_Ele45_WPLoose_Gsf_prescale
+    delete m_HLT_Mu50;            // HLT_Mu50
+    delete m_HLT_Mu50_prescale;   // HLT_Mu50_prescale
+    delete m_HLT_TkMu50;          // HLT_TkMu50
+    delete m_HLT_TkMu50_prescale; // HLT_TkMu50_prescale
+
+    delete m_scale_size;         // scale_size
+    delete m_scale_Weights;      // scale_Weights
+    delete m_pdf_size;           // pdf_size
+    delete m_weights_pdf;        // pdf_Weights
+    delete m_alphas_size;        // alphas_size
+    delete m_weights_alphas;     // alphas_Weights
+
+    if (m_isMC){
+      delete m_weight_mc;
+      delete m_weight_pileup;
+      delete m_weight_pileup_UP;
+      delete m_weight_pileup_DOWN;
+
+      if (m_config->useTruth()){
+        delete m_truthEventNumber;
+        delete m_truthRunNumber;
+        delete m_truth_weight_mc;
+        delete m_mc_ht;
+
+        delete m_truth_jet_pt;           // jetAK4CHS_GenJetPt
+        delete m_truth_jet_eta;          // jetAK4CHS_GenJetEta
+        delete m_truth_jet_phi;          // jetAK4CHS_GenJetPhi
+        delete m_truth_jet_e;            // jetAK4CHS_GenJetCharge
+
+        delete m_truth_ljet_pt;            // jetAK8CHS_GenJetPt
+        delete m_truth_ljet_eta;           // jetAK8CHS_GenJetEta
+        delete m_truth_ljet_phi;           // jetAK8CHS_GenJetPhi
+        delete m_truth_ljet_e;             // jetAK8CHS_GenJetE
+        delete m_truth_ljet_charge;        // jetAK8CHS_GenJetCharge
+        delete m_truth_ljet_subjet_pt;     // subjetAK8CHS_GenJetPt
+        delete m_truth_ljet_subjet_eta;    // subjetAK8CHS_GenJetEta
+        delete m_truth_ljet_subjet_phi;    // subjetAK8CHS_GenJetPhi
+        delete m_truth_ljet_subjet_e;      // subjetAK8CHS_GenJetE
+        delete m_truth_ljet_subjet_charge; // subjetAK8CHS_GenJetCharge
+
+        delete m_MC_part1_factor;      // MC_part1_factor
+        delete m_MC_part1_ID;          // MC_part1_ID
+        delete m_MC_part2_factor;      // MC_part2_factor
+        delete m_MC_part2_ID;          // MC_part2_ID
+        delete m_MC_t_pt;              // MC_t_pt
+        delete m_MC_t_eta;             // MC_t_eta
+        delete m_MC_t_phi;             // MC_t_phi
+        delete m_MC_t_e;               // MC_t_E
+        delete m_MC_tbar_pt;           // MC_tbar_pt
+        delete m_MC_tbar_eta;          // MC_tbar_eta
+        delete m_MC_tbar_phi;          // MC_tbar_phi
+        delete m_MC_tbar_e;            // MC_tbar_E
+        delete m_MC_lep_pt;            // MC_lep_pt
+        delete m_MC_lep_eta;           // MC_lep_eta
+        delete m_MC_lep_phi;           // MC_lep_phi
+        delete m_MC_lep_e;             // MC_lep_E
+        delete m_MC_lep_ID;            // MC_lep_ID
+        delete m_MC_nu_pt;             // MC_nu_pt
+        delete m_MC_nu_eta;            // MC_nu_eta
+        delete m_MC_nu_phi;            // MC_nu_phi
+        delete m_MC_nu_e;              // MC_nu_E
+        delete m_MC_lepb_pt;           // MC_lepb_pt
+        delete m_MC_lepb_eta;          // MC_lepb_eta
+        delete m_MC_lepb_phi;          // MC_lepb_phi
+        delete m_MC_lepb_e;            // MC_lepb_E
+        delete m_MC_hadW_pt;           // MC_hadW_pt
+        delete m_MC_hadW_eta;          // MC_hadW_eta
+        delete m_MC_hadW_phi;          // MC_hadW_phi
+        delete m_MC_hadW_e;            // MC_hadW_E
+        delete m_MC_hadb_pt;           // MC_hadb_pt
+        delete m_MC_hadb_eta;          // MC_hadb_eta
+        delete m_MC_hadb_phi;          // MC_hadb_phi
+        delete m_MC_hadb_e;            // MC_hadb_E
+        delete m_MC_cstar;             // MC_cstar
+        delete m_MC_x_F;               // MC_x_F
+        delete m_MC_Mtt;               // MC_Mtt
+      } // end useTruth
+    } // end isMC
+
+    return;
+}
+
+// THE END

@@ -1,6 +1,14 @@
 #ifndef EVENTSELECTION_H
 #define EVENTSELECTION_H
 
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -23,37 +31,43 @@
 #include "Analysis/CyMiniAna/interface/Event.h"
 #include "Analysis/CyMiniAna/interface/configuration.h"
 
-class eventSelection{
 
+class eventSelection : public edm::EDFilter {
   public:
     // constructor and destructor
-    eventSelection(configuration &cmaConfig, const std::string &level="");
+    explicit VLQAna(const edm::ParameterSet&);
     virtual ~eventSelection();
 
-    // Run once at the start of the job to setup the cuts
-    virtual void initialize();                            // use cut file defined in configuration
-    virtual void initialize(const std::string &cutsfile); // use any cut file desired
-    virtual void identifySelection();
-
-    // Run for every event (in every systematic) that needs saving
-    virtual bool applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_unweighted);
-
     // External access to information in this class
-    virtual void getCutNames();
     virtual std::vector<std::string> cutNames();     // Return a vector of the cut names (for labeling bins in cutflow histograms)
     virtual unsigned int numberOfCuts();             // Return the number of cuts (for binning cutflow histograms)
 
-  protected:
+  private:
+
+    virtual void beginJob() override;
+    virtual bool filter(edm::Event&, const edm::EventSetup&) override;
+    virtual void endJob() override;
+
+    // Run once at the start of the job to setup the cuts: called from beginJob()
+    virtual void identifySelection();
+    virtual void getCutNames();
+
+    // Run for every event (in every systematic) that needs saving: called from filter()
+    virtual bool applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_unweighted);
 
     // struct for holding information on a 'cut'
     //  ideally this could be extended so that cuts are parsed & written by code, not humans!
     struct Cut{
         std::string name;       // name of cut
-        std::string comparison; // sign of cut (<,<=,>,>=,==,!=)
+        std::string comparison; // sign of cut (<,<=,>,>=,==,!=), and '<<' = window cut; '>>' = window veto
         float value;            // float value -- cast to int if needed
+        float value_lower;      // float for lower bound of window cut
+        float value_upper;      // float for upper bound of window cut
     };
 
-    configuration* m_config;
+    // cutflow histograms
+    edm::Service<TFileService> m_fs;
+    std::map<std::string,TH1D*> m_hists;     // map of histograms (cutflows, others)
 
     // cut information
     std::string m_level;     // useful if you want to define one 'family' of selections 

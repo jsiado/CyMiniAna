@@ -19,87 +19,43 @@ To run:
 
 where <config.txt> is the configuration file
 """
-import sys, os
+import os
+import sys
 
 import FWCore.ParameterSet.Config as cms
 
 from configuration import Configuration
-from inputFiles_cfi import *
-from Analysis.VLQAna.VLQAna_cfi import *
-from Analysis.VLQAna.JetMaker_cfi import *
+from Analysis.VLQAna.VLQAna_cfi import *    # 'ana'
+from Analysis.VLQAna.JetMaker_cfi import *  # jet parameters
 from Analysis.EventCounter.eventcounter_cfi import eventCounter
 
 
 
-## Register configuration options
+## Configuration options
 ##  don't use VarParsing, switch to config file instead
 config = Configuration( sys.argv[1] )
 
 nEventsToProcess = config.nEventsToProcess()
 outputFileName   = config.outputFileName()
 dataFilePath     = config.dataDirectory()    # os.environ["$CMSSW_BASE]+"/src/Analysis/CyMiniAna/data"
-isMC     = config.isMC()
-jerShift = config.jerShift()
-jecShift = config.jecShift()
+isMC      = config.isMC()
+jerShift  = config.jerShift()
+jecShift  = config.jecShift()
+filenames = config.filesToProcess()
 
 
 ## PROCESS
 process = cms.Process("CyMiniAna")
 
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring(FileNames[config.FileNames])
+                            fileNames = cms.untracked.vstring(filenames)  #inputFiles_cfi: FileNames[config.FileNames])
                            )
 process.maxEvents    = cms.untracked.PSet( input = cms.untracked.int32(nEventsToProcess) )
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string(outputFileName)
                                   )
 
-## Event Cleaner
-process.load("Analysis.VLQAna.EventCleaner_cff") 
-process.evtcleaner.hltORAND = cms.string (config.hltORAND)  
-process.evtcleaner.hltPaths = cms.vstring (hltpathsOr)  
-process.evtcleaner.cleanEvents = cms.bool(config.cleanEvents())
-process.evtcleaner.isData = (not isMC)
-process.evtcleaner.DoPUReweightingOfficial = config.doPUReweightingOfficial()
-process.evtcleaner.storeLHEWts = config.storeLHEWts()
-process.evtcleaner.File_PUDistData      = cms.string(os.path.join(dataFilePath,'RunII2016Rereco_25ns_PUXsec69000nb.root'))
-process.evtcleaner.File_PUDistDataLow   = cms.string(os.path.join(dataFilePath,'RunII2016Rereco_25ns_PUXsec65550nb.root'))
-process.evtcleaner.File_PUDistDataHigh  = cms.string(os.path.join(dataFilePath,'RunII2016Rereco_25ns_PUXsec72450nb.root'))
-process.evtcleaner.File_PUDistMC        = cms.string(os.path.join(dataFilePath,'PUDistMC_Summer2016_25ns_Moriond17MC_PoissonOOTPU.root'))
-
-process.evtcleanerBG = process.evtcleaner.clone()
-process.evtcleanerBG.File_PUDistData = cms.string(os.path.join(dataFilePath,'RunII2016Rereco_25ns_RunsBtoG_PUXsec69000nb.root'))
-
-process.evtcleanerH = process.evtcleaner.clone()
-process.evtcleanerH.File_PUDistData  = cms.string(os.path.join(dataFilePath,'RunII2016Rereco_25ns_RunH_PUXsec69000nb.root'))
-
-
-# Setup JET uncertainty payloads
-if isMC:
-    ### Careful, to be reset when B2GAnaFW_v80X_v2.4 MC are used
-    for par in ['jetAK4selParams', 'jetAK8selParams', 'jetHTaggedselParams', 'jetAntiHTaggedselParams', 'jetTopTaggedselParams', 'jetAntiTopTaggedselParams']:
-        if 'AK4' in par:
-            jetType = 'AK4PFchs'
-        else:
-            jetType = 'AK8PFchs'
-            payLoadTypes = ['L2Relative', 'L3Absolute']
-            payLoadFiles = []
-            for payLoadType in payLoadTypes:
-                payLoadFiles.append(os.path.join(dataFilePath,'Summer16_23Sep2016V4_MC_'+payLoadType+'_'+jetType+'.txt'))   
-
-            setattr(getattr(ana, par), 'jecAK8GroomedPayloadNames', cms.vstring(payLoadFiles))
-
-            setattr(getattr(getattr(ana, par), 'JetSubstrParams'), 'jettau1Label'         ,cms.InputTag("jetsAK8CHS", "jetAK8CHStau1CHS"))
-            setattr(getattr(getattr(ana, par), 'JetSubstrParams'), 'jettau2Label'         ,cms.InputTag("jetsAK8CHS", "jetAK8CHStau2CHS"))
-            setattr(getattr(getattr(ana, par), 'JetSubstrParams'), 'jettau3Label'         ,cms.InputTag("jetsAK8CHS", "jetAK8CHStau3CHS"))
-            setattr(getattr(getattr(ana, par), 'JetSubstrParams'), 'jetPrunedMassLabel'   ,cms.InputTag("jetsAK8CHS", "jetAK8CHSprunedMassCHS"))
-            setattr(getattr(getattr(ana, par), 'JetSubstrParams'), 'jetTrimmedMassLabel'  ,cms.InputTag("jetsAK8CHS", "jetAK8CHStrimmedMassCHS"))
-            setattr(getattr(getattr(ana, par), 'JetSubstrParams'), 'jetFilteredMassLabel' ,cms.InputTag("jetsAK8CHS", "jetAK8CHSfilteredMassCHS"))
-            setattr(getattr(getattr(ana, par), 'JetSubstrParams'), 'jetSoftDropMassLabel' ,cms.InputTag("jetsAK8CHS", "jetAK8CHSsoftDropMassCHS"))
-
-        setattr(getattr(ana,par), 'jecUncPayloadName', cms.string(os.path.join(dataFilePath, 'Summer16_23Sep2016V4_MC_Uncertainty_'+jetType+'.txt')))
-
-
+## CMAProducer
 process.ana = ana.clone()
 process.ana.jetAK4selParams.jecShift = jecShift 
 process.ana.jetAK4selParams.jerShift = jerShift 
@@ -136,14 +92,15 @@ process.anaPuppi = process.ana.clone(
     )
 
 
+## Cutflow counting
 process.allEvents          = eventCounter.clone(isMC=isMC)
 process.cleanedEvents      = eventCounter.clone(isMC=isMC)
 process.finalEvents        = eventCounter.clone(isMC=isMC)
 process.finalEventsPuppi   = eventCounter.clone(isMC=isMC)
-process.finalEventsDoubleB = eventCounter.clone(isMC=isMC)
 
 
 ## PROCESS PATHS
+#  - Count events; event cleaning; count events; anaCHS; count events
 #  - CHS
 process.p = cms.Path(
       process.allEvents
@@ -155,15 +112,24 @@ process.p = cms.Path(
      *process.finalEvents
     )
 
+#  - Count events; event cleaning; count events; anaPuppi; count events
 #  - PUPPI
 process.pPuppi = cms.Path(
-      process.allEvents
-     *process.evtcleaner
-     *process.anaPuppi
-     *process.finalEventsPuppi
+      process.allEvents*
+      process.evtcleaner*
+      process.anaPuppi*
+      process.finalEventsPuppi
     )
 
-## OUTPUT
+process.p = cms.Path(
+                     process.initial*
+                     process.analysis*
+                     process.histogrammer*
+                     process.finalize
+                    )
+
+
+## OUTPUTMODULE
 process.out = cms.OutputModule("PoolOutputModule",
                                SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('evtcleaner')),
                               )
