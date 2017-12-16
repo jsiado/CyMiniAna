@@ -35,7 +35,7 @@
 class eventSelection : public edm::EDFilter {
   public:
     // constructor and destructor
-    explicit VLQAna(const edm::ParameterSet&);
+    explicit eventSelection(const edm::ParameterSet&);
     virtual ~eventSelection();
 
     // External access to information in this class

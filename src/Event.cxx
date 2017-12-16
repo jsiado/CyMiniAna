@@ -8,15 +8,15 @@ University of Michigan, Ann Arbor, MI 48109
 
 -----
 
-EventFlatNtuple class
+Event class
 Contains all the objects (& structs) with event information
 Assumes a flat ntuple data structure
 
 */
-#include "Analysis/CyMiniAna/interface/EventFlatNtuple.h"
+#include "Analysis/CyMiniAna/interface/Event.h"
 
 // constructor
-EventFlatNtuple::EventFlatNtuple( TTreeReader &myReader, configuration &cmaConfig ) :
+Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
   m_config(&cmaConfig),
   m_ttree(myReader),
   m_treeName("SetMe"),
@@ -392,11 +392,11 @@ EventFlatNtuple::EventFlatNtuple( TTreeReader &myReader, configuration &cmaConfi
 } // end constructor
 
 
-EventFlatNtuple::~EventFlatNtuple() {}
+Event::~Event() {}
 
 
 
-void EventFlatNtuple::initialize_eventWeights(){
+void Event::initialize_eventWeights(){
     /* Create vectors of the systematics that are weights for the nominal events
        Must be called from the constructor for the access to TTreeReaderValues to work!
     */
@@ -423,26 +423,26 @@ void EventFlatNtuple::initialize_eventWeights(){
 
 
 
-void EventFlatNtuple::updateEntry(Long64_t entry){
+void Event::updateEntry(Long64_t entry){
     /* Update the entry -> update all TTree variables */
-    cma::DEBUG("EVENTFLATNTUPLE : Update Entry "+std::to_string(entry) );
+    cma::DEBUG("EVENT : Update Entry "+std::to_string(entry) );
     m_entry = entry;
 
     // make sure the entry exists
     if(isValidRecoEntry())
         m_ttree.SetEntry(m_entry);
     else
-        cma::ERROR("EVENTFLATNTUPLE : Invalid Reco entry "+std::to_string(m_entry)+"!");
+        cma::ERROR("EVENT : Invalid Reco entry "+std::to_string(m_entry)+"!");
 
     return;
 }
 
 
-bool EventFlatNtuple::isValidRecoEntry(){
+bool Event::isValidRecoEntry(){
     return (m_entry > (long long)-1);
 }
 
-void EventFlatNtuple::clear(){
+void Event::clear(){
     /* Clear many of the vectors/maps for each event -- SAFETY PRECAUTION */
     m_truth_ljets.clear();
     m_truth_jets.clear();
@@ -468,9 +468,9 @@ void EventFlatNtuple::clear(){
 }
 
 
-void EventFlatNtuple::execute(Long64_t entry){
+void Event::execute(Long64_t entry){
     /* Get the values from the event */
-    cma::DEBUG("EVENTFLATNTUPLE : Execute event " );
+    cma::DEBUG("EVENT : Execute event " );
 
     // Load data from root tree for this event
     updateEntry(entry);
@@ -480,35 +480,35 @@ void EventFlatNtuple::execute(Long64_t entry){
 
     // Get the event weights (for cutflow & histograms)
     initialize_weights();
-    cma::DEBUG("EVENTFLATNTUPLE : Setup weights ");
+    cma::DEBUG("EVENT : Setup weights ");
 
     // Truth Information
     if (m_config->useTruth() && m_config->isMC()){
         initialize_truth();
-        cma::DEBUG("EVENTFLATNTUPLE : Setup truth information ");
+        cma::DEBUG("EVENT : Setup truth information ");
     }
 
     // Jets
     if (m_config->useJets()){
         initialize_jets();
-        cma::DEBUG("EVENTFLATNTUPLE : Setup small-R jets ");
+        cma::DEBUG("EVENT : Setup small-R jets ");
     }
 
     // Large-R Jets
     if (m_config->useLargeRJets()){
         initialize_ljets();
-        cma::DEBUG("EVENTFLATNTUPLE : Setup large-R jets ");
+        cma::DEBUG("EVENT : Setup large-R jets ");
     }
 
     // Leptons
     if (m_config->useLeptons()){
         initialize_leptons();
-        cma::DEBUG("EVENTFLATNTUPLE : Setup leptons ");
+        cma::DEBUG("EVENT : Setup leptons ");
     }
 
     // Get some kinematic variables (MET, HT, ST)
     initialize_kinematics();
-    cma::DEBUG("EVENTFLATNTUPLE : Setup kinematic variables ");
+    cma::DEBUG("EVENT : Setup kinematic variables ");
 
 
 
@@ -519,19 +519,19 @@ void EventFlatNtuple::execute(Long64_t entry){
     // build the ttbar system (depends on analysis!)
     // use the reconstruction, or load from root file; depends on m_kinematicReco value
     buildTtbar();
-    cma::DEBUG("EVENTFLATNTUPLE : Ttbar system constructed & defined");
+    cma::DEBUG("EVENT : Ttbar system constructed & defined");
 
     // Neutrinos
     if (m_config->useNeutrino()){
         // relies on kinematic reconstruction, unless the information is saved in root file
         initialize_neutrinos();
-        cma::DEBUG("EVENTFLATNTUPLE : Setup neutrinos ");
+        cma::DEBUG("EVENT : Setup neutrinos ");
     }
 
 
     // DNN
     if (m_getDNN){
-        cma::DEBUG("EVENTFLATNTUPLE : Calculate DNN ");
+        cma::DEBUG("EVENT : Calculate DNN ");
         getDNN();
     }
     else{
@@ -539,19 +539,19 @@ void EventFlatNtuple::execute(Long64_t entry){
         m_DNN = 0.0;  //*(*m_dnn_score);
     }
 
-    cma::DEBUG("EVENTFLATNTUPLE : Setup Event ");
+    cma::DEBUG("EVENT : Setup Event ");
 
     return;
 }
 
 
-void EventFlatNtuple::initialize_truth(){
+void Event::initialize_truth(){
     /* Setup struct of truth information */
     return;
 }
 
 
-void EventFlatNtuple::initialize_jets(){
+void Event::initialize_jets(){
     /* Setup struct of jets (small-r) and relevant information 
      * b-tagging: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
         cMVAv2L -0.5884
@@ -581,7 +581,7 @@ void EventFlatNtuple::initialize_jets(){
 }
 
 
-void EventFlatNtuple::initialize_ljets(){
+void Event::initialize_ljets(){
     /* Setup struct of large-R jets and relevant information */
     m_ljets.resize(**m_ljet_size);
 
@@ -612,7 +612,7 @@ void EventFlatNtuple::initialize_ljets(){
 }
 
 
-void EventFlatNtuple::initialize_leptons(){
+void Event::initialize_leptons(){
     /* Setup struct of lepton and relevant information */
     m_leptons.clear();
 
@@ -623,7 +623,7 @@ void EventFlatNtuple::initialize_leptons(){
 }
 
 
-void EventFlatNtuple::initialize_neutrinos(){
+void Event::initialize_neutrinos(){
     /* Build the neutrinos */
     m_neutrinos.clear();
 
@@ -634,7 +634,7 @@ void EventFlatNtuple::initialize_neutrinos(){
 }
 
 
-void EventFlatNtuple::initialize_weights(){
+void Event::initialize_weights(){
     /* Event weights */
     m_nominal_weight = 1.0;
 
@@ -654,7 +654,7 @@ void EventFlatNtuple::initialize_weights(){
 }
 
 
-void EventFlatNtuple::initialize_kinematics(){
+void Event::initialize_kinematics(){
     /* Kinematic variables (HT, ST, MET) */
     m_HT = 0.0;
     m_ST = 0.0;
@@ -698,7 +698,7 @@ void EventFlatNtuple::initialize_kinematics(){
 //    USE ROOT FILE INFORMATION IF "m_kinematicReco"==false
 //    ELSE USE ALGORITHM
 
-void EventFlatNtuple::buildTtbar(){
+void Event::buildTtbar(){
     /* Build ttbar system */
     if (m_kinematicReco){
     }
@@ -712,17 +712,17 @@ void EventFlatNtuple::buildTtbar(){
 }
 
 
-void EventFlatNtuple::getDNNInputs(){
+void Event::getDNNInputs(){
     /* Load DNN values and return them */
     m_dnnInputs.clear();
 
-    cma::DEBUG("EVENTFLATNTUPLE : Set DNN input values ");
+    cma::DEBUG("EVENT : Set DNN input values ");
 
     return;
 }
 
 
-void EventFlatNtuple::getDNN(){
+void Event::getDNN(){
     /* Dan Guest's lightweight DNN framework */
     getDNNInputs();
 
@@ -733,7 +733,7 @@ void EventFlatNtuple::getDNN(){
 }
 
 
-void EventFlatNtuple::getBtaggedJets( Jet& jet ){
+void Event::getBtaggedJets( Jet& jet ){
     /* Determine the b-tagging */
     jet.isbtagged["L"] = false;
     jet.isbtagged["M"] = false;
@@ -756,7 +756,7 @@ void EventFlatNtuple::getBtaggedJets( Jet& jet ){
 }
 
 
-double EventFlatNtuple::getSystEventWeight( const std::string &syst, const int weightIndex ){
+double Event::getSystEventWeight( const std::string &syst, const int weightIndex ){
     /* Calculate the event weight given some systematic
        -- only call for nominal events and systematic weights
        -- for non-nominal tree systematics, use the nominal event weight
@@ -805,10 +805,10 @@ double EventFlatNtuple::getSystEventWeight( const std::string &syst, const int w
     }
     else{
         // safety to catch something weird -- just return 1.0
-        cma::WARNING("EVENTFLATNTUPLE : Passed systematic variation, "+syst+", to EventFlatNtuple::getSystEventWeight() ");
-        cma::WARNING("EVENTFLATNTUPLE : that is inconsistent with the CyMiniAna options of ");
-        cma::WARNING("EVENTFLATNTUPLE :     nominal, jvt, pileup, leptonSF, and bTagSF. ");
-        cma::WARNING("EVENTFLATNTUPLE : Returning a weight of 1.0. ");
+        cma::WARNING("EVENT : Passed systematic variation, "+syst+", to Event::getSystEventWeight() ");
+        cma::WARNING("EVENT : that is inconsistent with the CyMiniAna options of ");
+        cma::WARNING("EVENT :     nominal, jvt, pileup, leptonSF, and bTagSF. ");
+        cma::WARNING("EVENT : Returning a weight of 1.0. ");
         syst_event_weight = 1.0;
     }
 
@@ -819,63 +819,63 @@ double EventFlatNtuple::getSystEventWeight( const std::string &syst, const int w
 
 
 /*** RETURN PHYSICS INFORMATION ***/
-std::vector<Lepton> EventFlatNtuple::leptons(){
+std::vector<Lepton> Event::leptons(){
     // Leptons
     return m_leptons;
 }
 
-std::vector<Lepton> EventFlatNtuple::truth_leptons(){
+std::vector<Lepton> Event::truth_leptons(){
     // Truth leptons
     return m_leptons;
 }
 
-std::vector<Neutrino> EventFlatNtuple::neutrinos(){
+std::vector<Neutrino> Event::neutrinos(){
     // Neutrinos
     return m_neutrinos;
 }
 
-std::vector<Neutrino> EventFlatNtuple::truth_neutrinos(){
+std::vector<Neutrino> Event::truth_neutrinos(){
     // Truth neutrinos
     return m_truth_neutrinos;
 }
 
-std::vector<Ljet> EventFlatNtuple::ljets(){
+std::vector<Ljet> Event::ljets(){
     // Large-R jets
     return m_ljets;
 }
 
-std::vector<Ljet> EventFlatNtuple::truth_ljets(){
+std::vector<Ljet> Event::truth_ljets(){
     // Truth Large-R jets
     return m_truth_ljets;
 }
 
-std::vector<Jet> EventFlatNtuple::jets(){
+std::vector<Jet> Event::jets(){
     // Jets
     return m_jets;
 }
 
-std::vector<Jet> EventFlatNtuple::truth_jets(){
+std::vector<Jet> Event::truth_jets(){
     // Truth jets
     return m_truth_jets;
 }
 
-std::vector<int> EventFlatNtuple::btag_jets(const std::string &wkpt){
+std::vector<int> Event::btag_jets(const std::string &wkpt){
     /* Small-R Jet b-tagging */
     std::string tmp_wkpt(wkpt);
     if(m_btag_jets.find(wkpt) == m_btag_jets.end()){
-        cma::WARNING("EVENTFLATNTUPLE : B-tagging working point "+wkpt+" does not exist.");
-        cma::WARNING("EVENTFLATNTUPLE : Return vector of b-tagged jets for default working point "+m_config->jet_btagWkpt());
+        cma::WARNING("EVENT : B-tagging working point "+wkpt+" does not exist.");
+        cma::WARNING("EVENT : Return vector of b-tagged jets for default working point "+m_config->jet_btagWkpt());
         tmp_wkpt = m_config->jet_btagWkpt();
     }
     return m_btag_jets.at(tmp_wkpt);
 }
 
-std::vector<int> EventFlatNtuple::btag_jets(){
+std::vector<int> Event::btag_jets(){
     /* Small-R Jet b-tagging. Configured b-tag WP. */
     return m_btag_jets_default;
 }
 
-float EventFlatNtuple::met( const std::string& met_name ){
+float Event::met( const std::string& met_name ){
     // MET
     float met_value(0.0);
     if (met_name.compare("met")==0)
@@ -883,60 +883,60 @@ float EventFlatNtuple::met( const std::string& met_name ){
     else if (met_name.compare("phi")==0)
         met_value = m_metphi;
     else{
-        cma::WARNING("EVENTFLATNTUPLE : Request for MET variable that is neither 'met' nor 'phi'");
-        cma::WARNING("EVENTFLATNTUPLE : Returning 0.0");
+        cma::WARNING("EVENT : Request for MET variable that is neither 'met' nor 'phi'");
+        cma::WARNING("EVENT : Returning 0.0");
     }
 
     return met_value;
 }
 
-float EventFlatNtuple::HT(){
+float Event::HT(){
     // Sum of hadronic transverse energy
     return m_HT;
 }
 
-float EventFlatNtuple::ST(){
+float Event::ST(){
     // Sum of all transverse energy
     return m_ST;
 }
 
-double EventFlatNtuple::DNN(){
+double Event::DNN(){
     /* Return the DNN value */
     return m_DNN;
 }
 
 
 /*** RETURN WEIGHTS ***/
-float EventFlatNtuple::nominal_weight(){
+float Event::nominal_weight(){
     return m_nominal_weight;
 }
-float EventFlatNtuple::truth_weight_mc(){
+float Event::truth_weight_mc(){
     return **m_truth_weight_mc;
 }
-float EventFlatNtuple::weight_mc(){
+float Event::weight_mc(){
     return **m_weight_mc;
 }
-float EventFlatNtuple::weight_pileup(){
+float Event::weight_pileup(){
     return **m_weight_pileup;
 }
 
-float EventFlatNtuple::weight_btag(const std::string &wkpt){
+float Event::weight_btag(const std::string &wkpt){
     std::string tmp_wkpt(wkpt);
     if(m_weight_btag.find(wkpt) == m_weight_btag.end()){
-        cma::WARNING("EVENTFLATNTUPLE : B-tagging working point "+wkpt+" does not exist");
-        cma::WARNING("EVENTFLATNTUPLE : Return calo-jet b-tag SF for default working point "+m_config->jet_btagWkpt());
+        cma::WARNING("EVENT : B-tagging working point "+wkpt+" does not exist");
+        cma::WARNING("EVENT : Return calo-jet b-tag SF for default working point "+m_config->jet_btagWkpt());
         tmp_wkpt = m_config->jet_btagWkpt();
     }
     return m_weight_btag[tmp_wkpt];
 }
 
-float EventFlatNtuple::weight_btag(){
+float Event::weight_btag(){
     /* Default b-tag weight */
     return m_weight_btag_default;
 }
 
 // Get weight systematics
-std::map<std::string,float> EventFlatNtuple::weightSystematicsFloats(){
+std::map<std::string,float> Event::weightSystematicsFloats(){
     /* systematics floats */
     std::map<std::string,float> tmp_weightSystematicsFloats;
     for (const auto& wsf : m_weightSystematicsFloats)
@@ -945,13 +945,13 @@ std::map<std::string,float> EventFlatNtuple::weightSystematicsFloats(){
     return tmp_weightSystematicsFloats;
 }
 
-std::map<std::string,std::vector<float> > EventFlatNtuple::weightSystematicsVectorFloats(){
+std::map<std::string,std::vector<float> > Event::weightSystematicsVectorFloats(){
     /* weight systematics stored as vectors */
     std::map<std::string,std::vector<float> > tmp_weightSystematicsVectorFloats;
     return tmp_weightSystematicsVectorFloats;
 }
 
-std::vector<std::string> EventFlatNtuple::listOfWeightSystematics(){
+std::vector<std::string> Event::listOfWeightSystematics(){
     /* list of weight systematics */
     return m_listOfWeightSystematics;
 }
@@ -959,42 +959,42 @@ std::vector<std::string> EventFlatNtuple::listOfWeightSystematics(){
 
 
 /*** RETURN EVENT INFORMATION ***/
-void EventFlatNtuple::truth(){
+void Event::truth(){
     /* Do something with truth information (possibly change type and return information?) */
     return;
 }
 
-std::string EventFlatNtuple::treeName(){
+std::string Event::treeName(){
     return m_treeName;
 }
 
-float EventFlatNtuple::xsection(){
+float Event::xsection(){
     return m_xsection;
 }
 
-float EventFlatNtuple::kfactor(){
+float Event::kfactor(){
     return m_kfactor;
 }
 
-float EventFlatNtuple::sumOfWeights(){
+float Event::sumOfWeights(){
     return m_sumOfWeights;
 }
 
-//unsigned long long EventFlatNtuple::eventNumber(){
-float EventFlatNtuple::eventNumber(){
+//unsigned long long Event::eventNumber(){
+float Event::eventNumber(){
     return **m_eventNumber;
 }
 
-//unsigned int EventFlatNtuple::runNumber(){
-float EventFlatNtuple::runNumber(){
+//unsigned int Event::runNumber(){
+float Event::runNumber(){
     return **m_runNumber;
 }
 
-float EventFlatNtuple::mu(){
+float Event::mu(){
     return **m_mu;
 }
 
-int EventFlatNtuple::lumiblock(){
+int Event::lumiblock(){
     return **m_lumiblock;
 }
 
@@ -1002,9 +1002,9 @@ int EventFlatNtuple::lumiblock(){
 
 
 /*** DELETE VARIABLES ***/
-void EventFlatNtuple::finalize(){
+void Event::finalize(){
     // delete variables
-    cma::DEBUG("EVENTFLATNTUPLE : Finalize() ");
+    cma::DEBUG("EVENT : Finalize() ");
     delete m_lwnn;
     delete m_eventNumber;
     delete m_runNumber;

@@ -1,5 +1,5 @@
-#ifndef EVENTFLATNTUPLE_H
-#define EVENTFLATNTUPLE_H
+#ifndef EVENT_H
+#define EVENT_H
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -33,15 +33,15 @@
 #include "lwtnn/lwtnn/interface/parse_json.hh"
 
 
-// EventFlatNtuple Class
-class EventFlatNtuple {
+// Event Class
+class Event {
   public:
     // Constructor
-    EventFlatNtuple( TTreeReader &myReader, configuration &cmaConfig);
-    EventFlatNtuple( const EventFlatNtuple &obj);
+    Event( TTreeReader &myReader, configuration &cmaConfig);
+    Event( const Event &obj);
 
     // Destructor
-    virtual ~EventFlatNtuple();
+    virtual ~Event();
 
     // create hash tables in truth/reco TTree to match truth <-> reco events
     // uses configuration option matchTruthToReco to match truth to reco (reco loop)

@@ -1,5 +1,5 @@
-#ifndef EVENT_H
-#define EVENT_H
+#ifndef CMAPRODUCER_H
+#define CMAPRODUCER_H
 
 #include <set>
 #include <list>
@@ -26,8 +26,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "Analysis/CyMiniAna/interface/CMAProducer.h"
-#include "Analysis/CyMiniAna/interface/cmaEvent.h"
+#include "Analysis/CyMiniAna/interface/physicsObjects.h"
 
 
 // CMAProducer Class
@@ -45,31 +44,75 @@ class CMAProducer : public edm::EDProducer {
     virtual void produce(edm::Event&, const edm::EventSetup&);
     virtual void endJob();
 
-    // Setup physics information
-    edm::InputTag m_src;
+    // Build physics objects
+    void initialize_electrons(edm::Event& evt);
+    void initialize_muons(edm::Event& evt);
+    void initialize_neutrinos(edm::Event& evt);
+    void initialize_jets(edm::Event& evt);
+    void initialize_largeRjets(edm::Event& evt);
+    void initialize_kinematics(edm::Event& evt);
+
+    // General Parameters
+    bool m_isMC;
+    bool m_cleanFlags;
+    bool m_useTruth;
+    bool m_useJets;
+    bool m_useLargeRJets;
+    bool m_useLeptons;
+    bool m_useNeutrinos;
+    bool m_kinematicReco;
+    std::string m_metadataFile;
+    float m_LUMI;
+
+    // Physics information
+    std::vector<Electron> m_electrons;
+    std::vector<Muon> m_muons;
+    std::vector<Neutrino> m_neutrinos;
+    std::vector<Jet> m_jets;
+    std::vector<Ljet> m_ljets;
+    float m_HT;
+    float m_ST;
+
+    // Setup physics information from EDMntuples
+    float m_elPtMin;
+    float m_elAbsEtaMax;
+    float m_applyIso;
+    float m_muPtMin;
+    float m_muAbsEtaMax;
+    float m_muIsoMin;
+    float m_muIsoMax;
+    float m_jetPtMin;
+    float m_jetAbsEtaMax;
+    float m_ljetPtMin;
+    float m_ljetAbsEtaMax;
+    float m_METPtMin;
 
     // ************
     // Setup to read EDMntuple format
     // -- following this example:
     //    https://github.com/dmajumder/VLQAna
     // ----------member data ---------------------------
-    edm::EDGetTokenT<int>            t_runno;
-    edm::EDGetTokenT<int>            t_lumisec;
-    edm::EDGetTokenT<int>            t_evtno;
-    edm::EDGetTokenT<bool>           t_isData;
-    edm::EDGetTokenT<bool>           t_hltdecision;
-    edm::EDGetTokenT<string>         t_evttype;
-    edm::EDGetTokenT<double>         t_evtwtGen;
-    edm::EDGetTokenT<double>         t_evtwtPV;
-    edm::EDGetTokenT<double>         t_evtwtPVBG;
-    edm::EDGetTokenT<double>         t_evtwtPVH;
-    edm::EDGetTokenT<double>         t_evtwtPVLow;
-    edm::EDGetTokenT<double>         t_evtwtPVHigh;
-    edm::EDGetTokenT<unsigned>       t_npv;
-    edm::EDGetTokenT<int>            t_npuTrue;
-    edm::EDGetTokenT<double>         t_htHat;
-    edm::EDGetTokenT<vector<int>>    t_lhewtids;
-    edm::EDGetTokenT<vector<double>> t_lhewts;
+    edm::ConsumesCollector& m_iC; // = consumesCollector();
+    edm::InputTag m_src;
+
+    edm::EDGetTokenT<float> t_rho;
+    edm::EDGetTokenT<int> t_runno;
+    edm::EDGetTokenT<int> t_lumisec;
+    edm::EDGetTokenT<int> t_evtno;
+    edm::EDGetTokenT<bool> t_isData;
+    edm::EDGetTokenT<bool> t_hltdecision;
+    edm::EDGetTokenT<std::string> t_evttype;
+    edm::EDGetTokenT<float> t_evtwtGen;
+    edm::EDGetTokenT<float> t_evtwtPV;
+    edm::EDGetTokenT<float> t_evtwtPVBG;
+    edm::EDGetTokenT<float> t_evtwtPVH;
+    edm::EDGetTokenT<float> t_evtwtPVLow;
+    edm::EDGetTokenT<float> t_evtwtPVHigh;
+    edm::EDGetTokenT<unsigned int> t_npv;
+    edm::EDGetTokenT<int> t_npuTrue;
+    edm::EDGetTokenT<float> t_htHat;
+    edm::EDGetTokenT<std::vector<int>> t_lhewtids;
+    edm::EDGetTokenT<std::vector<float>> t_lhewts;
 
     // Electron handles
     edm::Handle<std::vector<float>> h_elCharge;
@@ -133,7 +176,7 @@ class CMAProducer : public edm::EDProducer {
 
     // AK4 Jet Handles
     edm::Handle <int> h_npv;
-    edm::Handle <double> h_rho;
+    edm::Handle <float> h_rho;
     edm::Handle <std::vector<float>> h_jetPt;
     edm::Handle <std::vector<float>> h_jetEta;
     edm::Handle <std::vector<float>> h_jetPhi;
@@ -171,8 +214,6 @@ class CMAProducer : public edm::EDProducer {
     edm::EDGetTokenT<std::vector<float>> t_ljetCMVA;
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsB;
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsL;
-    edm::EDGetTokenT<std::vector<float>> t_ljetDoubleBAK8;
-    edm::EDGetTokenT<std::vector<float>> t_ljetDoubleBCA15;
     edm::EDGetTokenT<std::vector<float>> t_ljetJEC;
     edm::EDGetTokenT<std::vector<float>> t_ljetnHadEnergy;
     edm::EDGetTokenT<std::vector<float>> t_ljetnEMEnergy;

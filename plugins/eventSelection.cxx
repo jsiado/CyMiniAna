@@ -24,8 +24,8 @@ eventSelection::eventSelection(const edm::ParameterSet& cfg) :
     m_cuts.resize(0);
     m_cutflowNames.clear();
 
-    m_selection = cfg.getParameter<std::string>("selection")
-    m_cutsfile  = cfg.getParameter<std::string>("cutsfile")
+    m_selection = cfg.getParameter<std::string>("selection");
+    m_cutsfile  = cfg.getParameter<std::string>("cutsfile");
   }
 
 eventSelection::~eventSelection() {}
@@ -61,15 +61,15 @@ void eventSelection::beginJob() {
     getCutNames();
 
     // Setup histograms
-    m_hists["cutflow"]     = fs->make<TH1D>( (m_selection+"_cutflow").c_str(),           (m_selection+"_cutflow").c_str(),           m_numberOfCuts+1,0,m_numberOfCuts+1);
-    m_hists["cutflow_unw"] = fs->make<TH1D>( (m_selection+"_cutflow_unweighted").c_str(),(m_selection+"_cutflow_unweighted").c_str(),m_numberOfCuts+1,0,m_numberOfCuts+1);
+    m_hists["cutflow"]     = m_fs->make<TH1D>( (m_selection+"_cutflow").c_str(),           (m_selection+"_cutflow").c_str(),           m_numberOfCuts+1,0,m_numberOfCuts+1);
+    m_hists["cutflow_unw"] = m_fs->make<TH1D>( (m_selection+"_cutflow_unweighted").c_str(),(m_selection+"_cutflow_unweighted").c_str(),m_numberOfCuts+1,0,m_numberOfCuts+1);
 
     m_hists["cutflow"]->GetXaxis()->SetBinLabel(1,"INITIAL");
     m_hists["cutflow_unw"]->GetXaxis()->SetBinLabel(1,"INITIAL");
 
     for (unsigned int c=1;c<=m_numberOfCuts;++c){
-        m_hists["cutflow"]->GetXaxis()->SetBinLabel(c+1,cutNames.at(c-1).c_str());
-        m_hists["cutflow_unw"]->GetXaxis()->SetBinLabel(c+1,cutNames.at(c-1).c_str());
+        m_hists["cutflow"]->GetXaxis()->SetBinLabel(c+1,m_cutflowNames.at(c-1).c_str());
+        m_hists["cutflow_unw"]->GetXaxis()->SetBinLabel(c+1,m_cutflowNames.at(c-1).c_str());
     }
 
     return;
@@ -107,7 +107,7 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
     bool passSelection(true);
     double first_bin(0.5);            // first bin value in cutflow histogram ("INITIAL")
 
-    float nominal_weight = event.nominal_weight();
+    float nominal_weight(1.0);  // = event.nominal_weight();
 
     // fill cutflow histograms with initial value (before any cuts)
     m_hists["cutflow"]->Fill(first_bin,nominal_weight); // event weights
@@ -119,7 +119,7 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
 
     // selection for all-hadronic DNN 
     else if (m_allHadDNNSelection){
-        std::vector<Jet> jets = event.jets();          // access some event information
+        std::vector<Jet> jets;// = event.jets();          // access some event information
 
         // cut0 :: >=1 jets 
         if ( jets.size()<1 )                           // check if the event passes the cut!

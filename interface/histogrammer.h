@@ -10,6 +10,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -17,12 +19,8 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TSystem.h"
-#include "TTreeReader.h"
-#include "TTreeReaderValue.h"
-#include "TTreeReaderArray.h"
 
 #include "Analysis/CyMiniAna/interface/tools.h"
-#include "Analysis/CyMiniAna/interface/Event.h"
 
 class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   public:
@@ -55,8 +53,7 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
 
     /* fill histograms */
-    virtual void fill( Event& event );
-    virtual void fill( const std::string& name, Event& event, double event_weight );
+    virtual void fill( const std::string& name, const edm::Event& event, double event_weight );
     virtual void fill( const std::string& name, const double& value, const double& weight );
     virtual void fill( const std::string& name, const double& xvalue, const double& yvalue, const double& weight );
     virtual void fill( const std::string& name, const double& xvalue, const double& yvalue, const double& zvalue, const double& weight );
@@ -70,6 +67,7 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     virtual void beginJob() override;
     virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
 
+    edm::Service<TFileService> m_fs;
     edm::InputTag m_src;
 
     std::string m_name;
@@ -77,6 +75,13 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     bool m_useSystWeights;
     bool m_putOverflowInLastBin;
     bool m_putUnderflowInFirstBin;
+
+    bool m_useJets;
+    bool m_useLeptons;
+    bool m_useNeutrinos;
+
+    std::vector<std::string> m_listOfWeightSystematics;
+    std::vector<std::string> m_mapOfWeightVectorSystematics;
 
     std::map<std::string, TH1D*> m_map_histograms1D;
     std::map<std::string, TH2D*> m_map_histograms2D;

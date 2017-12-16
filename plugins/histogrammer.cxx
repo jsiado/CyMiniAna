@@ -16,9 +16,9 @@ to go into plots || Combine
 using namespace edm;
 
 histogrammer::histogrammer( const ParameterSet & cfg ) :
+  m_src( cfg.getUntrackedParameter<edm::InputTag>("src") ),
   m_putOverflowInLastBin(true),
-  m_putUnderflowInFirstBin(true),
-  m_src( cfg.getUntrackedParameter<edm::InputTag>("src") ){
+  m_putUnderflowInFirstBin(true){
     usesResource("TFileService");
 
     m_map_histograms1D.clear();
@@ -29,8 +29,25 @@ histogrammer::histogrammer( const ParameterSet & cfg ) :
     m_isMC           = cfg.getParameter<bool>("isMC");
     m_useJets        = cfg.getParameter<bool>("useJets");
     m_useLeptons     = cfg.getParameter<bool>("useLeptons");
-    m_useNeutrino    = cfg.getParameter<bool>("useNeutrino");
+    m_useNeutrinos   = cfg.getParameter<bool>("useNeutrinos");
     m_useSystWeights = cfg.getParameter<bool>("useSystWeights");
+
+    // Obtain lists of systematics (treated as weights)
+    std::string listOfWeightSystematics = cfg.getParameter<std::string>("weightSystematicsFile");
+    cma::read_file( listOfWeightSystematics, m_listOfWeightSystematics);
+
+    std::string weightVectorSystematicsFile = cfg.getParameter<std::string>("weightVectorSystematicsFile");
+    std::vector<std::string> weightVectorSystematics;
+    cma::read_file(weightVectorSystematicsFile,weightVectorSystematics);   // read config file and get systematics name
+
+    for (const auto& weightVectorSystematic : weightVectorSystematics){
+        // split config items by space
+        std::istringstream cfg(weightVectorSystematic);
+        std::istream_iterator<std::string> start(cfg), stop;
+        std::vector<std::string> tokens(start, stop);
+
+        m_mapOfWeightVectorSystematics.insert( std::pair<std::string,unsigned int>( tokens.at(0),std::stoi(tokens.at(1)) ) );
+    }
 }
 
 
@@ -120,7 +137,7 @@ void histogrammer::bookHists( const std::string name ){
         init_hist("lep_phi_"+name,  64, -3.2, 3.2);
     }
 
-    if (m_useNeutrino){
+    if (m_useNeutrinos){
         init_hist("nu_pt_"+name,  500, 0.0, 2000);
         init_hist("nu_eta_"+name,  50, -2.5, 2.5);
         init_hist("nu_phi_"+name,  64, -3.2, 3.2);
@@ -160,12 +177,12 @@ void histogrammer::beginJob(){
     if (m_isMC && m_useSystWeights){
         // In ATLAS these were only necessary for the nominal tree.
         // Do not need to make them for every systematic variation!
-        for (const auto& syst : m_config->listOfWeightSystematics()){
+        for (const auto& syst : m_listOfWeightSystematics){
             bookHists( m_name+syst );
         } // end weight systematics
 
         // vector weight systematics
-        for (const auto& syst : m_config->mapOfWeightVectorSystematics()){
+        for (const auto& syst : m_mapOfWeightVectorSystematics){
             for (unsigned int el=0;el<syst.second;++el){
                 std::string weightIndex = std::to_string(el);
                 bookHists( m_name+weightIndex+"_"+syst.first );
@@ -212,15 +229,15 @@ void histogrammer::fill( const std::string& name,
 }
 
 
-void histogrammer::fill( const std::string& name, Event& event, double event_weight){
+void histogrammer::fill( const std::string& name, const edm::Event& event, double event_weight){
     /* Fill histograms -- just use information from the event and fill histogram
        This is the function to modify / inherit for analysis-specific purposes
     */
     cma::DEBUG("HISTOGRAMMER : Fill histograms.");
     cma::DEBUG("HISTOGRAMMER : event weight = "+std::to_string(event_weight) );
 
-    Handle<TrackCollection> tracks;
-    event.getByLabel( m_src, tracks );
+//    Handle<TrackCollection> tracks;
+//    event.getByLabel( m_src, tracks );
 
 //    for( TrackCollection::const_iterator t = tracks->begin(); t != tracks->end(); ++ t ) {
 //        double pt = t->pt(), eta = t->eta(), phi = t->phi();
@@ -231,9 +248,9 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
 
     if (m_useJets){
         cma::DEBUG("HISTOGRAMMER : Fill small-R jets");
-        fill("n_btags_"+name, event.btag_jets().size(), event_weight );
+        fill("n_btags_"+name, 0/*event.btag_jets().size()*/, event_weight );
 
-        std::vector<Jet> jets = event.jets();
+        std::vector<Jet> jets;// = event.jets();
         fill("n_jets_"+name, jets.size(), event_weight );  // reflects the "nJetsL" variables, not 2
 
         fill("jet1_pt_"+name,  jets.at(0).p4.Pt(),   event_weight);
@@ -249,16 +266,16 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
 
     if (m_useLeptons){
         cma::DEBUG("HISTOGRAMMER : Fill leptons");
-        std::vector<Lepton> leptons = event.leptons();
+        std::vector<Lepton> leptons; // = event.leptons();
         fill("lep_pt_"+name,  leptons.at(0).p4.Pt(), event_weight);
         fill("lep_eta_"+name, leptons.at(0).p4.Eta(), event_weight);
         fill("lep_phi_"+name, leptons.at(0).p4.Phi(), event_weight);
     }
 
 
-    if (m_useNeutrino){
+    if (m_useNeutrinos){
         cma::DEBUG("HISTOGRAMMER : Fill neutrinos");
-        std::vector<Neutrino> nus = event.neutrinos();
+        std::vector<Neutrino> nus;// = event.neutrinos();
 
         fill("nu_pt_"+name,  nus.at(0).p4.Pt(),  event_weight);
         fill("nu_eta_"+name, nus.at(0).p4.Eta(), event_weight);
@@ -268,13 +285,13 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
 
     // kinematics
     cma::DEBUG("HISTOGRAMMER : Fill kinematics");
-    fill("met_met_"+name, event.met("met"), event_weight);
-    fill("met_phi_"+name, event.met("phi"), event_weight);
-    fill("ht_"+name,      event.HT(),       event_weight);
+    fill("met_met_"+name, 0 /*event.met("met")*/, event_weight);
+    fill("met_phi_"+name, 0 /*event.met("phi")*/, event_weight);
+    fill("ht_"+name,      0 /*event.HT()*/,       event_weight);
 
     // HME && DNN && AMWT
     cma::DEBUG("HISTOGRAMMER : Fill AMWT");
-    //fill("dnn_"+name, event.dnn(), event_weight); // N/A
+    //fill("dnn_"+name, 1.0 /*event.dnn()*/, event_weight); // N/A
 
     cma::DEBUG("HISTOGRAMMER : Fill VLQ/Wprime");
 /*    fill("top_pt_"+name,  top.p4.Pt(),  event_weight);
@@ -299,8 +316,8 @@ void histogrammer::analyze( const edm::Event& event, const edm::EventSetup& ) {
     /* Fill histograms -- fill histograms based on treename or systematic weights ("nominal" but different weight)
        This is the function to modify / inherit for analysis-specific purposes
     */
-    std::string treeName = event.treeName();
-    double event_weight  = event.nominal_weight();
+    std::string treeName;// = event.treeName();
+    double event_weight; //  = event.nominal_weight();
 
     fill( m_name+treeName, event, event_weight );
 
@@ -309,20 +326,20 @@ void histogrammer::analyze( const edm::Event& event, const edm::EventSetup& ) {
     // the following calls the fill() function with different event weights
     // to make histograms
     // In ATLAS, these weights only existed in the 'nominal' tree
-    bool isNominal = m_config->isNominalTree( treeName );
+    bool isNominal(true); // = m_config->isNominalTree( treeName );
     if (m_isMC && isNominal && m_useSystWeights){
         // weight systematics
         event_weight = 1.0;
-        for (const auto& syst : m_config->listOfWeightSystematics()){
-            event_weight = event.getSystEventWeight( syst );
+        for (const auto& syst : m_listOfWeightSystematics){
+            event_weight = 1.0; //event.getSystEventWeight( syst );
             fill( m_name+syst, event, event_weight );
         } // end weight systematics
 
         // vector weight systematics
         event_weight = 1.0;
-        for (const auto& syst : m_config->mapOfWeightVectorSystematics()){
+        for (const auto& syst : m_mapOfWeightVectorSystematics){
             for (unsigned int el=0;el<syst.second;++el){
-                event_weight = event.getSystEventWeight( syst.first, el );
+                event_weight = 1.0; //event.getSystEventWeight( syst.first, el );
                 std::string weightIndex = std::to_string(el);
 
                 fill( m_name+weightIndex+"_"+syst.first, event, event_weight );

@@ -1,5 +1,5 @@
-#ifndef HISTOGRAMMER_H
-#define HISTOGRAMMER_H
+#ifndef HISTOGRAMMERFLATNTUPLE_H
+#define HISTOGRAMMERFLATNTUPLE_H
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -19,14 +19,14 @@
 #include "Analysis/CyMiniAna/interface/tools.h"
 #include "Analysis/CyMiniAna/interface/Event.h"
 
-class histogrammer {
+class histogrammerFlatNtuple {
   public:
 
     // Default - so root can load based on a name;
-    histogrammer( configuration& cmaConfig, std::string name="" );
+    histogrammerFlatNtuple( configuration& cmaConfig, std::string name="" );
 
     // Default - so we can clean up;
-    virtual ~histogrammer();
+    virtual ~histogrammerFlatNtuple();
 
     /* initialize histograms (1D, 2D, & 3D) */
     virtual void init_hist( const std::string& name, 

@@ -23,12 +23,12 @@
 #include "Analysis/CyMiniAna/interface/Event.h"
 #include "Analysis/CyMiniAna/interface/configuration.h"
 
-class eventSelection{
+class eventSelectionFlatNtuple{
 
   public:
     // constructor and destructor
-    eventSelection(configuration &cmaConfig, const std::string &level="");
-    virtual ~eventSelection();
+    eventSelectionFlatNtuple(configuration &cmaConfig, const std::string &level="");
+    virtual ~eventSelectionFlatNtuple();
 
     // Run once at the start of the job to setup the cuts
     virtual void initialize();                            // use cut file defined in configuration

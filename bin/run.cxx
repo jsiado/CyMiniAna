@@ -37,10 +37,10 @@ Basic steering macro for running CyMiniAna
 
 #include "Analysis/CyMiniAna/interface/configuration.h"
 #include "Analysis/CyMiniAna/interface/Event.h"
-#include "Analysis/CyMiniAna/interface/eventSelection.h"
+#include "Analysis/CyMiniAna/interface/eventSelectionFlatNtuple.h"
 #include "Analysis/CyMiniAna/interface/miniTree.h"
 #include "Analysis/CyMiniAna/interface/tools.h"
-#include "Analysis/CyMiniAna/interface/histogrammer.h"
+#include "Analysis/CyMiniAna/interface/histogrammerFlatNtuple.h"
 #include "Analysis/CyMiniAna/interface/efficiency.h"
 
 
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
     }
 
     // event selection
-    eventSelection evtSel( config );
+    eventSelectionFlatNtuple evtSel( config );
     evtSel.initialize();
     unsigned int ncuts = evtSel.numberOfCuts();            // number of cuts in selection
     std::vector<std::string> cutNames = evtSel.cutNames(); // names of cuts
@@ -131,8 +131,8 @@ int main(int argc, char** argv) {
         std::vector<std::string> fileKeys;
         cma::getListOfKeys(file,fileKeys); // keep track of ttrees in file
 
-        histogrammer histMaker(config);      // initialize histogrammer
-        efficiency effMaker(config);         // initialize efficiency class
+        histogrammerFlatNtuple histMaker(config);      // initialize histogrammer
+        efficiency effMaker(config);                   // initialize efficiency class
         if (makeHistograms)
             histMaker.initialize( *outputFile,doSystWeights );
         if (makeEfficiencies)
