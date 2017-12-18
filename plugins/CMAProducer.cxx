@@ -33,6 +33,7 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   t_npv(consumes<int>(iConfig.getParameter<edm::InputTag>("npvLabel"))),
   t_rho(consumes<float>(iConfig.getParameter<edm::InputTag>("rhoLabel"))),
 
+  // MET
   t_metFullPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPhiLabel")),
   t_metFullPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPtLabel")),
   t_metFullPx(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPxLabel")),
@@ -40,33 +41,33 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   t_metFulluncorPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPhiLabel")),
   t_metFulluncorPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPtLabel")),
   t_metFulluncorSumEt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorSumEtLabel")){
+    // Electrons and Muons
     if (m_useLeptons){
-        // call Electrons class
-        m_electronTool = new Electron(iConfig,consumesCollector());
-        // call Muons class
-        m_muonTool = new Muon(iConfig,consumesCollector());
+        m_electronsTool = new Electron(iConfig,consumesCollector());
+        m_muonsTool     = new Muon(iConfig,consumesCollector());
     }
 
+    // Neutrinos (reconstructed from MET)
     if (m_useNeutrinos && !m_kinematicReco){
-        // neutrinos reconstructed from MET
-        m_neutrinoTool = new Neutrino(iConfig,consumesCollector());
+        m_neutrinosTool = new Neutrino(iConfig,consumesCollector());
     }
 
+    // AK4 Jets
     if (m_useJets){
-        // AK4 Jets
-        m_jetTool = new Jets(iConfig,consumesCollector());
+        m_jetsTool = new Jets(iConfig,consumesCollector());
     }
 
+    // AK8 Jets
     if (m_useLargeRJets){
-        // AK8 Jets
-        m_ljetTool = new LargeRJets(iConfig,consumesCollector());
+        m_ljetsTool = new LargeRJets(iConfig,consumesCollector());
     }
 
+    // Triggers
     if (m_useTriggers){
-        m_triggerTool = new Trigger(iConfig,consumesCollector());
+        m_triggersTool = new Trigger(iConfig,consumesCollector());
     }
 
-    // Generator information (parton-level)
+    // Generator information (parton-level information)
     if (m_isMC){
     }
 

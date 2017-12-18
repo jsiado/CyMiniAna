@@ -1,45 +1,55 @@
-#include <iostream>
-#include "Analysis/VLQAna/interface/ElectronMaker.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
+/*
+Created:        --
+Last Updated:   18 December 2017
 
-using namespace std;
-using namespace edm ; 
+Dan Marley
+daniel.edison.marley@cernSPAMNOT.ch
+Texas A&M University
 
-ElectronMaker::ElectronMaker (edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  t_elCharge	= consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elChargeLabel"));
-  t_elDxy         = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDxyLabel"));
-  t_elDz          = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDzLabel"));
-  t_elE           = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elELabel"));
-  t_elEta         = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elEtaLabel"));
-  t_elHoE         = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elHoELabel"));
-        t_elRelIsoEA    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elRelIsoEALabel"));
-        t_elKey         = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elKeyLabel"));
-        t_elPhi         = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPhiLabel"));
-        t_elPt          = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPtLabel"));
-        t_eldEtaIn	= consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInLabel"));
-        t_eldEtaInSeed  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInSeedLabel"));
-        t_eldPhiIn	= consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldPhiInLabel"));
-        t_elfull5x5siee = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elfull5x5sieeLabel"));
-        t_elvidLoose    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidLooseLabel"));
-        t_elvidMedium   = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidMediumLabel"));
-        t_elvidTight    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidTightLabel"));
-        t_elvidVeto     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidVetoLabel"));
-        t_elvidHEEP     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidHEEPLabel"));
-        t_elmissHits    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elmissHitsLabel"));
-        t_elooEmooP     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elooEmooPLabel"));
-        t_elscEta       = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elscEtaLabel"));
-        t_elhasMatchedConVeto = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elhasMatchedConVetoLabel"));
+-----
+
+Build Electrons from EDMntuples
+*/
+#include "Analysis/CyMiniAna/interface/Electrons.h"
 
 
+using namespace edm; 
+
+
+Electrons::Electrons(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
+  t_elCharge(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elChargeLabel"))),
+  t_elDxy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDxyLabel"))),
+  t_elDz(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDzLabel"))),
+  t_elE(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elELabel"))),
+  t_elEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elEtaLabel"))),
+  t_elHoE(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elHoELabel"))),
+  t_elRelIsoEA(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elRelIsoEALabel"))),
+  t_elKey(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elKeyLabel"))),
+  t_elPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPhiLabel"))),
+  t_elPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPtLabel"))),
+  t_eldEtaIn(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInLabel"))),
+  t_eldEtaInSeed(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInSeedLabel"))),
+  t_eldPhiIn(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldPhiInLabel"))),
+  t_elfull5x5siee(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elfull5x5sieeLabel"))),
+  t_elvidLoose(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidLooseLabel"))),
+  t_elvidMedium(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidMediumLabel"))),
+  t_elvidTight(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidTightLabel"))),
+  t_elvidVeto(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidVetoLabel"))),
+  t_elvidHEEP(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidHEEPLabel"))),
+  t_elmissHits(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elmissHitsLabel"))),
+  t_elooEmooP(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elooEmooPLabel"))),
+  t_elscEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elscEtaLabel"))),
+  t_elhasMatchedConVeto(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elhasMatchedConVetoLabel")){
     m_elPtMin     = iConfig.getParameter<float>("elPtMin");
     m_elAbsEtaMax = iConfig.getParameter<float>("elAbsEtaMax");
     m_applyIso    = iConfig.getParameter<bool>("applyIso");
+}
 
 
 
-
-
-
+std::vector<Electron> Electrons::execute(const edm::Event& evt){
+    /* Build the electrons */
+    m_electrons.clear();
 
     evt.getByToken(t_elDxy, h_elDxy);
     evt.getByToken(t_elDz,  h_elDz);
@@ -69,17 +79,18 @@ ElectronMaker::ElectronMaker (edm::ParameterSet const& iConfig, edm::ConsumesCol
     for (unsigned int iel=0, size=(h_elPt.product())->size(); iel<size; ++iel) {
         Electron el;
 
-        float elPt        = (h_elPt.product())->at(iel) ;
-        float elscAbsEta  = std::abs((h_elscEta.product())->at(iel)) ;
-        float elRelIsoEA  = (h_elRelIsoEA.product())->at(iel) ;
-        float dEtaInSeed  = (h_eldEtaInSeed.product())->at(iel);
-        float dPhiIn	  = (h_eldPhiIn.product())->at(iel);
-        float full5x5siee = (h_elfull5x5siee.product())->at(iel);
-        float HoE = (h_elHoE.product())->at(iel);
-        float Dxy = (h_elDxy.product())->at(iel);
-        float Dz  = (h_elDz.product())->at(iel);
-        float ooEmooP = (h_elooEmooP.product())->at(iel);
+        float elPt    = (h_elPt.product())->at(iel);
+        float elscEta = (h_elscEta.product())->at(iel);
+        float dPhiIn  = (h_eldPhiIn.product())->at(iel);
+        float HoE     = (h_elHoE.product())->at(iel);
+        float Dxy     = (h_elDxy.product())->at(iel);
+        float Dz      = (h_elDz.product())->at(iel);
+        float ooEmooP  = (h_elooEmooP.product())->at(iel);
         float missHits = (h_elmissHits.product())->at(iel);
+        float elRelIsoEA  = (h_elRelIsoEA.product())->at(iel);
+        float dEtaInSeed  = (h_eldEtaInSeed.product())->at(iel);
+        float full5x5siee = (h_elfull5x5siee.product())->at(iel);
+
         bool hasMatchedConVeto = (h_elhasMatchedConVeto.product())->at(iel);
         bool isEB = (elscAbsEta <= 1.479);
         // electron ID
@@ -88,3 +99,9 @@ ElectronMaker::ElectronMaker (edm::ParameterSet const& iConfig, edm::ConsumesCol
 
         m_electrons.push_back(el);
     }
+
+    return m_electrons;
+}
+
+
+// THE END
