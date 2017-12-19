@@ -26,6 +26,7 @@ Neutrinos::Neutrinos(edm::ParameterSet const& iConfig, edm::ConsumesCollector &&
       t_nu_phi = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPhiLabel"));
 }
 
+Neutrinos::~Neutrinos() {}
 
 
 std::vector<Neutrino> Neutrinos::buildNeutrinos(const Lepton& lep, const MET& met){

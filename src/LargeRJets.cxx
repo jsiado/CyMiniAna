@@ -53,9 +53,6 @@ LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector 
   t_ljet_subjetJEC(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetJECLabel"));
   t_ljet_subjetCSV(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCSVLabel"));
   t_ljet_subjetCMVA(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCMVALabel"))){
-	m_ljetPtMin     = iConfig.getParameter<float>("ljetPtMin");
-	m_ljetAbsEtaMax = iConfig.getParameter<float>("ljetAbsEtaMax");
-
 	if (m_useTruth){
 		t_ljetGenPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPtLabel"));
 		t_ljetGenEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenEtaLabel"));
@@ -70,8 +67,10 @@ LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector 
 	}
 }
 
+LargeRJets::~LargeRJets() {}
 
-std::vector<Ljet> LargeRJets::execute(const edm::Event& evt){
+
+std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build the large-R jets */
     evt.getByToken(t_ljetPt,     h_ljetPt);
     evt.getByToken(t_ljetEta,    h_ljetEta);
@@ -82,7 +81,7 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt){
     evt.getByToken(t_ljetCvsB,   h_ljetCvsB);
     evt.getByToken(t_ljetCvsL,   h_ljetCvsL);
     evt.getByToken(t_ljetJEC,    h_ljetJEC);
-    evt.getByToken(t_ljetY,     h_ljetY);
+    evt.getByToken(t_ljetY,      h_ljetY);
     evt.getByToken(t_ljetArea,   h_ljetArea);
     evt.getByToken(t_ljetnHadEnergy, h_ljetnHadEnergy);
     evt.getByToken(t_ljetnEMEnergy,  h_ljetnEMEnergy);
@@ -94,14 +93,13 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt){
     evt.getByToken(t_ljetPartonFlavour, h_ljetPartonFlavour);
 
     for (unsigned ijet=0, size=(h_ljetPt.product())->size(); ijet<size; ++ijet) {
-        Jet jet;
+        Jet ljet;
 
-        // pT & |eta| min
-        float jetPt  = (h_ljetPt.product())->at(ijet);
-        float jetEta = (h_ljetEta.product())->at(ijet);
-        if (abs(jetEta) > m_ljetAbsEtaMax || jetPt < m_ljetPtMin) continue;
+        ljet.p4.SetPtEtaPhiE( (h_ljetPt.product())->at(ijet), (h_ljetEta.product())->at(ijet), 
+                              (h_ljetPhi.product())->at(ijet), (h_ljetE.product())->at(ijet));
 
-        jet.p4.SetPtEtaPhiE( jetPt, jetEta, (h_ljetPhi.product())->at(ijet), (h_ljetE.product())->at(ijet));
+        if (!obj.pass(ljet))
+            continue;
 
         m_ljets.push_back(jet);
     }
@@ -110,7 +108,7 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt){
 }
 
 
-std::vector<Jet> LargeRJets::execute_truth(const edm::Event& evt){
+std::vector<Jet> LargeRJets::execute_truth(const edm::Event& evt, const objectSelection& obj){
     /* Build Generator large-R jets */
     m_truth_ljets.clear()
 
@@ -123,10 +121,15 @@ std::vector<Jet> LargeRJets::execute_truth(const edm::Event& evt){
         Jet ljet;
         ljet.p4.SetPtEtaPhiE( (h_ljetGenPt.product())->at(ijet),  (h_ljetGenPt.product())->at(ijet),
                               (h_ljetGenPhi.product())->at(ijet), (h_ljetGenE.product())->at(ijet));
+
+        if (!obj.pass(ljet,true))  // check truth-level large-R jet selection
+            continue;
+
         m_truth_ljets.push_back(jet);
     }
 
     return m_truth_ljets;
 }
+
 
 // THE END

@@ -48,6 +48,7 @@ Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
     }
 }
 
+Jets::~Jets() {}
 
 
 std::vector<Jet> Jets::execute(const edm::Event& evt){

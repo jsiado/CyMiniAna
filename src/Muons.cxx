@@ -58,6 +58,8 @@ Muons::Muons(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
     }
 }
 
+Muons::~Muons() {}
+
 
 std::vector<Muon> Muons::execute(const edm::Event& evt){
     /* Build Muons */
