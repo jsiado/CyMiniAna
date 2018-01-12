@@ -1,15 +1,19 @@
-#ifndef PHYSICSOBJECTS_H_
-#define PHYSICSOBJECTS_H_
+#ifndef PHYSICSOBJECTS_H
+#define PHYSICSOBJECTS_H
 
 /* 
    Physics objects to be used in analyses
-   This structure allows the Event class
-   and other classes to access these objects
-   without circular inclusion (which breaks!)
 */
 #include "TLorentzVector.h"
 #include <map>
 #include <string>
+
+
+// easily keep track of isolation and ID working points
+enum class lep_id  {LOOSE, MEDIUM, TIGHT, VETO, NONE};
+enum class lep_iso {LOOSE, MEDIUM, TIGHT, NONE};
+enum class jet_id  {LOOSE, MEDIUM, TIGHT, TIGHTLEPVETO, NONE};
+
 
 // base object (consistent reference to TLorentzVector)
 struct CmaBase {
@@ -76,9 +80,9 @@ struct Lepton : CmaBase{
 
     float key;
     float miniIso;
-    float loose;
-    float medium;
-    float tight;
+    bool loose;
+    bool medium;
+    bool tight;
 };
 
 struct Electron : Lepton{
@@ -88,14 +92,15 @@ struct Electron : Lepton{
         isMuon     = false;
     }
 
+    bool vidVeto;
+    bool vidLoose;
+    bool vidMedium;
+    bool vidTight;
+    float charge;
     float iso03;
     float iso03db;
     float SCEta;
     float SCPhi;
-    float vidVeto;
-    float vidLoose;
-    float vidMedium;
-    float vidTight;
     float vidHEEP;
     float vidVetonoiso;
     float vidLoosenoiso;
@@ -115,6 +120,20 @@ struct Electron : Lepton{
     int isoMedium;
     int isoTight;
     int vetoID;
+    // electron ID variables (to re-calculate)
+    float Dz;
+    float Dxy;
+    float HoE;
+    float scEta;
+    float dPhiIn;
+    float ooEmooP;
+    int missHits;
+    float RelIsoEA;
+    float dEtaInSeed;
+    float full5x5siee;
+    bool hasMatchedConVeto;
+
+
 };
 struct Muon : Lepton{
     // extra muon attributes

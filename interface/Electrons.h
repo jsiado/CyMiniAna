@@ -12,7 +12,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
-
+#include "Analysis/CyMiniAna/interface/objectSelection.h"
 
 // Electrons Class
 class Electrons {
@@ -26,15 +26,12 @@ class Electrons {
   private:
 
     // Container of electrons (defined in interface/physicsObjects.h)
-    std::vector<Electron> execute(const edm::Event& evt);
+    std::vector<Electron> execute(const edm::Event& evt, const objectSelection& obj);
 
     // Physics information
     std::vector<Electron> m_electrons;
 
     // Setup physics information from EDMntuples
-    float m_elPtMin;
-    float m_elAbsEtaMax;
-    float m_applyIso;
 
 
     // ************
@@ -42,9 +39,6 @@ class Electrons {
     // -- following this example:
     //    https://github.com/dmajumder/VLQAna
     // ----------member data ---------------------------
-    edm::EDGetTokenT<std::vector<float>> t_elCharge;
-
-
     edm::Handle<std::vector<float>> h_elCharge;
     edm::Handle<std::vector<float>> h_elDxy;
     edm::Handle<std::vector<float>> h_elDz;
@@ -68,6 +62,31 @@ class Electrons {
     edm::Handle<std::vector<float>> h_elmissHits;
     edm::Handle<std::vector<float>> h_elooEmooP;
     edm::Handle<std::vector<float>> h_elscEta;
+
+    // Tokens
+    edm::EDGetTokenT<std::vector<float>> t_elCharge;
+    edm::EDGetTokenT<std::vector<float>> t_elDxy;
+    edm::EDGetTokenT<std::vector<float>> t_elDz;
+    edm::EDGetTokenT<std::vector<float>> t_elE;
+    edm::EDGetTokenT<std::vector<float>> t_elEta;
+    edm::EDGetTokenT<std::vector<float>> t_elHoE;
+    edm::EDGetTokenT<std::vector<float>> t_elRelIsoEA;
+    edm::EDGetTokenT<std::vector<float>> t_elKey;
+    edm::EDGetTokenT<std::vector<float>> t_elPhi;
+    edm::EDGetTokenT<std::vector<float>> t_elPt;
+    edm::EDGetTokenT<std::vector<float>> t_eldEtaIn;
+    edm::EDGetTokenT<std::vector<float>> t_eldEtaInSeed;
+    edm::EDGetTokenT<std::vector<float>> t_eldPhiIn;
+    edm::EDGetTokenT<std::vector<float>> t_elfull5x5siee;
+    edm::EDGetTokenT<std::vector<float>> t_elhasMatchedConVeto;
+    edm::EDGetTokenT<std::vector<float>> t_elvidLoose;
+    edm::EDGetTokenT<std::vector<float>> t_elvidMedium;
+    edm::EDGetTokenT<std::vector<float>> t_elvidTight;
+    edm::EDGetTokenT<std::vector<float>> t_elvidVeto;
+    edm::EDGetTokenT<std::vector<float>> t_elvidHEEP;
+    edm::EDGetTokenT<std::vector<float>> t_elmissHits;
+    edm::EDGetTokenT<std::vector<float>> t_elooEmooP;
+    edm::EDGetTokenT<std::vector<float>> t_elscEta;
 }
 
 #endif

@@ -33,13 +33,11 @@ eventSelection::~eventSelection() {}
 
 void eventSelection::beginJob() {
     /* Setup the class by identifying the selection and cuts */
-    // Identify the selection this instance will apply
-    identifySelection();
+    identifySelection();  // identify the selection to apply in filter()
 
+    // Read file with cuts one line at a time into the vector of 'Cut' structs:
+    // this only stores information, but can be expanded later
     std::ifstream file = cma::open_file(m_cutsfile);
-
-    // Read one line at a time into the vector of Cut structs:
-    // this only stores information, but can be expanded
     m_cuts.clear();
     std::string line;
     if (file.is_open()){
@@ -53,14 +51,11 @@ void eventSelection::beginJob() {
         file.close();
     } // end reading cuts file
 
-    // Get the number of cuts (for cutflow histogram binning)
-    m_numberOfCuts = m_cuts.size();
-
-    // Get the names of cuts (for cutflow histogram bin labeling)
-    m_cutflowNames.clear();
+    // Cutflow histogram setup
+    m_numberOfCuts = m_cuts.size();  // cutflow histogram binning
+    m_cutflowNames.clear();          // cutflow histogram bin labeling
     getCutNames();
 
-    // Setup histograms
     m_hists["cutflow"]     = m_fs->make<TH1D>( (m_selection+"_cutflow").c_str(),           (m_selection+"_cutflow").c_str(),           m_numberOfCuts+1,0,m_numberOfCuts+1);
     m_hists["cutflow_unw"] = m_fs->make<TH1D>( (m_selection+"_cutflow_unweighted").c_str(),(m_selection+"_cutflow_unweighted").c_str(),m_numberOfCuts+1,0,m_numberOfCuts+1);
 
@@ -71,6 +66,8 @@ void eventSelection::beginJob() {
         m_hists["cutflow"]->GetXaxis()->SetBinLabel(c+1,m_cutflowNames.at(c-1).c_str());
         m_hists["cutflow_unw"]->GetXaxis()->SetBinLabel(c+1,m_cutflowNames.at(c-1).c_str());
     }
+    
+    // add more histograms to 'm_hists' if desired
 
     return;
 }
@@ -104,10 +101,12 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
           if (n_jets==3 && n_ljets<1)  FAIL
           else :                       PASS & fill cutflows
     */
-    bool passSelection(true);
+    bool passSelection(true);         // use a bool rather than return after a failed cut
+                                      // to examine all cuts in cutflow (make N-1 plots,
+                                      // sequential plots)
     double first_bin(0.5);            // first bin value in cutflow histogram ("INITIAL")
 
-    float nominal_weight(1.0);  // = event.nominal_weight();
+    float nominal_weight(1.0);        // = event.nominal_weight();
 
     // fill cutflow histograms with initial value (before any cuts)
     m_hists["cutflow"]->Fill(first_bin,nominal_weight); // event weights
@@ -115,18 +114,21 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
 
     // no selection applied
     if (m_dummySelection)
-        passSelection = true;                          // event 'passed'  
+        passSelection = true;                           // event 'passed'  
 
     // selection for all-hadronic DNN 
     else if (m_allHadDNNSelection){
-        std::vector<Jet> jets;// = event.jets();          // access some event information
+        std::vector<Jet> jets;// = event.jets();        // access some event information
 
         // cut0 :: >=1 jets 
-        if ( jets.size()<1 )                           // check if the event passes the cut!
+        if ( jets.size()<1 )                            // check if the event passes the cut!
             passSelection = false;
         else{
-            m_hists["cutflow"]->Fill(first_bin+1,nominal_weight);  // fill cutflow
-            m_hists["cutflow_unw"]->Fill(first_bin+1);
+            if (passSelection){
+                // only fill cutflow if the event is still 'good'
+                m_hists["cutflow"]->Fill(first_bin+1,nominal_weight);
+                m_hists["cutflow_unw"]->Fill(first_bin+1);
+            }
             passSelection = true;
         }
     }

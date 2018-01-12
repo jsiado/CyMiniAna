@@ -39,15 +39,12 @@ Electrons::Electrons(edm::ParameterSet const& iConfig, edm::ConsumesCollector &&
   t_elmissHits(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elmissHitsLabel"))),
   t_elooEmooP(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elooEmooPLabel"))),
   t_elscEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elscEtaLabel"))),
-  t_elhasMatchedConVeto(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elhasMatchedConVetoLabel")){
-    m_elPtMin     = iConfig.getParameter<float>("elPtMin");
-    m_elAbsEtaMax = iConfig.getParameter<float>("elAbsEtaMax");
-    m_applyIso    = iConfig.getParameter<bool>("applyIso");
-}
+  t_elhasMatchedConVeto(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elhasMatchedConVetoLabel")){}
+
+Electrons::~Electrons() {}
 
 
-
-std::vector<Electron> Electrons::execute(const edm::Event& evt){
+std::vector<Electron> Electrons::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build the electrons */
     m_electrons.clear();
 
@@ -79,23 +76,28 @@ std::vector<Electron> Electrons::execute(const edm::Event& evt){
     for (unsigned int iel=0, size=(h_elPt.product())->size(); iel<size; ++iel) {
         Electron el;
 
-        float elPt    = (h_elPt.product())->at(iel);
-        float elscEta = (h_elscEta.product())->at(iel);
-        float dPhiIn  = (h_eldPhiIn.product())->at(iel);
-        float HoE     = (h_elHoE.product())->at(iel);
-        float Dxy     = (h_elDxy.product())->at(iel);
-        float Dz      = (h_elDz.product())->at(iel);
-        float ooEmooP  = (h_elooEmooP.product())->at(iel);
-        float missHits = (h_elmissHits.product())->at(iel);
-        float elRelIsoEA  = (h_elRelIsoEA.product())->at(iel);
-        float dEtaInSeed  = (h_eldEtaInSeed.product())->at(iel);
-        float full5x5siee = (h_elfull5x5siee.product())->at(iel);
+        el.p4.SetPtEtaPhiE((h_elPt.product())->at(iel), (h_elEta.product())->at(iel),
+                           (h_elPhi.product())->at(iel),(h_elE.product())->at(iel),);
 
-        bool hasMatchedConVeto = (h_elhasMatchedConVeto.product())->at(iel);
-        bool isEB = (elscAbsEta <= 1.479);
-        // electron ID
+        el.charge    = (h_elCharge.product())->at(iel);
+        el.vidLoose  = (h_elvidLoose.product())->at(iel);
+        el.vidMedium = (h_elvidMedium.product())->at(iel);
+        el.vidTight  = (h_elvidTight.product())->at(iel);
+        el.vidVeto   = (h_elvidVeto.product())->at(iel);
+ 
+        el.Dz  = (h_elDz.product())->at(iel);
+        el.Dxy = (h_elDxy.product())->at(iel);
+        el.HoE = (h_elHoE.product())->at(iel);
+        el.scEta  = (h_elscEta.product())->at(iel);
+        el.dPhiIn = (h_eldPhiIn.product())->at(iel);
+        el.ooEmooP  = (h_elooEmooP.product())->at(iel);
+        el.missHits = (h_elmissHits.product())->at(iel);
+        el.RelIsoEA = (h_elRelIsoEA.product())->at(iel);
+        el.dEtaInSeed  = (h_eldEtaInSeed.product())->at(iel);
+        el.full5x5siee = (h_elfull5x5siee.product())->at(iel);
+        el.hasMatchedConVeto = (h_elhasMatchedConVeto.product())->at(iel);
 
-        el.p4.SetPtEtaPhiE();
+        if (!obj.pass(el)) continue;
 
         m_electrons.push_back(el);
     }

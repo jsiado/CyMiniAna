@@ -61,7 +61,7 @@ Muons::Muons(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
 Muons::~Muons() {}
 
 
-std::vector<Muon> Muons::execute(const edm::Event& evt){
+std::vector<Muon> Muons::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build Muons */
     evt.getByToken(t_muDxy, h_muDxy);
     evt.getByToken(t_muDz,  h_muDz);
@@ -111,6 +111,8 @@ std::vector<Muon> Muons::execute(const edm::Event& evt){
         mu.p4.SetPtEtaPhiE( muPt, muEta, (h_muPhi.product())->at(imu), (h_muE.product())->at(imu) );
         /* ... */
 
+        if (!obj.pass(mu)) continue;
+
         m_muons.push_back(muon) ;
     }
 
@@ -119,7 +121,7 @@ std::vector<Muon> Muons::execute(const edm::Event& evt){
 
 
 
-std::vector<Muon> Muons::execute_truth(const edm::Event& evt){
+std::vector<Muon> Muons::execute_truth(const edm::Event& evt, const objectSelection& obj){
     /* Build Generator Muons */
     m_truth_muons.clear();
 
@@ -134,6 +136,10 @@ std::vector<Muon> Muons::execute_truth(const edm::Event& evt){
         mu.p4.SetPtEtaPhiE( (h_muGenMuonPt.product())->at(imu),  (h_muGenMuonEta.product())->at(imu),
                             (h_muGenMuonPhi.product())->at(imu), (h_muGenMuonE.product())->at(imu) );
         mu.charge = (h_muGenMuonCharge.product())->at(imu);
+
+        if (!obj.pass(mu,true))  // check truth-level muon selection
+            continue;
+
         m_truth_muons.push_back(mu);
     }
 

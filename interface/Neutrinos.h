@@ -12,7 +12,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
-
+#include "Analysis/CyMiniAna/interface/objectSelection.h"
 
 // Neutrinos Class
 class Neutrinos {
@@ -26,13 +26,14 @@ class Neutrinos {
   private:
 
     // Container of Neutrinos (defined in interface/physicsObjects.h)
-    std::vector<Neutrino> buildNeutrinos(const Lepton& lep, const MET& met);
-    std::vector<Neutrino> execute(const edm::Event& evt);
+    std::vector<Neutrino> execute(const Lepton& lep, const MET& met, const objectSelection& obj);
+    std::vector<Neutrino> execute(const edm::Event& evt, const objectSelection& obj);
 
     // Physics information
     std::vector<Neutrino> m_neutrinos;
 
     // Setup physics information from EDMntuples
+    bool m_buildNeutrinos;
 
     // ************
     // Setup to read EDMntuple format
@@ -42,6 +43,10 @@ class Neutrinos {
     edm::Handle<std::vector<float>> h_nu_pt;
     edm::Handle<std::vector<float>> h_nu_eta;
     edm::Handle<std::vector<float>> h_nu_phi;
+
+    edm::EDGetTokenT<std::vector<float>> t_nu_pt;
+    edm::EDGetTokenT<std::vector<float>> t_nu_eta;
+    edm::EDGetTokenT<std::vector<float>> t_nu_phi;
 }
 
 #endif

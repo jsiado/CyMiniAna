@@ -17,6 +17,7 @@ using namespace edm;
 
 
 Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
+  m_useTruth(iConfig.getParameter<float>("useTruth")),
   t_jetPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetPtLabel"))),
   t_jetEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetEtaLabel"))),
   t_jetPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetPhiLabel"))),
@@ -35,36 +36,35 @@ Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
   t_jetcMultip(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetcMultipLabel"))),
   t_jetnMultip(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetnMultipLabel"))),
   t_jetHadronFlavour(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetPartonFlavourLabel"))),
-  t_jetPartonFlavour(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetHadronFlavourLabel"))){
-    m_jetPtMin     = iConfig.getParameter<float>("jetPtMin");
-    m_jetAbsEtaMax = iConfig.getParameter<float>("jetAbsEtaMax");
-
+  t_jetPartonFlavour(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetHadronFlavourLabel"))),
+  t_jetMuonEnergy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("jetMuonEnergyLabel"))){
     if (m_useTruth){
-      t_jetGenPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPtLabel"))),
-      t_jetGenEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenEtaLabel"))),
-      t_jetGenPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPhiLabel"))),
-      t_jetGenE(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenELabel"))),
-      t_jetGenCharge(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenChargeLabel")))
+      t_jetGenPt  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPtLabel"));
+      t_jetGenEta = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenEtaLabel"));
+      t_jetGenPhi = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPhiLabel"));
+      t_jetGenE   = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenELabel"));
+      t_jetGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenChargeLabel"));
     }
 }
 
 Jets::~Jets() {}
 
 
-std::vector<Jet> Jets::execute(const edm::Event& evt){
+std::vector<Jet> Jets::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build the jets */
-    evt.getByToken(t_rho,     h_rho);
-    evt.getByToken(t_jetPt,     h_jetPt);
-    evt.getByToken(t_jetEta,    h_jetEta);
-    evt.getByToken(t_jetPhi,    h_jetPhi);
-    evt.getByToken(t_jetEnergy, h_jetEnergy);
-    evt.getByToken(t_jetCSV,    h_jetCSV);
+    evt.getByToken(t_rho,    h_rho);
+    evt.getByToken(t_jetY,   h_jetY);
+    evt.getByToken(t_jetPt,  h_jetPt);
+    evt.getByToken(t_jetEta, h_jetEta);
+    evt.getByToken(t_jetPhi, h_jetPhi);
+    evt.getByToken(t_jetJEC, h_jetJEC);
+    evt.getByToken(t_jetCSV, h_jetCSV);
     evt.getByToken(t_jetCMVA,   h_jetCMVA);
     evt.getByToken(t_jetCvsB,   h_jetCvsB);
     evt.getByToken(t_jetCvsL,   h_jetCvsL);
-    evt.getByToken(t_jetJEC,    h_jetJEC);
-    evt.getByToken(t_jetY,     h_jetY);
     evt.getByToken(t_jetArea,   h_jetArea);
+    evt.getByToken(t_jetEnergy, h_jetEnergy);
+    evt.getByToken(t_jetMuonEnergy, h_jetMuonEnergy);
     evt.getByToken(t_jetnHadEnergy, h_jetnHadEnergy);
     evt.getByToken(t_jetnEMEnergy,  h_jetnEMEnergy);
     evt.getByToken(t_jetcHadEnergy, h_jetcHadEnergy);
@@ -77,12 +77,18 @@ std::vector<Jet> Jets::execute(const edm::Event& evt){
     for (unsigned ijet=0, size=(h_jetPt.product())->size(); ijet<size; ++ijet) {
         Jet jet;
 
-        // pT & |eta| min
-        float jetPt  = (h_jetPt.product())->at(ijet);
-        float jetEta = (h_jetEta.product())->at(ijet);
-        if (abs(jetEta) > m_jetAbsEtaMax || jetPt < m_jetPtMin) continue;
+        jet.p4.SetPtEtaPhiE((h_jetPt.product())->at(ijet),  (h_jetEta.product())->at(ijet), 
+                            (h_jetPhi.product())->at(ijet), (h_jetE.product())->at(ijet));
 
-        jet.p4.SetPtEtaPhiE( jetPt, jetEta, (h_jetPhi.product())->at(ijet), (h_jetE.product())->at(ijet));
+        jet.cMultip    = (h_jetcMultip.product())->at(ijet);
+        jet.nMultip    = (h_jetnMultip.product())->at(ijet);
+        jet.nEMEnergy  = (h_jetnEMEnergy.product())->at(ijet);
+        jet.nHadEnergy = (h_jetnHadEnergy.product())->at(ijet);
+        jet.cEMEnergy  = (h_jetcEMEnergy.product())->at(ijet);
+        jet.cHadEnergy = (h_jetcHadEnergy.product())->at(ijet);
+        jet.MuonEnergy = (h_jetcMultip.product())->at(ijet);
+
+        if (!obj.pass(jet)) continue;
 
         m_jets.push_back(jet);
     }
@@ -91,7 +97,7 @@ std::vector<Jet> Jets::execute(const edm::Event& evt){
 }
 
 
-std::vector<Jet> Jets::execute_truth(const edm::Event& evt){
+std::vector<Jet> Jets::execute_truth(const edm::Event& evt, const objectSelection& obj){
     /* Build Generator jets */
     m_truth_jets.clear()
 
@@ -104,6 +110,10 @@ std::vector<Jet> Jets::execute_truth(const edm::Event& evt){
         Jet jet;
         jet.p4.SetPtEtaPhiE( (h_jetGenPt.product())->at(ijet),  (h_jetGenPt.product())->at(ijet),
                              (h_jetGenPhi.product())->at(ijet), (h_jetGenE.product())->at(ijet));
+
+        if (!obj.pass(jet,true))  // check truth-level small-R jet selection
+            continue;
+
         m_truth_jets.push_back(jet);
     }
 

@@ -27,13 +27,13 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
-
+#include "Analysis/CyMiniAna/interface/objectSelection.h"
 
 // CMAProducer Class
 class CMAProducer : public edm::EDProducer {
   public:
     // Constructor
-    explicit CMAProducer(const edm::ParameterSet&);
+    explicit CMAProducer(const edm::ParameterSet& iConfig);
 
     // Destructor
     virtual ~CMAProducer();
@@ -68,6 +68,7 @@ class CMAProducer : public edm::EDProducer {
     std::vector<Electron> m_electrons;
     std::vector<Muon> m_muons;
     std::vector<Muon> m_truth_muons;
+    std::vector<Lepton> m_leptons;
     std::vector<Neutrino> m_neutrinos;
     std::vector<Jet> m_jets;
     std::vector<Jet> m_truth_jets;

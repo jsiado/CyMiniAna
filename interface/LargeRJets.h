@@ -12,6 +12,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
+#include "Analysis/CyMiniAna/interface/objectSelection.h"
 
 
 // LargeRJets Class
@@ -26,16 +27,15 @@ class LargeRJets {
   private:
 
     // Container of LargeRJets (defined in interface/physicsObjects.h)
-    std::vector<Ljet> execute(const edm::Event& evt);
-    std::vector<Ljet> execute_truth(const edm::Event& evt);
+    std::vector<Ljet> execute(const edm::Event& evt, const objectSelection& obj);
+    std::vector<Ljet> execute_truth(const edm::Event& evt, const objectSelection& obj);
 
     // Physics information
     std::vector<Ljet> m_ljets;
     std::vector<Ljet> m_truth_ljets;
 
     // Setup physics information from EDMntuples
-    float m_ljetPtMin;
-    float m_ljetAbsEtaMax;
+    bool m_useTruth;
 
     // ************
     // Setup to read EDMntuple format
@@ -43,6 +43,60 @@ class LargeRJets {
     //    https://github.com/dmajumder/VLQAna
     // ----------member data ---------------------------
     // AK8 Jet Handles
+    edm::Handle<std::vector<float>> h_ljetPt;
+    edm::Handle<std::vector<float>> h_ljetEta;
+    edm::Handle<std::vector<float>> h_ljetPhi;
+    edm::Handle<std::vector<float>> h_ljetMass;
+    edm::Handle<std::vector<float>> h_ljetEnergy;
+    edm::Handle<std::vector<float>> h_ljetPartonFlavour;
+    edm::Handle<std::vector<float>> h_ljetHadronFlavour;
+    edm::Handle<std::vector<float>> h_ljetCSV;
+    edm::Handle<std::vector<float>> h_ljetCMVA;
+    edm::Handle<std::vector<float>> h_ljetCvsB;
+    edm::Handle<std::vector<float>> h_ljetCvsL;
+    edm::Handle<std::vector<float>> h_ljetJEC;
+    edm::Handle<std::vector<float>> h_ljetnHadEnergy;
+    edm::Handle<std::vector<float>> h_ljetnEMEnergy;
+    edm::Handle<std::vector<float>> h_ljetHFHadronEnergy;
+    edm::Handle<std::vector<float>> h_ljetcHadEnergy;
+    edm::Handle<std::vector<float>> h_ljetcEMEnergy;
+    edm::Handle<std::vector<float>> h_ljetnumDaughters;
+    edm::Handle<std::vector<float>> h_ljetcMultip;
+    edm::Handle<std::vector<float>> h_ljetnMultip;
+    edm::Handle<std::vector<float>> h_ljetY;
+    edm::Handle<std::vector<float>> h_ljetArea;
+    edm::Handle<std::vector<float>> h_ljettau1;
+    edm::Handle<std::vector<float>> h_ljettau2;
+    edm::Handle<std::vector<float>> h_ljettau3;
+    edm::Handle<std::vector<float>> h_ljetPrunedMass;
+    edm::Handle<std::vector<float>> h_ljetTrimmedMass;
+    edm::Handle<std::vector<float>> h_ljetFilteredMass;
+    edm::Handle<std::vector<float>> h_ljetSoftDropMass;
+    edm::Handle<std::vector<float>> h_ljetnSubJets;
+    edm::Handle<std::vector<float>> h_ljeh_subjetIdx0;
+    edm::Handle<std::vector<float>> h_ljeh_subjetIdx1;
+    edm::Handle<std::vector<float>> h_ljeh_subjetHadFl;
+    edm::Handle<std::vector<float>> h_ljeh_subjetPt;
+    edm::Handle<std::vector<float>> h_ljeh_subjetEta;
+    edm::Handle<std::vector<float>> h_ljeh_subjetPhi;
+    edm::Handle<std::vector<float>> h_ljeh_subjetMass;
+    edm::Handle<std::vector<float>> h_ljeh_subjetEnergy;
+    edm::Handle<std::vector<float>> h_ljeh_subjetJEC;
+    edm::Handle<std::vector<float>> h_ljeh_subjetCSV;
+    edm::Handle<std::vector<float>> h_ljeh_subjetCMVA;
+    // Truth jets
+    edm::Handle<std::vector<float>> h_ljetGenJetPt;
+    edm::Handle<std::vector<float>> h_ljetGenJetEta;
+    edm::Handle<std::vector<float>> h_ljetGenJetPhi;
+    edm::Handle<std::vector<float>> h_ljetGenJetE;
+    edm::Handle<std::vector<float>> h_ljetGenJetCharge;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetPt;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetEta;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetPhi;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetE;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetCharge; 
+
+    // Tokens
     edm::EDGetTokenT<std::vector<float>> t_ljetPt;
     edm::EDGetTokenT<std::vector<float>> t_ljetEta;
     edm::EDGetTokenT<std::vector<float>> t_ljetPhi;

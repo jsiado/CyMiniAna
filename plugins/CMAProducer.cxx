@@ -41,6 +41,8 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   t_metFulluncorPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPhiLabel")),
   t_metFulluncorPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPtLabel")),
   t_metFulluncorSumEt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorSumEtLabel")){
+    m_objectSelectionTool = new objectSelection(iConfig);
+
     // Electrons and Muons
     if (m_useLeptons){
         m_electronsTool = new Electron(iConfig,consumesCollector());
@@ -48,7 +50,7 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
     }
 
     // Neutrinos (reconstructed from MET)
-    if (m_useNeutrinos && !m_kinematicReco){
+    if (m_useNeutrinos){
         m_neutrinosTool = new Neutrino(iConfig,consumesCollector());
     }
 
@@ -87,13 +89,30 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
 } // end constructor
 
 
-CMAProducer::~CMAProducer() {}
+CMAProducer::~CMAProducer() {
+    // Clean-up
+    if (m_useLeptons){
+        delete m_electronsTool;
+        delete m_muonsTool;
+    }
+    if (m_useNeutrinos)
+        delete m_neutrinosTool;
+    if (m_useJets)
+        delete m_jetsTool;
+    if (m_useLargeRJets)
+        delete m_ljetsTool;
+    if (m_useTriggers)
+        delete m_triggersTool;
+}
 
 
 void CMAProducer::beginJob(){
     /* Producer setup before the event loop */
+    m_objectSelectionTool->initialize();
+
     m_electrons.clear();
     m_muons.clear();
+    m_leptons.clear();    // contain electrons and muons
     m_jets.clear();
     m_ljets.clear();
     m_neutrinos.clear();
@@ -110,31 +129,44 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
        - Build the different physics objects
        - Store for easy access in other EDModules
     */
-    edm::Handle<int> h_runno; 
+    edm::Handle<int> h_runno;
     evt.getByToken(t_runno, h_runno);
-    const int runno(*h_runno.product()) ; 
+    const int runno(*h_runno.product());
+
 
     // Event information
 
     // physics objects
     // - pass 'evt' to each function to access handles
     if (m_useLeptons){
-        m_electrons = m_electronTool->initialize_electrons(evt);    // Electrons
-        m_muons     = m_muonTool->initialize_muons(evt);        // Muons
+        m_electrons = m_electronTool->execute(evt,m_objectSelectionTool); // Electrons
+        m_muons     = m_muonTool->execute(evt,m_objectSelectionTool);     // Muons
+
+        unsigned int nEls = m_electrons.size();
+        unsigned int nMus = m_muons.size();
+        m_leptons.resize( nEls+nMus );
+        for (unsigned int el=0;el<nEls;el++) m_leptons.at(el) = m_electrons.at(el);
+        for (unsigned int mu=0;mu<nMus;mu++) m_leptons.at(mu+nEls) = m_muons.at(mu);
     }
+    if (m_useJets)
+        m_jets = jetTool->execute(evt,m_objectSelectionTool);             // AK4 jets
+
+    if (m_useLargeRJets)
+        m_ljets = ljetTool->execute(evt,m_objectSelectionTool);           // AK8 jets
+
+    initialize_kinematics(evt);                                           // MET, HT
+
     if (m_useNeutrinos){
-        m_neutrinos = m_neutrinoTool->initialize_neutrinos(evt);    // Neutrinos
-    }
-    if (m_useJets){
-        m_jets = jetTool->initialize_jets(evt);         // AK4 jets
-    }
-    if (m_useLargeRJets){
-        m_ljets = ljetTool->initialize_largeRjets(evt);   // AK8 jets
+        // Neutrinos (reconstruct or grab from ntuple)
+        if (m_buildNeutrinos)
+            m_neutrinos = m_neutrinoTool->execute(m_leptons.at(0),m_MET,m_objectSelectionTool);
+        else
+            m_neutrinos = m_neutrinoTool->execute(evt,m_objectSelectionTool);
     }
 
-    initialize_kinematics(evt);       // MET, HT calculations
-
-    /* do reconstruction, weight calculations here */
+    /* 
+     * do kinematic reconstruction, event weight calculations here 
+     */
 
     evt.put(m_electrons, "electrons");
     evt.put(m_muons,     "muons");
@@ -181,12 +213,12 @@ void CMAProducer::initialize_kinematics(edm::Event& evt){
         m_HT += jet.p4.Pt();
         m_ST += jet.p4.Pt();
     }
-    for (const auto& el : m_electrons){
+
+    for (const auto& el : m_electrons)
         m_ST += el.p4.Pt();
-    }
-    for (const auto& mu : m_muons){
+
+    for (const auto& mu : m_muons)
         m_ST += mu.p4.Pt();
-    }
 
     return;
 }

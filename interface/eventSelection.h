@@ -30,6 +30,7 @@
 
 #include "Analysis/CyMiniAna/interface/Event.h"
 #include "Analysis/CyMiniAna/interface/configuration.h"
+#include "Analysis/CyMiniAna/interface/objectSelection.h"
 
 
 class eventSelection : public edm::EDFilter {

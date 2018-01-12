@@ -19,17 +19,18 @@ using namespace edm;
 
 
 Neutrinos::Neutrinos(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  m_buildNeutrino(iConfig.getParameter<float>("buildNeutrino")){
-    if (!m_buildNeutrino){
+  m_buildNeutrinos(iConfig.getParameter<float>("buildNeutrinos")){
+    if (!m_buildNeutrinos){
       t_nu_pt  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPtLabel"));
       t_nu_eta = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuEtaLabel"));
       t_nu_phi = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPhiLabel"));
+    }
 }
 
 Neutrinos::~Neutrinos() {}
 
 
-std::vector<Neutrino> Neutrinos::buildNeutrinos(const Lepton& lep, const MET& met){
+std::vector<Neutrino> Neutrinos::execute(const Lepton& lep, const MET& met, const objectSelection& obj){
     /* Reconstruct neutrino using W mass constraint: MET+lepton */
     m_neutrinos.clear();
     return m_neutrinos;
@@ -37,7 +38,7 @@ std::vector<Neutrino> Neutrinos::buildNeutrinos(const Lepton& lep, const MET& me
 
 
 
-std::vector<Neutrino> Neutrinos::execute(const edm::Event& evt){
+std::vector<Neutrino> Neutrinos::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build the Neutrinos from ntuple */
     m_neutrinos.clear();
 
