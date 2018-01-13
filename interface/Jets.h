@@ -23,11 +23,11 @@ class Jets {
     // Destructor
     virtual ~Jets();
 
-  private:
-
     // Container of Jets (defined in interface/physicsObjects.h)
     std::vector<Jet> execute(const edm::Event& evt, const objectSelection& obj);
     std::vector<Jet> execute_truth(const edm::Event& evt, const objectSelection& obj);
+
+  private:
 
     // Physics information
     std::vector<Jet> m_jets;
@@ -47,7 +47,7 @@ class Jets {
     edm::Handle<std::vector<float>> h_jetPt;
     edm::Handle<std::vector<float>> h_jetEta;
     edm::Handle<std::vector<float>> h_jetPhi;
-    edm::Handle<std::vector<float>> h_jetEnergy;
+    edm::Handle<std::vector<float>> h_jetE;
     edm::Handle<std::vector<float>> h_jetHadronFlavour;
     edm::Handle<std::vector<float>> h_jetPartonFlavour;
     edm::Handle<std::vector<float>> h_jetCSV;
@@ -65,10 +65,11 @@ class Jets {
     edm::Handle<std::vector<float>> h_jetArea;
     edm::Handle<std::vector<float>> h_jetMuonEnergy;
     // Truth jets
-    edm::Handle<std::vector<float>> h_jetGenJetE;
-    edm::Handle<std::vector<float>> h_jetGenJetEta;
-    edm::Handle<std::vector<float>> h_jetGenJetPt;
-    edm::Handle<std::vector<float>> h_jetGenJetPhi;
+    edm::Handle<std::vector<float>> h_jetGenE;
+    edm::Handle<std::vector<float>> h_jetGenEta;
+    edm::Handle<std::vector<float>> h_jetGenPt;
+    edm::Handle<std::vector<float>> h_jetGenPhi;
+    edm::Handle<std::vector<float>> h_jetGenCharge;
 
     // Tokens
     edm::EDGetTokenT<int> t_npv;
@@ -76,7 +77,7 @@ class Jets {
     edm::EDGetTokenT<std::vector<float>> t_jetPt;
     edm::EDGetTokenT<std::vector<float>> t_jetEta;
     edm::EDGetTokenT<std::vector<float>> t_jetPhi;
-    edm::EDGetTokenT<std::vector<float>> t_jetEnergy;
+    edm::EDGetTokenT<std::vector<float>> t_jetE;
     edm::EDGetTokenT<std::vector<float>> t_jetHadronFlavour;
     edm::EDGetTokenT<std::vector<float>> t_jetPartonFlavour;
     edm::EDGetTokenT<std::vector<float>> t_jetCSV;
@@ -92,11 +93,13 @@ class Jets {
     edm::EDGetTokenT<std::vector<float>> t_jetnMultip;
     edm::EDGetTokenT<std::vector<float>> t_jetY;
     edm::EDGetTokenT<std::vector<float>> t_jetArea;
+    edm::EDGetTokenT<std::vector<float>> t_jetMuonEnergy;
     // Truth jets
-    edm::EDGetTokenT<std::vector<float>> t_jetGenJetE;
-    edm::EDGetTokenT<std::vector<float>> t_jetGenJetEta;
-    edm::EDGetTokenT<std::vector<float>> t_jetGenJetPt;
-    edm::EDGetTokenT<std::vector<float>> t_jetGenJetPhi;
-}
+    edm::EDGetTokenT<std::vector<float>> t_jetGenE;
+    edm::EDGetTokenT<std::vector<float>> t_jetGenEta;
+    edm::EDGetTokenT<std::vector<float>> t_jetGenPt;
+    edm::EDGetTokenT<std::vector<float>> t_jetGenPhi;
+    edm::EDGetTokenT<std::vector<float>> t_jetGenCharge;
+};
 
 #endif

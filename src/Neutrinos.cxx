@@ -19,11 +19,11 @@ using namespace edm;
 
 
 Neutrinos::Neutrinos(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  m_buildNeutrinos(iConfig.getParameter<float>("buildNeutrinos")){
+  m_buildNeutrinos(iConfig.getParameter<bool>("buildNeutrinos")){
     if (!m_buildNeutrinos){
-      t_nu_pt  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPtLabel"));
-      t_nu_eta = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuEtaLabel"));
-      t_nu_phi = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPhiLabel"));
+      t_nu_pt  = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPtLabel"));
+      t_nu_eta = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuEtaLabel"));
+      t_nu_phi = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("nuPhiLabel"));
     }
 }
 

@@ -17,55 +17,56 @@ using namespace edm;
 
 
 LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  m_useTruth(iConfig.getParameter<edm::InputTag>("useTruth")),
-  t_ljetPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPtLabel")),
-  t_ljetEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetEtaLabel")),
-  t_ljetPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPhiLabel")),
-  t_ljetE(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetEnergyLabel")),
-  t_ljetCSV(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCSVLabel")),
-  t_ljetCMVA(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCMVALabel")),
-  t_ljetCvsB(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCvsBLabel")),
-  t_ljetCvsL(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCvsLLabel")),
-  t_ljetJEC(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetJECLabel")),
-  t_ljetY(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetYLabel")),
-  t_ljetArea(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetAreaLabel")),
-  t_ljetnHadEnergy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnHadEnergyLabel")),
-  t_ljetnEMEnergy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnEMEnergyLabel")),
-  t_ljetcHadEnergy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcHadEnergyLabel")),
-  t_ljetcEMEnergy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcEMEnergyLabel")),
-  t_ljetcMultip(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcMultipLabel")),
-  t_ljetnMultip(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnMultipLabel")),
-  t_ljetHadronFlavour(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPartonFlavourLabel")),
-  t_ljetPartonFlavour(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetHadronFlavourLabel")),
-  t_ljettau1(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau1Label")),
-  t_ljettau2(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau2Label")),
-  t_ljettau3(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau3Label")),
-  t_ljetPrunedMass(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPrunedMassLabel")),
-  t_ljetTrimmedMass(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetTrimmedMassLabel")),
-  t_ljetFilteredMass(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetFilteredMassLabel")),
-  t_ljetSoftDropMass(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetSoftDropMassLabel")),
-  t_ljet_subjetIdx0(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetIdx0Label")),
-  t_ljet_subjetIdx1(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetIdx1Label")),
-  t_ljet_subjetHadFl(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetHadronFlavourLabel")),
-  t_ljet_subjetPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetPtLabel")),
-  t_ljet_subjetEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetEtaLabel")),
-  t_ljet_subjetPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetPhiLabel")),
-  t_ljet_subjetEnergy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetEnergyLabel")),
-  t_ljet_subjetJEC(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetJECLabel")),
-  t_ljet_subjetCSV(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCSVLabel")),
-  t_ljet_subjetCMVA(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCMVALabel"))){
-	if (m_useTruth){
-		t_ljetGenPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPtLabel"));
-		t_ljetGenEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenEtaLabel"));
-		t_ljetGenPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPhiLabel"));
-		t_ljetGenE      = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenELabel"));
-		t_ljetGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenChargeLabel"));
-		t_ljet_subjetGenPt     = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenPtLabel"));
-		t_ljet_subjetGenEta    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenEtaLabel"));
-		t_ljet_subjetGenPhi    = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenPhiLabel"));
-		t_ljet_subjetGenE	   = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenELabel"));
-		t_ljet_subjetGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenChargeLabel"));
-	}
+  m_useTruth(iConfig.getParameter<bool>("useTruth")),
+  t_ljetPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPtLabel"))),
+  t_ljetEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetEtaLabel"))),
+  t_ljetPhi(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPhiLabel"))),
+  t_ljetE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetEnergyLabel"))),
+  t_ljetCSV(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCSVLabel"))),
+  t_ljetCMVA(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCMVALabel"))),
+  t_ljetCvsB(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCvsBLabel"))),
+  t_ljetCvsL(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCvsLLabel"))),
+  t_ljetJEC(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetJECLabel"))),
+  t_ljetY(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetYLabel"))),
+  t_ljetArea(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetAreaLabel"))),
+  t_ljetMuonEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetMuonEnergyLabel"))),
+  t_ljetnHadEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnHadEnergyLabel"))),
+  t_ljetnEMEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnEMEnergyLabel"))),
+  t_ljetcHadEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcHadEnergyLabel"))),
+  t_ljetcEMEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcEMEnergyLabel"))),
+  t_ljetcMultip(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcMultipLabel"))),
+  t_ljetnMultip(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnMultipLabel"))),
+  t_ljetPartonFlavour(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetHadronFlavourLabel"))),
+  t_ljetHadronFlavour(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPartonFlavourLabel"))),
+  t_ljettau1(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau1Label"))),
+  t_ljettau2(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau2Label"))),
+  t_ljettau3(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau3Label"))),
+  t_ljetPrunedMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPrunedMassLabel"))),
+  t_ljetTrimmedMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetTrimmedMassLabel"))),
+  t_ljetFilteredMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetFilteredMassLabel"))),
+  t_ljetSoftDropMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetSoftDropMassLabel"))),
+  t_ljet_subjetIdx0(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetIdx0Label"))),
+  t_ljet_subjetIdx1(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetIdx1Label"))),
+  t_ljet_subjetHadFl(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetHadronFlavourLabel"))),
+  t_ljet_subjetPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetPtLabel"))),
+  t_ljet_subjetEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetEtaLabel"))),
+  t_ljet_subjetPhi(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetPhiLabel"))),
+  t_ljet_subjetE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetEnergyLabel"))),
+  t_ljet_subjetJEC(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetJECLabel"))),
+  t_ljet_subjetCSV(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCSVLabel"))),
+  t_ljet_subjetCMVA(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCMVALabel"))){
+    if (m_useTruth){
+        t_ljetGenPt  = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPtLabel"));
+        t_ljetGenEta = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenEtaLabel"));
+        t_ljetGenPhi = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPhiLabel"));
+        t_ljetGenE   = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenELabel"));
+        t_ljetGenCharge = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenChargeLabel"));
+        t_ljet_subjetGenPt  = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenPtLabel"));
+        t_ljet_subjetGenEta = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenEtaLabel"));
+        t_ljet_subjetGenPhi = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenPhiLabel"));
+        t_ljet_subjetGenE   = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenELabel"));
+        t_ljet_subjetGenCharge = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenChargeLabel"));
+    }
 }
 
 LargeRJets::~LargeRJets() {}
@@ -76,7 +77,7 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
     evt.getByToken(t_ljetPt,     h_ljetPt);
     evt.getByToken(t_ljetEta,    h_ljetEta);
     evt.getByToken(t_ljetPhi,    h_ljetPhi);
-    evt.getByToken(t_ljetEnergy, h_ljetEnergy);
+    evt.getByToken(t_ljetE,      h_ljetE);
     evt.getByToken(t_ljetCSV,    h_ljetCSV);
     evt.getByToken(t_ljetCMVA,   h_ljetCMVA);
     evt.getByToken(t_ljetCvsB,   h_ljetCvsB);
@@ -90,28 +91,74 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
     evt.getByToken(t_ljetcEMEnergy,  h_ljetcEMEnergy);
     evt.getByToken(t_ljetcMultip,    h_ljetcMultip);
     evt.getByToken(t_ljetnMultip,    h_ljetnMultip);
+    evt.getByToken(t_ljetMuonEnergy, h_ljetMuonEnergy);
     evt.getByToken(t_ljetHadronFlavour, h_ljetHadronFlavour);
     evt.getByToken(t_ljetPartonFlavour, h_ljetPartonFlavour);
+    evt.getByToken(t_ljettau1, h_ljettau1);
+    evt.getByToken(t_ljettau2, h_ljettau2);
+    evt.getByToken(t_ljettau3, h_ljettau3);
+    evt.getByToken(t_ljetSoftDropMass, h_ljetSoftDropMass);
+    evt.getByToken(t_ljet_subjetIdx0,  h_ljet_subjetIdx0);
+    evt.getByToken(t_ljet_subjetIdx1,  h_ljet_subjetIdx1);
+    evt.getByToken(t_ljet_subjetHadFl, h_ljet_subjetHadFl);
+    evt.getByToken(t_ljet_subjetJEC,   h_ljet_subjetJEC);
+    evt.getByToken(t_ljet_subjetCSV,   h_ljet_subjetCSV);
+    evt.getByToken(t_ljet_subjetCMVA,  h_ljet_subjetCMVA);
+    evt.getByToken(t_ljet_subjetPt,    h_ljet_subjetPt);
+    evt.getByToken(t_ljet_subjetEta,   h_ljet_subjetEta);
+    evt.getByToken(t_ljet_subjetPhi,   h_ljet_subjetPhi);
+    evt.getByToken(t_ljet_subjetE,     h_ljet_subjetE);
+
 
     for (unsigned ijet=0, size=(h_ljetPt.product())->size(); ijet<size; ++ijet) {
-        Jet ljet;
+        Ljet ljet;
 
         ljet.p4.SetPtEtaPhiE( (h_ljetPt.product())->at(ijet), (h_ljetEta.product())->at(ijet), 
                               (h_ljetPhi.product())->at(ijet), (h_ljetE.product())->at(ijet));
 
-        if (!obj.pass(ljet))
-            continue;
+        // Substructure
+        ljet.tau1 = (h_ljettau1.product())->at(ijet);
+        ljet.tau2 = (h_ljettau2.product())->at(ijet);
+        ljet.tau3 = (h_ljettau3.product())->at(ijet);
+        ljet.tau21 = ljet.tau2 / ljet.tau1;
+        ljet.tau32 = ljet.tau3 / ljet.tau2;
+        ljet.softDropMass = (h_ljetSoftDropMass.product())->at(ijet);
 
-        m_ljets.push_back(jet);
+        // Subjets:  2 soft drop subjets
+        ljet.subjets.resize(2);
+        for (unsigned int j=0;j<2;j++){    
+            unsigned int idx = (ijet*2)+j;  // vector has two entries to match single entry for AK8
+                                            // ljet index 0(1) -> subjets indices 0,1 (2,3); etc.
+            Jet subjet;
+            subjet.p4.SetPtEtaPhiE( (h_ljet_subjetPt.product())->at(idx), (h_ljet_subjetEta.product())->at(idx), 
+                                    (h_ljet_subjetPhi.product())->at(idx), (h_ljet_subjetE.product())->at(idx));
+
+            subjet.cMVAv2 = (h_ljet_subjetCMVA.product())->at(idx);
+            ljet.subjets.at(j) = subjet;
+        }
+
+        // ID
+        ljet.cMultip = (h_ljetcMultip.product())->at(ijet);
+        ljet.nMultip = (h_ljetnMultip.product())->at(ijet);
+        ljet.nEMEnergy = (h_ljetnEMEnergy.product())->at(ijet);
+        ljet.cEMEnergy = (h_ljetcEMEnergy.product())->at(ijet);
+        ljet.nHadEnergy = (h_ljetnHadEnergy.product())->at(ijet);
+        ljet.cHadEnergy = (h_ljetcHadEnergy.product())->at(ijet);
+        ljet.muonEnergy = (h_ljetMuonEnergy.product())->at(ijet);
+
+       	bool passObjSel	= obj.pass(ljet);
+        if (!passObjSel) continue;
+
+        m_ljets.push_back(ljet);
     }
 
     return m_ljets;
 }
 
 
-std::vector<Jet> LargeRJets::execute_truth(const edm::Event& evt, const objectSelection& obj){
+std::vector<Ljet> LargeRJets::execute_truth(const edm::Event& evt, const objectSelection& obj){
     /* Build Generator large-R jets */
-    m_truth_ljets.clear()
+    m_truth_ljets.clear();
 
     evt.getByToken(t_ljetGenPt,  h_ljetGenPt);
     evt.getByToken(t_ljetGenEta, h_ljetGenEta);
@@ -119,14 +166,14 @@ std::vector<Jet> LargeRJets::execute_truth(const edm::Event& evt, const objectSe
     evt.getByToken(t_ljetGenE,   h_ljetGenE);
 
     for (unsigned ijet=0, size=(h_ljetGenPt.product())->size(); ijet<size; ++ijet) {
-        Jet ljet;
+        Ljet ljet;
         ljet.p4.SetPtEtaPhiE( (h_ljetGenPt.product())->at(ijet),  (h_ljetGenPt.product())->at(ijet),
                               (h_ljetGenPhi.product())->at(ijet), (h_ljetGenE.product())->at(ijet));
 
-        if (!obj.pass(ljet,true))  // check truth-level large-R jet selection
-            continue;
+       	bool passObjSel	= obj.pass(ljet,true);
+        if (!passObjSel) continue;
 
-        m_truth_ljets.push_back(jet);
+        m_truth_ljets.push_back(ljet);
     }
 
     return m_truth_ljets;

@@ -17,44 +17,40 @@ using namespace edm;
 
 
 Muons::Muons(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  t_muDxy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muDxyLabel"))),
-  t_muDz(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muDzLabel"))),
-  t_muE(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muELabel"))),
-  t_muEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muEtaLabel"))),
-  t_muPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muPhiLabel"))),
-  t_muPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muPtLabel"))),
-  t_muKey(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muKeyLabel"))),
-  t_muIso04(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIso04Label"))),
-  t_muCharge(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muChargeLabel"))),
-  t_muSumPUPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumPUPtLabel"))),
-  t_muSumPhotonPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumPhotonPtLabel"))),
-  t_muGlbTrkNormChi2(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGlbTrkNormChi2Label"))),
-  t_muInTrkNormChi2(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muInTrkNormChi2Label"))),
-  t_muIsGlobalMuon(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsGlobalMuonLabel"))),
-  t_muIsLooseMuon(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsLooseMuonLabel"))),
-  t_muIsPFMuon(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsPFMuonLabel"))),
-  t_muIsSoftMuon(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsSoftMuonLabel"))),
-  t_muIsTightMuon(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsTightMuonLabel"))),
-  t_muIsTrackerMuon(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsTrackerMuonLabel"))),
-  t_muNumberOfPixelLayers(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberOfPixelLayersLabel"))),
-  t_muNumberTrackerLayers(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberTrackerLayersLabel"))),
-  t_muNumberValidMuonHits(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberValidMuonHitsLabel"))),
-  t_muNumberValidPixelHits(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberValidPixelHitsLabel"))),
-  t_muSumChargedHadronPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumChargedHadronPtLabel"))),
-  t_muSumNeutralHadronPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumNeutralHadronPtLabel"))),
-  t_muNumberMatchedStations(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberMatchedStationsLabel"))),
-  t_muNumberOfValidTrackerHits(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberOfValidTrackerHitsLabel"))){
-    m_muPtMin     = iConfig.getParameter<float>("muPtMin");
-    m_muAbsEtaMax = iConfig.getParameter<float>("muAbsEtaMax");
-    m_muIsoMin    = iConfig.getParameter<float>("muIsoMin");
-    m_muIsoMax    = iConfig.getParameter<float>("muIsoMax");
-
+  m_useTruth(iConfig.getParameter<bool>("useTruth")),
+  t_muPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muPtLabel"))),
+  t_muEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muEtaLabel"))),
+  t_muPhi(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muPhiLabel"))),
+  t_muE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muELabel"))),
+  t_muCharge(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muChargeLabel"))),
+  t_muDxy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muDxyLabel"))),
+  t_muDz(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muDzLabel"))),
+  t_muGlbTrkNormChi2(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGlbTrkNormChi2Label"))),
+  t_muInTrkNormChi2(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muInTrkNormChi2Label"))),
+  t_muIsGlobalMuon(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsGlobalMuonLabel"))),
+  t_muIsLooseMuon(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsLooseMuonLabel"))),
+  t_muIsPFMuon(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsPFMuonLabel"))),
+  t_muIsSoftMuon(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsSoftMuonLabel"))),
+  t_muIsTightMuon(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsTightMuonLabel"))),
+  t_muIsTrackerMuon(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIsTrackerMuonLabel"))),
+  t_muIso04(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muIso04Label"))),
+  t_muKey(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muKeyLabel"))),
+  t_muNumberMatchedStations(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberMatchedStationsLabel"))),
+  t_muNumberOfPixelLayers(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberOfPixelLayersLabel"))),
+  t_muNumberOfValidTrackerHits(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberOfValidTrackerHitsLabel"))),
+  t_muNumberTrackerLayers(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberTrackerLayersLabel"))),
+  t_muNumberValidMuonHits(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberValidMuonHitsLabel"))),
+  t_muNumberValidPixelHits(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muNumberValidPixelHitsLabel"))),
+  t_muSumChargedHadronPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumChargedHadronPtLabel"))),
+  t_muSumNeutralHadronPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumNeutralHadronPtLabel"))),
+  t_muSumPUPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumPUPtLabel"))),
+  t_muSumPhotonPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muSumPhotonPtLabel"))){
     if (m_useTruth){
-        t_muGenE   = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenELabel"))),
-        t_muGenEta = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenEtaLabel"))),
-        t_muGenPhi = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenPhiLabel"))),
-        t_muGenPt  = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenPtLabel"))),
-        t_muGenCharge = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenChargeLabel"))),
+        t_muGenE   = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenELabel"));
+        t_muGenEta = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenEtaLabel"));
+        t_muGenPhi = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenPhiLabel"));
+        t_muGenPt  = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenPtLabel"));
+        t_muGenCharge = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("muGenChargeLabel"));
     }
 }
 
@@ -92,28 +88,17 @@ std::vector<Muon> Muons::execute(const edm::Event& evt, const objectSelection& o
     evt.getByToken(t_muNumberOfValidTrackerHits, h_muNumberOfValidTrackerHits);
 
     for (unsigned int imu=0, size=(h_muPt.product())->size(); imu<size; ++imu) {
-        float muPt  = (h_muPt.product())->at(imu);
-        float muEta = (h_muEta.product())->at(imu);
-        float muIso = (h_muIso04.product())->at(imu);
-
-        bool passMuId(false);
-        bool isLooseMu((h_muIsLooseMuon.product())->at(imu) > 0);
-        bool isTightMu((h_muIsTightMuon.product())->at(imu) > 0);
-
-        bool passMuISO(false);
-        if ( muIso >= m_muIsoMin && muIso < m_muIsoMax ) passMuISO = true;
-
-        // kinematics, ID, and isolation
-        if ( muPt < m_muPtMin || abs(muEta) > m_muAbsEtaMax || !passMuID || !passMuISO )
-             continue;
-
         Muon mu;
-        mu.p4.SetPtEtaPhiE( muPt, muEta, (h_muPhi.product())->at(imu), (h_muE.product())->at(imu) );
-        /* ... */
+        mu.p4.SetPtEtaPhiE( (h_muPt.product())->at(imu), (h_muEta.product())->at(imu), 
+                            (h_muPhi.product())->at(imu), (h_muE.product())->at(imu) );
+        mu.iso04 = (h_muIso04.product())->at(imu);
+        mu.loose = ((h_muIsLooseMuon.product())->at(imu) > 0);
+        mu.tight = ((h_muIsTightMuon.product())->at(imu) > 0);
 
-        if (!obj.pass(mu)) continue;
+       	bool passObjSel	= obj.pass(mu);
+        if (!passObjSel) continue;
 
-        m_muons.push_back(muon) ;
+        m_muons.push_back(mu);
     }
 
     return m_muons;
@@ -131,14 +116,14 @@ std::vector<Muon> Muons::execute_truth(const edm::Event& evt, const objectSelect
     evt.getByToken(t_muGenPt,  h_muGenPt);
     evt.getByToken(t_muGenCharge, h_muGenCharge);
 
-    for (unsigned int imu=0, size=(h_muGenMuonPt.product())->size(); imu<size; ++imu) {
+    for (unsigned int imu=0, size=(h_muGenPt.product())->size(); imu<size; ++imu) {
         Muon mu;
-        mu.p4.SetPtEtaPhiE( (h_muGenMuonPt.product())->at(imu),  (h_muGenMuonEta.product())->at(imu),
-                            (h_muGenMuonPhi.product())->at(imu), (h_muGenMuonE.product())->at(imu) );
-        mu.charge = (h_muGenMuonCharge.product())->at(imu);
+        mu.p4.SetPtEtaPhiE( (h_muGenPt.product())->at(imu),  (h_muGenEta.product())->at(imu),
+                            (h_muGenPhi.product())->at(imu), (h_muGenE.product())->at(imu) );
+        mu.charge = (h_muGenCharge.product())->at(imu);
 
-        if (!obj.pass(mu,true))  // check truth-level muon selection
-            continue;
+       	bool passObjSel	= obj.pass(mu,true);
+        if (!passObjSel) continue;
 
         m_truth_muons.push_back(mu);
     }

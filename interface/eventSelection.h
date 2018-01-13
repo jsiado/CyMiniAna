@@ -28,8 +28,8 @@
 #include <sstream>
 #include <iostream>
 
-#include "Analysis/CyMiniAna/interface/Event.h"
-#include "Analysis/CyMiniAna/interface/configuration.h"
+#include "Analysis/CyMiniAna/interface/tools.h"
+#include "Analysis/CyMiniAna/interface/physicsObjects.h"
 #include "Analysis/CyMiniAna/interface/objectSelection.h"
 
 
@@ -54,7 +54,7 @@ class eventSelection : public edm::EDFilter {
     virtual void getCutNames();
 
     // Run for every event (in every systematic) that needs saving: called from filter()
-    virtual bool applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_unweighted);
+    //virtual bool applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_unweighted);
 
     // struct for holding information on a 'cut'
     //  ideally this could be extended so that cuts are parsed & written by code, not humans!

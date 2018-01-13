@@ -32,12 +32,13 @@ struct Jet : CmaBase{
 
     float partonFlavour;
     float hadronFlavour;
-    float neutralMultiplicity;
-    float neutralHadronEnergyFrac;
-    float neutralEmEnergyFrac;
-    float chargedHadronEnergyFrac;
-    float chargedEmEnergyFrac;
-    float chargedMultiplicity;
+    float nMultip;
+    float nHadEnergy;
+    float nEMEnergy;
+    float cHadEnergy;
+    float cEMEnergy;
+    float cMultip;
+    float muonEnergy;
 
     float jecFactor0;
     float jetArea;
@@ -52,15 +53,17 @@ struct Jet : CmaBase{
 struct Ljet : Jet{
     // extra ljet attributes
     int isGood;
-    float tau1_CHS;
-    float tau2_CHS;
-    float tau3_CHS;
-    float tau21_CHS;
-    float tau32_CHS;
-    float softDropMass_CHS;
+    // substructure
+    float tau1;
+    float tau2;
+    float tau3;
+    float tau21;
+    float tau32;
+    float softDropMass;
+    std::vector<Jet> subjets;
+    float charge;
     float vSubjetIndex0;
     float vSubjetIndex1;
-    float charge;
 };
 
 struct Tjet : Jet{

@@ -81,7 +81,7 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     bool m_useNeutrinos;
 
     std::vector<std::string> m_listOfWeightSystematics;
-    std::vector<std::string> m_mapOfWeightVectorSystematics;
+    std::map<std::string,unsigned int> m_mapOfWeightVectorSystematics;
 
     std::map<std::string, TH1D*> m_map_histograms1D;
     std::map<std::string, TH2D*> m_map_histograms2D;

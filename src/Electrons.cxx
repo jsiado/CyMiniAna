@@ -17,29 +17,30 @@ using namespace edm;
 
 
 Electrons::Electrons(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  t_elCharge(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elChargeLabel"))),
-  t_elDxy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDxyLabel"))),
-  t_elDz(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDzLabel"))),
-  t_elE(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elELabel"))),
-  t_elEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elEtaLabel"))),
-  t_elHoE(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elHoELabel"))),
-  t_elRelIsoEA(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elRelIsoEALabel"))),
-  t_elKey(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elKeyLabel"))),
-  t_elPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPhiLabel"))),
-  t_elPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPtLabel"))),
-  t_eldEtaIn(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInLabel"))),
-  t_eldEtaInSeed(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInSeedLabel"))),
-  t_eldPhiIn(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldPhiInLabel"))),
-  t_elfull5x5siee(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elfull5x5sieeLabel"))),
-  t_elvidLoose(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidLooseLabel"))),
-  t_elvidMedium(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidMediumLabel"))),
-  t_elvidTight(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidTightLabel"))),
-  t_elvidVeto(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidVetoLabel"))),
-  t_elvidHEEP(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidHEEPLabel"))),
-  t_elmissHits(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elmissHitsLabel"))),
-  t_elooEmooP(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elooEmooPLabel"))),
-  t_elscEta(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elscEtaLabel"))),
-  t_elhasMatchedConVeto(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elhasMatchedConVetoLabel")){}
+  t_elCharge(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elChargeLabel"))),
+  t_elDxy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDxyLabel"))),
+  t_elDz(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elDzLabel"))),
+  t_elE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elELabel"))),
+  t_elEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elEtaLabel"))),
+  t_elHoE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elHoELabel"))),
+  t_elRelIsoEA(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elRelIsoEALabel"))),
+  t_elKey(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elKeyLabel"))),
+  t_elPhi(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPhiLabel"))),
+  t_elPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elPtLabel"))),
+  t_eldEtaIn(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInLabel"))),
+  t_eldEtaInSeed(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldEtaInSeedLabel"))),
+  t_eldPhiIn(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("eldPhiInLabel"))),
+  t_elfull5x5siee(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elfull5x5sieeLabel"))),
+  t_elhasMatchedConVeto(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elhasMatchedConVetoLabel"))),
+  t_elvidLoose(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidLooseLabel"))),
+  t_elvidMedium(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidMediumLabel"))),
+  t_elvidTight(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidTightLabel"))),
+  t_elvidVeto(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidVetoLabel"))),
+  t_elvidHEEP(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elvidHEEPLabel"))),
+  t_elmissHits(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elmissHitsLabel"))),
+  t_elooEmooP(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elooEmooPLabel"))),
+  t_elscEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("elscEtaLabel"))){
+}
 
 Electrons::~Electrons() {}
 
@@ -77,7 +78,7 @@ std::vector<Electron> Electrons::execute(const edm::Event& evt, const objectSele
         Electron el;
 
         el.p4.SetPtEtaPhiE((h_elPt.product())->at(iel), (h_elEta.product())->at(iel),
-                           (h_elPhi.product())->at(iel),(h_elE.product())->at(iel),);
+                           (h_elPhi.product())->at(iel),(h_elE.product())->at(iel));
 
         el.charge    = (h_elCharge.product())->at(iel);
         el.vidLoose  = (h_elvidLoose.product())->at(iel);
@@ -97,7 +98,11 @@ std::vector<Electron> Electrons::execute(const edm::Event& evt, const objectSele
         el.full5x5siee = (h_elfull5x5siee.product())->at(iel);
         el.hasMatchedConVeto = (h_elhasMatchedConVeto.product())->at(iel);
 
-        if (!obj.pass(el)) continue;
+        bool updateElectronID(false);
+        if (updateElectronID) obj.electronID(el);
+
+       	bool passObjSel	= obj.pass(el);
+        if (!passObjSel) continue;
 
         m_electrons.push_back(el);
     }

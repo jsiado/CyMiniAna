@@ -23,11 +23,11 @@ class Muons {
     // Destructor
     virtual ~Muons();
 
-  private:
-
     // Container of Muons (defined in interface/physicsObjects.h)
     std::vector<Muon> execute(const edm::Event& evt, const objectSelection& obj);
     std::vector<Muon> execute_truth(const edm::Event& evt, const objectSelection& obj);
+
+  private:
 
     // Physics information
     std::vector<Muon> m_muons;
@@ -35,7 +35,6 @@ class Muons {
 
     // Setup physics information from EDMntuples
     bool m_useTruth;
-
 
     // ************
     // Setup to read EDMntuple format
@@ -72,18 +71,20 @@ class Muons {
     edm::Handle<std::vector<float>> h_muSumPhotonPt;
 
     // Truth Muons
-    edm::Handle<std::vector<float>> h_muGenMuonCharge;
-    edm::Handle<std::vector<float>> h_muGenMuonE;
-    edm::Handle<std::vector<float>> h_muGenMuonEta;
-    edm::Handle<std::vector<float>> h_muGenMuonPhi;
-    edm::Handle<std::vector<float>> h_muGenMuonPt;
+    edm::Handle<std::vector<float>> h_muGenCharge;
+    edm::Handle<std::vector<float>> h_muGenE;
+    edm::Handle<std::vector<float>> h_muGenEta;
+    edm::Handle<std::vector<float>> h_muGenPhi;
+    edm::Handle<std::vector<float>> h_muGenPt;
 
     // Tokens
+    edm::EDGetTokenT<std::vector<float>> t_muPt;
+    edm::EDGetTokenT<std::vector<float>> t_muEta;
+    edm::EDGetTokenT<std::vector<float>> t_muPhi;
+    edm::EDGetTokenT<std::vector<float>> t_muE;
     edm::EDGetTokenT<std::vector<float>> t_muCharge;
     edm::EDGetTokenT<std::vector<float>> t_muDxy;
     edm::EDGetTokenT<std::vector<float>> t_muDz;
-    edm::EDGetTokenT<std::vector<float>> t_muE;
-    edm::EDGetTokenT<std::vector<float>> t_muEta;
     edm::EDGetTokenT<std::vector<float>> t_muGlbTrkNormChi2;
     edm::EDGetTokenT<std::vector<float>> t_muInTrkNormChi2;
     edm::EDGetTokenT<std::vector<float>> t_muIsGlobalMuon;
@@ -100,18 +101,16 @@ class Muons {
     edm::EDGetTokenT<std::vector<float>> t_muNumberTrackerLayers;
     edm::EDGetTokenT<std::vector<float>> t_muNumberValidMuonHits;
     edm::EDGetTokenT<std::vector<float>> t_muNumberValidPixelHits;
-    edm::EDGetTokenT<std::vector<float>> t_muPhi;
-    edm::EDGetTokenT<std::vector<float>> t_muPt;
     edm::EDGetTokenT<std::vector<float>> t_muSumChargedHadronPt;
     edm::EDGetTokenT<std::vector<float>> t_muSumNeutralHadronPt;
     edm::EDGetTokenT<std::vector<float>> t_muSumPUPt;
     edm::EDGetTokenT<std::vector<float>> t_muSumPhotonPt;
     // Truth Muons
-    edm::EDGetTokenT<std::vector<float>> t_muGenMuonCharge;
-    edm::EDGetTokenT<std::vector<float>> t_muGenMuonE;
-    edm::EDGetTokenT<std::vector<float>> t_muGenMuonEta;
-    edm::EDGetTokenT<std::vector<float>> t_muGenMuonPhi;
-    edm::EDGetTokenT<std::vector<float>> t_muGenMuonPt;
-}
+    edm::EDGetTokenT<std::vector<float>> t_muGenCharge;
+    edm::EDGetTokenT<std::vector<float>> t_muGenE;
+    edm::EDGetTokenT<std::vector<float>> t_muGenEta;
+    edm::EDGetTokenT<std::vector<float>> t_muGenPhi;
+    edm::EDGetTokenT<std::vector<float>> t_muGenPt;
+};
 
 #endif

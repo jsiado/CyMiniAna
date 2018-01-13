@@ -316,8 +316,8 @@ void histogrammer::analyze( const edm::Event& event, const edm::EventSetup& ) {
     /* Fill histograms -- fill histograms based on treename or systematic weights ("nominal" but different weight)
        This is the function to modify / inherit for analysis-specific purposes
     */
-    std::string treeName;// = event.treeName();
-    double event_weight; //  = event.nominal_weight();
+    std::string treeName("");  // = event.treeName();
+    double event_weight(1.0);  // = event.nominal_weight();
 
     fill( m_name+treeName, event, event_weight );
 
@@ -447,4 +447,5 @@ void histogrammer::underFlow() {
     } // end else put underflow in first bin
 }
 
+DEFINE_FWK_MODULE(histogrammer);
 // THE END

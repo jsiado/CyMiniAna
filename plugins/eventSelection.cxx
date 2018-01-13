@@ -137,6 +137,11 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
 }
 
 
+void eventSelection::endJob(){
+    /* Clean-up */
+    return;
+}
+
 void eventSelection::getCutNames(){
     /* Get the cut names (for labeling bins in cutflow histograms) and store in vector */
     m_cutflowNames.clear();
@@ -156,4 +161,5 @@ unsigned int eventSelection::numberOfCuts(){
     return m_numberOfCuts;
 }
 
+DEFINE_FWK_MODULE(eventSelection);
 // the end

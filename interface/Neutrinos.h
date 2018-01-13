@@ -23,11 +23,11 @@ class Neutrinos {
     // Destructor
     virtual ~Neutrinos();
 
-  private:
-
     // Container of Neutrinos (defined in interface/physicsObjects.h)
     std::vector<Neutrino> execute(const Lepton& lep, const MET& met, const objectSelection& obj);
     std::vector<Neutrino> execute(const edm::Event& evt, const objectSelection& obj);
+
+  private:
 
     // Physics information
     std::vector<Neutrino> m_neutrinos;
@@ -47,6 +47,6 @@ class Neutrinos {
     edm::EDGetTokenT<std::vector<float>> t_nu_pt;
     edm::EDGetTokenT<std::vector<float>> t_nu_eta;
     edm::EDGetTokenT<std::vector<float>> t_nu_phi;
-}
+};
 
 #endif

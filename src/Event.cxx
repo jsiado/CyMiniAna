@@ -593,17 +593,15 @@ void Event::initialize_ljets(){
         ljet.p4.SetPtEtaPhiE( m_ljet_pt->At(i),m_ljet_eta->At(i),m_ljet_phi->At(i),m_ljet_e->At(i));
         ljet.charge    = m_ljet_charge->At(i);
 
-        ljet.tau1_CHS  = m_ljet_tau1_CHS->At(i);
-        ljet.tau2_CHS  = m_ljet_tau2_CHS->At(i);
-        ljet.tau3_CHS  = m_ljet_tau3_CHS->At(i);
-        ljet.tau21_CHS = ljet.tau2_CHS / ljet.tau1_CHS;
-        ljet.tau32_CHS = ljet.tau3_CHS / ljet.tau2_CHS;
+        ljet.tau1  = m_ljet_tau1_CHS->At(i);
+        ljet.tau2  = m_ljet_tau2_CHS->At(i);
+        ljet.tau3  = m_ljet_tau3_CHS->At(i);
+        ljet.tau21 = ljet.tau2 / ljet.tau1;
+        ljet.tau32 = ljet.tau3 / ljet.tau2;
 
-        ljet.softDropMass_CHS = m_ljet_softDropMass_CHS->At(i);
-        ljet.vSubjetIndex0    = m_ljet_vSubjetIndex0->At(i);
-        ljet.vSubjetIndex1    = m_ljet_vSubjetIndex1->At(i);
-
-        ljet.isGood    = (ljet.p4.Pt()>200000. && fabs(ljet.p4.Eta())<2.0) ? 1 : 0;
+        ljet.softDropMass  = m_ljet_softDropMass_CHS->At(i);
+        ljet.vSubjetIndex0 = m_ljet_vSubjetIndex0->At(i);
+        ljet.vSubjetIndex1 = m_ljet_vSubjetIndex1->At(i);
 
         m_ljets[i] = ljet;
     }
@@ -615,10 +613,6 @@ void Event::initialize_ljets(){
 void Event::initialize_leptons(){
     /* Setup struct of lepton and relevant information */
     m_leptons.clear();
-
-    Lepton lep;
-    m_leptons.push_back(lep);
-
     return;
 }
 

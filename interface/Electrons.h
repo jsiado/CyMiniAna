@@ -7,8 +7,8 @@
 #include "TROOT.h"
 #include "TLorentzVector.h"
 
-#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
@@ -23,10 +23,10 @@ class Electrons {
     // Destructor
     virtual ~Electrons();
 
-  private:
-
     // Container of electrons (defined in interface/physicsObjects.h)
     std::vector<Electron> execute(const edm::Event& evt, const objectSelection& obj);
+
+  private:
 
     // Physics information
     std::vector<Electron> m_electrons;
@@ -87,6 +87,6 @@ class Electrons {
     edm::EDGetTokenT<std::vector<float>> t_elmissHits;
     edm::EDGetTokenT<std::vector<float>> t_elooEmooP;
     edm::EDGetTokenT<std::vector<float>> t_elscEta;
-}
+};
 
 #endif

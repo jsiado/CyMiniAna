@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "Analysis/CyMiniAna/interface/Event.h"
-#include "Analysis/CyMiniAna/interface/eventSelection.h"
 #include "Analysis/CyMiniAna/interface/configuration.h"
 
 class miniTree {

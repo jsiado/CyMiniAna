@@ -24,11 +24,11 @@ class LargeRJets {
     // Destructor
     virtual ~LargeRJets();
 
-  private:
-
     // Container of LargeRJets (defined in interface/physicsObjects.h)
     std::vector<Ljet> execute(const edm::Event& evt, const objectSelection& obj);
     std::vector<Ljet> execute_truth(const edm::Event& evt, const objectSelection& obj);
+
+  private:
 
     // Physics information
     std::vector<Ljet> m_ljets;
@@ -47,7 +47,7 @@ class LargeRJets {
     edm::Handle<std::vector<float>> h_ljetEta;
     edm::Handle<std::vector<float>> h_ljetPhi;
     edm::Handle<std::vector<float>> h_ljetMass;
-    edm::Handle<std::vector<float>> h_ljetEnergy;
+    edm::Handle<std::vector<float>> h_ljetE;
     edm::Handle<std::vector<float>> h_ljetPartonFlavour;
     edm::Handle<std::vector<float>> h_ljetHadronFlavour;
     edm::Handle<std::vector<float>> h_ljetCSV;
@@ -65,6 +65,7 @@ class LargeRJets {
     edm::Handle<std::vector<float>> h_ljetnMultip;
     edm::Handle<std::vector<float>> h_ljetY;
     edm::Handle<std::vector<float>> h_ljetArea;
+    edm::Handle<std::vector<float>> h_ljetMuonEnergy;
     edm::Handle<std::vector<float>> h_ljettau1;
     edm::Handle<std::vector<float>> h_ljettau2;
     edm::Handle<std::vector<float>> h_ljettau3;
@@ -73,42 +74,43 @@ class LargeRJets {
     edm::Handle<std::vector<float>> h_ljetFilteredMass;
     edm::Handle<std::vector<float>> h_ljetSoftDropMass;
     edm::Handle<std::vector<float>> h_ljetnSubJets;
-    edm::Handle<std::vector<float>> h_ljeh_subjetIdx0;
-    edm::Handle<std::vector<float>> h_ljeh_subjetIdx1;
-    edm::Handle<std::vector<float>> h_ljeh_subjetHadFl;
-    edm::Handle<std::vector<float>> h_ljeh_subjetPt;
-    edm::Handle<std::vector<float>> h_ljeh_subjetEta;
-    edm::Handle<std::vector<float>> h_ljeh_subjetPhi;
-    edm::Handle<std::vector<float>> h_ljeh_subjetMass;
-    edm::Handle<std::vector<float>> h_ljeh_subjetEnergy;
-    edm::Handle<std::vector<float>> h_ljeh_subjetJEC;
-    edm::Handle<std::vector<float>> h_ljeh_subjetCSV;
-    edm::Handle<std::vector<float>> h_ljeh_subjetCMVA;
+    edm::Handle<std::vector<float>> h_ljet_subjetIdx0;
+    edm::Handle<std::vector<float>> h_ljet_subjetIdx1;
+    edm::Handle<std::vector<float>> h_ljet_subjetHadFl;
+    edm::Handle<std::vector<float>> h_ljet_subjetPt;
+    edm::Handle<std::vector<float>> h_ljet_subjetEta;
+    edm::Handle<std::vector<float>> h_ljet_subjetPhi;
+    edm::Handle<std::vector<float>> h_ljet_subjetMass;
+    edm::Handle<std::vector<float>> h_ljet_subjetE;
+    edm::Handle<std::vector<float>> h_ljet_subjetJEC;
+    edm::Handle<std::vector<float>> h_ljet_subjetCSV;
+    edm::Handle<std::vector<float>> h_ljet_subjetCMVA;
     // Truth jets
-    edm::Handle<std::vector<float>> h_ljetGenJetPt;
-    edm::Handle<std::vector<float>> h_ljetGenJetEta;
-    edm::Handle<std::vector<float>> h_ljetGenJetPhi;
-    edm::Handle<std::vector<float>> h_ljetGenJetE;
-    edm::Handle<std::vector<float>> h_ljetGenJetCharge;
-    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetPt;
-    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetEta;
-    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetPhi;
-    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetE;
-    edm::Handle<std::vector<float>> h_ljeh_subjetGenJetCharge; 
+    edm::Handle<std::vector<float>> h_ljetGenPt;
+    edm::Handle<std::vector<float>> h_ljetGenEta;
+    edm::Handle<std::vector<float>> h_ljetGenPhi;
+    edm::Handle<std::vector<float>> h_ljetGenE;
+    edm::Handle<std::vector<float>> h_ljetGenCharge;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenPt;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenEta;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenPhi;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenE;
+    edm::Handle<std::vector<float>> h_ljeh_subjetGenCharge; 
 
     // Tokens
     edm::EDGetTokenT<std::vector<float>> t_ljetPt;
     edm::EDGetTokenT<std::vector<float>> t_ljetEta;
     edm::EDGetTokenT<std::vector<float>> t_ljetPhi;
     edm::EDGetTokenT<std::vector<float>> t_ljetMass;
-    edm::EDGetTokenT<std::vector<float>> t_ljetEnergy;
-    edm::EDGetTokenT<std::vector<float>> t_ljetPartonFlavour;
-    edm::EDGetTokenT<std::vector<float>> t_ljetHadronFlavour;
+    edm::EDGetTokenT<std::vector<float>> t_ljetE;
     edm::EDGetTokenT<std::vector<float>> t_ljetCSV;
     edm::EDGetTokenT<std::vector<float>> t_ljetCMVA;
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsB;
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsL;
     edm::EDGetTokenT<std::vector<float>> t_ljetJEC;
+    edm::EDGetTokenT<std::vector<float>> t_ljetY;
+    edm::EDGetTokenT<std::vector<float>> t_ljetArea;
+    edm::EDGetTokenT<std::vector<float>> t_ljetMuonEnergy;
     edm::EDGetTokenT<std::vector<float>> t_ljetnHadEnergy;
     edm::EDGetTokenT<std::vector<float>> t_ljetnEMEnergy;
     edm::EDGetTokenT<std::vector<float>> t_ljetHFHadronEnergy;
@@ -117,8 +119,8 @@ class LargeRJets {
     edm::EDGetTokenT<std::vector<float>> t_ljetnumDaughters;
     edm::EDGetTokenT<std::vector<float>> t_ljetcMultip;
     edm::EDGetTokenT<std::vector<float>> t_ljetnMultip;
-    edm::EDGetTokenT<std::vector<float>> t_ljetY;
-    edm::EDGetTokenT<std::vector<float>> t_ljetArea;
+    edm::EDGetTokenT<std::vector<float>> t_ljetPartonFlavour;
+    edm::EDGetTokenT<std::vector<float>> t_ljetHadronFlavour;
     edm::EDGetTokenT<std::vector<float>> t_ljettau1;
     edm::EDGetTokenT<std::vector<float>> t_ljettau2;
     edm::EDGetTokenT<std::vector<float>> t_ljettau3;
@@ -134,21 +136,21 @@ class LargeRJets {
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetEta;
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetPhi;
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetMass;
-    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetEnergy;
+    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetE;
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetJEC;
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetCSV;
     edm::EDGetTokenT<std::vector<float>> t_ljet_subjetCMVA;
     // Truth jets
-    edm::EDGetTokenT<std::vector<float>> t_ljetGenJetPt;
-    edm::EDGetTokenT<std::vector<float>> t_ljetGenJetEta;
-    edm::EDGetTokenT<std::vector<float>> t_ljetGenJetPhi;
-    edm::EDGetTokenT<std::vector<float>> t_ljetGenJetE;
-    edm::EDGetTokenT<std::vector<float>> t_ljetGenJetCharge;
-    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetPt;
-    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetEta;
-    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetPhi;
-    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetE;
-    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenJetCharge; 
-}
+    edm::EDGetTokenT<std::vector<float>> t_ljetGenPt;
+    edm::EDGetTokenT<std::vector<float>> t_ljetGenEta;
+    edm::EDGetTokenT<std::vector<float>> t_ljetGenPhi;
+    edm::EDGetTokenT<std::vector<float>> t_ljetGenE;
+    edm::EDGetTokenT<std::vector<float>> t_ljetGenCharge;
+    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenPt;
+    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenEta;
+    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenPhi;
+    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenE;
+    edm::EDGetTokenT<std::vector<float>> t_ljet_subjetGenCharge; 
+};
 
 #endif
