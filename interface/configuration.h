@@ -64,7 +64,6 @@ class configuration {
     std::string treename();
 
     // functions about the file
-    virtual void checkFileType( TFile& file );
     std::vector<std::string> filesToProcess();
     void setFilename(std::string fileName);
     std::string filename();
@@ -85,6 +84,7 @@ class configuration {
     bool makeEfficiencies();
 
     // information for event weights
+    void checkFileType( TFile& file );
     std::string metadataFile();
     double XSectionMap ( std::string mcChannelNumber);
     double KFactorMap ( std::string mcChannelNumber );

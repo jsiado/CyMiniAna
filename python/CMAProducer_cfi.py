@@ -1,6 +1,6 @@
 """
 Created:        14 December  2017
-Last Updated:   14 December  2017
+Last Updated:   15 January   2018
 
 Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
@@ -12,6 +12,11 @@ import FWCore.ParameterSet.Config as cms
 
 
 cma = cms.EDProducer("CMAProducer",
+    isMC = cms.bool("isMC"),
+)
+
+
+    # from vlqana
     runno                      = cms.InputTag("evtcleaner","runno"), 
     lumisec                    = cms.InputTag("evtcleaner","lumisec"), 
     evtno                      = cms.InputTag("evtcleaner","evtno"), 
@@ -48,7 +53,6 @@ cma = cms.EDProducer("CMAProducer",
     leadingJetPtMin            = cms.double  (400.), 
     leadingJetPrunedMassMin    = cms.double  (50.), 
 
-    HTMin                      = cms.double  (0.), 
     doBTagSFUnc                = cms.bool(False), 
     storePreselEvts            = cms.bool(False), 
     doPreselOnly               = cms.bool(False),

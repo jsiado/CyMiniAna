@@ -41,6 +41,7 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   t_metFulluncorPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPhiLabel"))),
   t_metFulluncorPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPtLabel"))),
   t_metFulluncorSumEt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorSumEtLabel"))){
+    // Phyiscs Objects Selection
     m_objectSelectionTool = new objectSelection(iConfig);
 
     // Electrons and Muons

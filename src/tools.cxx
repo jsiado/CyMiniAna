@@ -19,14 +19,12 @@ namespace cma{
 void check_file(const std::string & filename) {
     /* Check that file exists */
     std::ifstream f = open_file(filename);
-
     return;
 }
 
 
 void check_file(const std::ifstream& file, const std::string& fname){
     /* Check that file exists */
-
     if (!file) {
         cma::ERROR("TOOLS : File does not exist:       "+fname);
         cma::ERROR("TOOLS : Exiting. ");

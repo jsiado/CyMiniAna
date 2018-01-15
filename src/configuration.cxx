@@ -155,22 +155,14 @@ void configuration::initialize() {
     m_useRCJets        = cma::str2bool( getConfigOption("useRCJets") );
     m_useNeutrino      = cma::str2bool( getConfigOption("useNeutrino") );
     m_useFlags         = cma::str2bool( getConfigOption("useFlags") );
-    m_useTtbar         = cma::str2bool( getConfigOption("useTtbar") );
     m_makeNewFile      = cma::str2bool( getConfigOption("makeNewFile") );
     m_makeHistograms   = cma::str2bool( getConfigOption("makeHistograms") );
     m_makeEfficiencies = cma::str2bool( getConfigOption("makeEfficiencies") );
     m_dnnFile          = getConfigOption("dnnFile");
     m_dnnKey           = getConfigOption("dnnKey");
     m_getDNN           = cma::str2bool( getConfigOption("getDNN") );
-    m_getHME           = cma::str2bool( getConfigOption("getHME") );
     m_doRecoEventLoop  = cma::str2bool( getConfigOption("doRecoEventLoop") );
-    m_doTruthEventLoop = cma::str2bool( getConfigOption("doTruthEventLoop") );
-    m_matchTruthToReco = true;  // not needed in this analysis (so it's not a config option) but here in case we do later
     m_kinematicReco   = cma::str2bool( getConfigOption("kinematicReco") );
-    m_NJetSmear        = std::stoi( getConfigOption("NJetSmear") );
-    m_NMassPoints      = std::stoi( getConfigOption("NMassPoints") );
-    m_massMin          = std::stoi( getConfigOption("massMin") );
-    m_massMax          = std::stoi( getConfigOption("massMax") );
     m_metadataFile     = getConfigOption("metadataFile");
     m_calcWeightSystematics             = cma::str2bool( getConfigOption("calcWeightSystematics") );
     m_listOfWeightSystematicsFile       = getConfigOption("weightSystematicsFile");
@@ -239,28 +231,6 @@ std::string configuration::getConfigOption( std::string item ){
 }
 
 
-void configuration::checkFileType( TFile& file ){
-    // -- Check the sum of weights tree DSIDs (to determine Data || MC)
-    m_isMC = true; // only MC for now -- need to know how CMS does this!
-/*
-    TTreeReader sumWeights("sumWeights", &file);
-    TTreeReaderValue<int> dsid(sumWeights, "dsid");
-
-    std::vector<int> dsids;   // keep track of dsids (just in case)
-    unsigned int mc_dsid(0);  // count number of events that have DSID > 0
-
-    while (sumWeights.Next()){
-        dsids.push_back(*dsid);
-        if (*dsid>0){
-            ++mc_dsid;
-        } // MC sample (dsid>0)
-    }
-    m_isMC = (mc_dsid > 0) ? true : false;
-*/
-    return;
-}
-
-
 std::string configuration::verboseLevel(){
     /* Return the verbosity level */
     return m_verboseLevel;
@@ -302,6 +272,16 @@ bool configuration::isNominalTree( const std::string &tree_name ){
         isNominal = false;
 
     return isNominal;
+}
+
+void configuration::checkFileType( TFile& file ){
+    // -- Check the sum of weights tree DSIDs (to determine Data || MC)
+    m_isMC = false;
+    // check filename!
+    // std::string name = file.GetName();
+    // if (name.startswith("JetHT") or "SingleElectron" or "SingleMuon")
+    // isMC = false;
+    return;
 }
 
 bool configuration::isMC(){
