@@ -1,21 +1,21 @@
 """
 Created:      13 December 2017
-Last Updated: 13 December 2017
+Last Updated: 14 January  2018
 
 Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
 Texas A&M University
 ---
 
-Configuration file for running CyMiniAna
-over EDMNtuples (from B2GAnaFW).
+Primary script for running CyMiniAna
+over EDMNtuples (from B2GAnaFW) in CMSSW.
 Based on VLQAna:
   https://github.com/dmajumder/VLQAna
 
-Requires a CMSSW environment!
+  Requires a CMSSW environment!
 
 To run:
-  python python/cma_cfg.py <config.txt>
+  cmsRun python/cma_cfg.py <config.txt>
 
 where <config.txt> is the configuration file
 """
@@ -25,23 +25,22 @@ import sys
 import FWCore.ParameterSet.Config as cms
 
 from configuration import Configuration
-from Analysis.VLQAna.VLQAna_cfi import *    # 'ana'
-from Analysis.VLQAna.JetMaker_cfi import *  # jet parameters
-from Analysis.EventCounter.eventcounter_cfi import eventCounter
-
+from Analysis.CyMiniAna.CMAProducer_cfi import *  # 'cma'
+# from Analysis.VLQAna.VLQAna_cfi import *    # 'ana'
+# from Analysis.VLQAna.JetMaker_cfi import *  # jet parameters
 
 
 ## Configuration options
 ##  don't use VarParsing, switch to config file instead
 config = Configuration( sys.argv[1] )
 
-nEventsToProcess = config.nEventsToProcess()
+nEventsToProcess = config.nEvents()
 outputFileName   = config.outputFileName()
-dataFilePath     = config.dataDirectory()    # os.environ["$CMSSW_BASE]+"/src/Analysis/CyMiniAna/data"
+dataFilePath     = config.dataDirectory()
 isMC      = config.isMC()
 jerShift  = config.jerShift()
 jecShift  = config.jecShift()
-filenames = config.filesToProcess()
+filenames = config.filesToProcess()   # list of files
 
 
 ## PROCESS
@@ -56,7 +55,7 @@ process.TFileService = cms.Service("TFileService",
                                   )
 
 ## CMAProducer
-process.ana = ana.clone()
+process.ana = cma.clone()
 process.ana.jetAK4selParams.jecShift = jecShift 
 process.ana.jetAK4selParams.jerShift = jerShift 
 process.ana.jetAK8selParams.jecShift = jecShift 
