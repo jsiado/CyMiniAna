@@ -18,6 +18,17 @@ using namespace edm;
 
 // constructor
 CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
+  // PhysicsObjects
+//  m_electronsTool(iConfig.getParameter<edm::ParameterSet>("electronLabels"),consumesCollector()),
+  m_electronsTool(iConfig,consumesCollector()),
+  m_muonsTool(iConfig,consumesCollector()),
+  m_neutrinosTool(iConfig,consumesCollector()),
+  m_jetsTool(iConfig,consumesCollector()),
+  m_ljetsTool(iConfig,consumesCollector()),
+  m_METTool(iConfig,consumesCollector()),
+  m_objectSelectionTool(iConfig.getParameter<edm::ParameterSet>("objSelectionParams")),
+  //m_triggersTool(iConfig,consumesCollector()){
+  // General Parameters
   m_isMC(iConfig.getParameter<bool>("isMC")),
   m_cleanFlags(iConfig.getParameter<bool>("cleanEvents")),
   m_useTruth(iConfig.getParameter<bool>("useTruth")),
@@ -28,44 +39,14 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   m_buildNeutrinos(iConfig.getParameter<bool>("buildNeutrinos")),
   m_kinematicReco(iConfig.getParameter<bool>("kinematicReco")),
   m_metadataFile(iConfig.getParameter<std::string>("metadataFile")),
-  m_LUMI(iConfig.getParameter<bool>("LUMI")),
+  m_LUMI(iConfig.getParameter<double>("LUMI")),
   // EDModules
   t_rho(consumes<float>(iConfig.getParameter<edm::InputTag>("rhoLabel"))),
   t_runno(consumes<int>(iConfig.getParameter<edm::InputTag>("runno"))),
-  t_npv(consumes<unsigned int>(iConfig.getParameter<edm::InputTag>("npvLabel"))),
-  // MET
-  t_metFullPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPhiLabel"))),
-  t_metFullPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPtLabel"))),
-  t_metFullPx(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFullPxLabel"))),
-  t_metFullPy(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPhiLabel"))),
-  t_metFulluncorPhi(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPhiLabel"))),
-  t_metFulluncorPt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorPtLabel"))),
-  t_metFulluncorSumEt(consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("metFulluncorSumEtLabel"))){
-    // Phyiscs Objects Selection
-    m_objectSelectionTool = new objectSelection(iConfig);
-
-    // Electrons and Muons
-    m_electronsTool = new Electrons(iConfig,consumesCollector());
-    m_muonsTool     = new Muons(iConfig,consumesCollector());
-
-    // Neutrinos (reconstructed from MET)
-    m_neutrinosTool = new Neutrinos(iConfig,consumesCollector());
-
-    // AK4 Jets
-    m_jetsTool = new Jets(iConfig,consumesCollector());
-
-    // AK8 Jets
-    m_ljetsTool = new LargeRJets(iConfig,consumesCollector());
-
-    // Triggers
-    //m_triggersTool = new Trigger(iConfig,consumesCollector());
-
+  t_npv(consumes<unsigned int>(iConfig.getParameter<edm::InputTag>("npvLabel"))){
     // Generator information (parton-level information)
     if (m_isMC){
     }
-
-    // MET
-    m_METPtMin = iConfig.getParameter<double>("METPtMin");
 
     // Register products (physics objects)
     produces<std::vector<Electron>>("electrons").setBranchAlias( "electrons" );
@@ -82,18 +63,21 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
 
 CMAProducer::~CMAProducer() {
     // Clean-up
+/*
+    delete m_METTool;
     delete m_electronsTool;
     delete m_muonsTool;
     delete m_neutrinosTool;
     delete m_jetsTool;
     delete m_ljetsTool;
-    //delete m_triggersTool;
+    delete m_triggersTool;
+*/
 }
 
 
 void CMAProducer::beginJob(const edm::EventSetup&){
     /* Producer setup before the event loop */
-    m_objectSelectionTool->initialize();
+    m_objectSelectionTool.initialize();
 
     m_electrons.clear();
     m_muons.clear();
@@ -134,8 +118,8 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     // Build physics objects
     // - pass 'evt' to each function to access handles
     if (m_useLeptons){
-        m_electrons = m_electronsTool->execute(evt,*m_objectSelectionTool); // Electrons
-        m_muons     = m_muonsTool->execute(evt,*m_objectSelectionTool);     // Muons
+        m_electrons = m_electronsTool.execute(evt,m_objectSelectionTool); // Electrons
+        m_muons     = m_muonsTool.execute(evt,m_objectSelectionTool);     // Muons
 
         unsigned int nEls = m_electrons.size();
         unsigned int nMus = m_muons.size();
@@ -151,13 +135,13 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     }
 
     if (m_useJets){
-        m_jets = m_jetsTool->execute(evt,*m_objectSelectionTool);             // AK4 jets
+        m_jets = m_jetsTool.execute(evt,m_objectSelectionTool);             // AK4 jets
         for (auto& jet : m_jets)
             e_jets->push_back(jet);
     }
 
     if (m_useLargeRJets){
-        m_ljets = m_ljetsTool->execute(evt,*m_objectSelectionTool);           // AK8 jets
+        m_ljets = m_ljetsTool.execute(evt,m_objectSelectionTool);           // AK8 jets
         for (auto& jet : m_ljets)
             e_ljets->push_back(jet);
     }
@@ -167,9 +151,9 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     if (m_useNeutrinos){
         // Neutrinos (reconstruct or grab from ntuple)
         if (m_buildNeutrinos)
-            m_neutrinos = m_neutrinosTool->execute(m_leptons.at(0),m_MET,*m_objectSelectionTool);
+            m_neutrinos = m_neutrinosTool.execute(m_leptons.at(0),m_MET,m_objectSelectionTool);
         else
-            m_neutrinos = m_neutrinosTool->execute(evt,*m_objectSelectionTool);
+            m_neutrinos = m_neutrinosTool.execute(evt,m_objectSelectionTool);
 
         for (auto& nu : m_neutrinos)
             e_neutrinos->push_back(nu);
@@ -209,25 +193,11 @@ void CMAProducer::endJob(){
 void CMAProducer::initialize_kinematics(edm::Event& evt){
     /* Kinematic variables: MET, HT, and ST */
     // MET
-    evt.getByToken(t_metFullPhi, h_metFullPhi);
-    evt.getByToken(t_metFullPt,  h_metFullPt);
-    evt.getByToken(t_metFullPx,  h_metFullPx); // should be accessible using pT and phi
-    evt.getByToken(t_metFullPy,  h_metFullPy); // should be accessible using pT and phi
-    evt.getByToken(t_metFulluncorPhi,   h_metFulluncorPhi);
-    evt.getByToken(t_metFulluncorPt,    h_metFulluncorPt);
-    evt.getByToken(t_metFulluncorSumEt, h_metFulluncorSumEt);
-
-    float metFullPt = (h_metFullPt.product())->at(0);
-
-    m_MET = {};
-    m_MET.p4.SetPtEtaPhiM( metFullPt, 0, h_metFullPhi.product()->at(0), 0);
-    m_MET.uncorrPt    = h_metFulluncorPt.product()->at(0);
-    m_MET.uncorrPhi   = h_metFulluncorPhi.product()->at(0);
-    m_MET.uncorrSumEt = h_metFulluncorSumEt.product()->at(0);
+    m_MET = m_METTool.execute(evt,m_objectSelectionTool);
 
     // HT & ST
-    m_HT = 0;           // sum of jet pT
-    m_ST = metFullPt;   // sum of jet pT, lepton pT, MET
+    m_HT = 0;               // sum of jet pT
+    m_ST = m_MET.p4.Pt();   // sum of jet pT, lepton pT, MET
     for (const auto& jet : m_jets){
         m_HT += jet.p4.Pt();
         m_ST += jet.p4.Pt();

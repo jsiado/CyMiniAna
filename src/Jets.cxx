@@ -17,33 +17,34 @@ using namespace edm;
 
 
 Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  m_useTruth(iConfig.getParameter<bool>("useTruth")),
-  t_jetPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetPtLabel"))),
-  t_jetEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetEtaLabel"))),
-  t_jetPhi(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetPhiLabel"))),
-  t_jetE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetEnergyLabel"))),
-  t_jetHadronFlavour(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetPartonFlavourLabel"))),
-  t_jetPartonFlavour(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetHadronFlavourLabel"))),
-  t_jetCSV(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetCSVLabel"))),
-  t_jetCMVA(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetCMVALabel"))),
-  t_jetCvsB(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetCvsBLabel"))),
-  t_jetCvsL(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetCvsLLabel"))),
-  t_jetJEC(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetJECLabel"))),
-  t_jetnHadEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetnHadEnergyLabel"))),
-  t_jetnEMEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetnEMEnergyLabel"))),
-  t_jetcHadEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetcHadEnergyLabel"))),
-  t_jetcEMEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetcEMEnergyLabel"))),
-  t_jetcMultip(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetcMultipLabel"))),
-  t_jetnMultip(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetnMultipLabel"))),
-  t_jetY(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetYLabel"))),
-  t_jetArea(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetAreaLabel"))),
-  t_jetMuonEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag> ("jetMuonEnergyLabel"))){
+  m_labels(iConfig.getParameter<edm::ParameterSet>("jetLabels")){
+    m_useTruth = iConfig.getParameter<bool>("useTruth");
+    t_jetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPtLabel"));
+    t_jetEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetEtaLabel"));
+    t_jetPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPhiLabel"));
+    t_jetE = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetEnergyLabel"));
+    t_jetHadronFlavour = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPartonFlavourLabel"));
+    t_jetPartonFlavour = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetHadronFlavourLabel"));
+    t_jetCSV = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCSVLabel"));
+    t_jetCMVA = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCMVALabel"));
+    t_jetCvsB = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCvsBLabel"));
+    t_jetCvsL = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCvsLLabel"));
+    t_jetJEC = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetJECLabel"));
+    t_jetnHadEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetnHadEnergyLabel"));
+    t_jetnEMEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetnEMEnergyLabel"));
+    t_jetcHadEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetcHadEnergyLabel"));
+    t_jetcEMEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetcEMEnergyLabel"));
+    t_jetcMultip = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetcMultipLabel"));
+    t_jetnMultip = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetnMultipLabel"));
+    t_jetY = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetYLabel"));
+    t_jetArea = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetAreaLabel"));
+    t_jetMuonEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag> ("jetMuonEnergyLabel"));
     if (m_useTruth){
-      t_jetGenPt  = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPtLabel"));
-      t_jetGenEta = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenEtaLabel"));
-      t_jetGenPhi = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenPhiLabel"));
-      t_jetGenE   = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenELabel"));
-      t_jetGenCharge = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("jetGenChargeLabel"));
+      t_jetGenPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenPtLabel"));
+      t_jetGenEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenEtaLabel"));
+      t_jetGenPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenPhiLabel"));
+      t_jetGenE   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenELabel"));
+      t_jetGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenChargeLabel"));
     }
 }
 

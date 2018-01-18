@@ -34,6 +34,7 @@ class Jets {
     std::vector<Jet> m_truth_jets;
 
     // Setup physics information from EDMntuples
+    edm::ParameterSet m_labels;
     bool m_useTruth;
 
 

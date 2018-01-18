@@ -34,6 +34,7 @@ class Muons {
     std::vector<Muon> m_truth_muons;
 
     // Setup physics information from EDMntuples
+    edm::ParameterSet m_labels;
     bool m_useTruth;
 
     // ************

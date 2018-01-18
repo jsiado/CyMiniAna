@@ -14,60 +14,46 @@ running CyMiniAna in CMSSW.
    https://github.com/dmajumder/VLQAna/tree/CMSSW_8_0_X_NewB2GAnaFW/
 
 Configurations for:
-- MET
 - Muons
 - Electrons
 - Jets (AK4)
+  B-tagging
+    https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
 - LargeRJets (AK8)
+
 """
 import FWCore.ParameterSet.Config as cms
 
-METParameters = cms.PSet(
-    METPtMin = cms.double(0),
-)
 
-muonParameters = cms.PSet(
-    muidtype = cms.string("LOOSE"), 
-    muPtMin = cms.double(25),
-    muPtMax = cms.double(10000),
-    muAbsEtaMax = cms.double(2.4),
-    muIsoMin = cms.double(-100),
-    muIsoMax = cms.double(0.30), 
-)
+objectSelectionParams = cms.PSet(
 
-electronParameters = cms.PSet(
-    elidtype = cms.string("TIGHT"),
-    elPtMin = cms.double(25),
-    elPtMax = cms.double(10000),
-    elAbsEtaMax = cms.double(2.4),
-    applyIso = cms.bool(True), 
-)
-### 
-# B-tagging
-#  https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
-# - CSVv2L = 0.5426
-# - CSVv2M = 0.8484
-# - CSVv2T = 0.9535
+ # muonParameters 
+    mu_id     = cms.string("LOOSE"), 
+    mu_pt     = cms.double(25),
+    mu_eta    = cms.double(2.4),
+    mu_IsoMin = cms.double(-100),
+    mu_IsoMax = cms.double(0.30), 
 
-jetParameters = cms.PSet(
-    jettype      = cms.string('AK4JET'),
-    JetIDParams  = cms.string('loose')
-    jetPtMin     = cms.double(25),
-    jetAbsEtaMax = cms.double(2.5),
-    scaleJetP4   = cms.bool(False),
-    jecShift     = cms.double(1),
-    jerShift     = cms.int32(1), 
-    CSVv2        = cms.string('loose')
-)
+ # electronParameters
+    el_pt  = cms.double(25),
+    el_eta = cms.double(2.4),
+    el_id  = cms.string("TIGHT"),
+    el_iso = cms.string(""),
+    el_applyIso = cms.bool(True), 
 
-largeRJetParameters = cms.PSet(
-    jettype      = cms.string('AK4JET'),
-    JetIDParams  = cms.string('tight')
-    jetPtMin     = cms.double(200),
-    jetAbsEtaMax = cms.double(2.0),
-    scaleJetP4   = cms.bool(False),
-    jecShift     = cms.double(1),
-    jerShift     = cms.int32(1), 
-    CSVv2        = cms.string('loose')
-)
+ # neutrinoParameters
+    nu_pt  = cms.double(0.0),
+    nu_eta = cms.double(3.0),
 
+ # jetParameters AK4
+    jet_id    = cms.string('loose'),
+    jet_pt    = cms.double(25),
+    jet_eta   = cms.double(2.5),
+    jet_CSVv2 = cms.string('loose'),
+
+ # largeRJetParameters AK8
+    ljet_id  = cms.string('tight'),
+    ljet_pt  = cms.double(200),
+    ljet_eta = cms.double(2.0),
+    ljet_subCSVv2 = cms.string('loose'),
+)

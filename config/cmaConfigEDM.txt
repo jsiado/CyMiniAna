@@ -7,12 +7,12 @@ getDNN false
 # physics objects
 useJets true
 useLeptons true
-useNeutrinos true
+useNeutrinos false
 buildNeutrinos true
 useLargeRJets false
 useRCJets false
 useTruth false
-jet_btag_wkpt M
+jet_btag_wkpt medium
 
 # Input
 inputfile config/listOfDataMCSamples.txt
@@ -25,7 +25,7 @@ makeNewFile true
 makeHistograms true
 makeEfficiencies false
 selection none
-output_path /fdata/hepx/store/user/demarley/diHiggs/ttbarDileptonReco/
+output_path ./
 
 # Event Selection
 cutsfile config/cuts_none.txt

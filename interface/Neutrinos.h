@@ -33,6 +33,7 @@ class Neutrinos {
     std::vector<Neutrino> m_neutrinos;
 
     // Setup physics information from EDMntuples
+    edm::ParameterSet m_labels;
     bool m_buildNeutrinos;
 
     // ************

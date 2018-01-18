@@ -32,7 +32,7 @@ class Electrons {
     std::vector<Electron> m_electrons;
 
     // Setup physics information from EDMntuples
-
+    edm::ParameterSet m_labels;
 
     // ************
     // Setup to read EDMntuple format

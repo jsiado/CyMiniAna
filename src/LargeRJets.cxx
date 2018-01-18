@@ -17,55 +17,56 @@ using namespace edm;
 
 
 LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  m_useTruth(iConfig.getParameter<bool>("useTruth")),
-  t_ljetPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPtLabel"))),
-  t_ljetEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetEtaLabel"))),
-  t_ljetPhi(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPhiLabel"))),
-  t_ljetE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetEnergyLabel"))),
-  t_ljetCSV(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCSVLabel"))),
-  t_ljetCMVA(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCMVALabel"))),
-  t_ljetCvsB(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCvsBLabel"))),
-  t_ljetCvsL(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetCvsLLabel"))),
-  t_ljetJEC(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetJECLabel"))),
-  t_ljetY(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetYLabel"))),
-  t_ljetArea(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetAreaLabel"))),
-  t_ljetMuonEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetMuonEnergyLabel"))),
-  t_ljetnHadEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnHadEnergyLabel"))),
-  t_ljetnEMEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnEMEnergyLabel"))),
-  t_ljetcHadEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcHadEnergyLabel"))),
-  t_ljetcEMEnergy(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcEMEnergyLabel"))),
-  t_ljetcMultip(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetcMultipLabel"))),
-  t_ljetnMultip(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetnMultipLabel"))),
-  t_ljetPartonFlavour(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetHadronFlavourLabel"))),
-  t_ljetHadronFlavour(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPartonFlavourLabel"))),
-  t_ljettau1(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau1Label"))),
-  t_ljettau2(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau2Label"))),
-  t_ljettau3(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljettau3Label"))),
-  t_ljetPrunedMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetPrunedMassLabel"))),
-  t_ljetTrimmedMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetTrimmedMassLabel"))),
-  t_ljetFilteredMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetFilteredMassLabel"))),
-  t_ljetSoftDropMass(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetSoftDropMassLabel"))),
-  t_ljet_subjetIdx0(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetIdx0Label"))),
-  t_ljet_subjetIdx1(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetIdx1Label"))),
-  t_ljet_subjetHadFl(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetHadronFlavourLabel"))),
-  t_ljet_subjetPt(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetPtLabel"))),
-  t_ljet_subjetEta(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetEtaLabel"))),
-  t_ljet_subjetPhi(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetPhiLabel"))),
-  t_ljet_subjetE(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetEnergyLabel"))),
-  t_ljet_subjetJEC(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetJECLabel"))),
-  t_ljet_subjetCSV(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCSVLabel"))),
-  t_ljet_subjetCMVA(iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetCMVALabel"))){
+  m_labels(iConfig.getParameter<edm::ParameterSet>("largeRjetLabels")){
+    m_useTruth = iConfig.getParameter<bool>("useTruth");
+    t_ljetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPtLabel"));
+    t_ljetEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetEtaLabel"));
+    t_ljetPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPhiLabel"));
+    t_ljetE = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetEnergyLabel"));
+    t_ljetCSV = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCSVLabel"));
+    t_ljetCMVA = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCMVALabel"));
+    t_ljetCvsB = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCvsBLabel"));
+    t_ljetCvsL = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCvsLLabel"));
+    t_ljetJEC = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJECLabel"));
+    t_ljetY = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetYLabel"));
+    t_ljetArea = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetAreaLabel"));
+    t_ljetMuonEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetMuonEnergyLabel"));
+    t_ljetnHadEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetnHadEnergyLabel"));
+    t_ljetnEMEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetnEMEnergyLabel"));
+    t_ljetcHadEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetcHadEnergyLabel"));
+    t_ljetcEMEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetcEMEnergyLabel"));
+    t_ljetcMultip = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetcMultipLabel"));
+    t_ljetnMultip = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetnMultipLabel"));
+    t_ljetPartonFlavour = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetHadronFlavourLabel"));
+    t_ljetHadronFlavour = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPartonFlavourLabel"));
+    t_ljettau1 = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljettau1Label"));
+    t_ljettau2 = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljettau2Label"));
+    t_ljettau3 = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljettau3Label"));
+    t_ljetPrunedMass = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPrunedMassLabel"));
+    t_ljetTrimmedMass = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetTrimmedMassLabel"));
+    t_ljetFilteredMass = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetFilteredMassLabel"));
+    t_ljetSoftDropMass = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetSoftDropMassLabel"));
+    t_ljet_subjetIdx0 = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetIdx0Label"));
+    t_ljet_subjetIdx1 = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetIdx1Label"));
+    t_ljet_subjetHadFl = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetHadronFlavourLabel"));
+    t_ljet_subjetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetPtLabel"));
+    t_ljet_subjetEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetEtaLabel"));
+    t_ljet_subjetPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetPhiLabel"));
+    t_ljet_subjetE = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetEnergyLabel"));
+    t_ljet_subjetJEC = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetJECLabel"));
+    t_ljet_subjetCSV = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetCSVLabel"));
+    t_ljet_subjetCMVA = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetCMVALabel"));
     if (m_useTruth){
-        t_ljetGenPt  = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPtLabel"));
-        t_ljetGenEta = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenEtaLabel"));
-        t_ljetGenPhi = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenPhiLabel"));
-        t_ljetGenE   = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenELabel"));
-        t_ljetGenCharge = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljetGenChargeLabel"));
-        t_ljet_subjetGenPt  = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenPtLabel"));
-        t_ljet_subjetGenEta = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenEtaLabel"));
-        t_ljet_subjetGenPhi = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenPhiLabel"));
-        t_ljet_subjetGenE   = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenELabel"));
-        t_ljet_subjetGenCharge = iC.consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("ljet_subjetGenChargeLabel"));
+        t_ljetGenPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenPtLabel"));
+        t_ljetGenEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenEtaLabel"));
+        t_ljetGenPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenPhiLabel"));
+        t_ljetGenE   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenELabel"));
+        t_ljetGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenChargeLabel"));
+        t_ljet_subjetGenPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenPtLabel"));
+        t_ljet_subjetGenEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenEtaLabel"));
+        t_ljet_subjetGenPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenPhiLabel"));
+        t_ljet_subjetGenE   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenELabel"));
+        t_ljet_subjetGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenChargeLabel"));
     }
 }
 

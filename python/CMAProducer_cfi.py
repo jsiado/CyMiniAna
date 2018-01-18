@@ -6,59 +6,44 @@ Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
 Texas A&M University
 -----
+
 Config file for CMAProducer
 """
 import FWCore.ParameterSet.Config as cms
 
+from Analysis.CyMiniAna.physObjects_cfi import *
+from Analysis.CyMiniAna.physObjectsEDMLabels import *
+
 
 cma = cms.EDProducer("CMAProducer",
-    isMC = cms.bool("isMC"),
-)
+    isMC = cms.bool(False),
+    useTruth = cms.bool(False),
+    useJets  = cms.bool(False),
+    useLargeRJets = cms.bool(False),
+    useLeptons    = cms.bool(False),
+    useNeutrinos  = cms.bool(False),
+    buildNeutrinos = cms.bool(False),
+    kinematicReco  = cms.bool(False),
 
+    LUMI = cms.double(1.0),
+    cleanEvents  = cms.bool(False),
+    metadataFile = cms.string(""),
 
-    # from vlqana
-    runno                      = cms.InputTag("evtcleaner","runno"), 
-    lumisec                    = cms.InputTag("evtcleaner","lumisec"), 
-    evtno                      = cms.InputTag("evtcleaner","evtno"), 
-    isData                     = cms.InputTag("evtcleaner","isData"), 
-    hltdecision                = cms.InputTag("evtcleaner","hltdecision"), 
-    evttype                    = cms.InputTag("evtcleaner","evttype"),
-    evtwtGen                   = cms.InputTag("evtcleaner","evtwtGen"),
-    evtwtPV                    = cms.InputTag("evtcleaner","evtwtPV"),
-    evtwtPVBG                  = cms.InputTag("evtcleanerBG","evtwtPV"),
-    evtwtPVH                   = cms.InputTag("evtcleanerH","evtwtPV"),
-    evtwtPVLow                 = cms.InputTag("evtcleaner","evtwtPVLow"),
-    evtwtPVHigh                = cms.InputTag("evtcleaner","evtwtPVHigh"),
-    npv                        = cms.InputTag("evtcleaner","npv"),
-    npuTrue                    = cms.InputTag("evtcleaner","npuTrue"),
-    htHat                      = cms.InputTag("evtcleaner","htHat"),
-    lhewtids                   = cms.InputTag("evtcleaner","lhewtids"),
-    lhewts                     = cms.InputTag("evtcleaner","lhewts"), 
+    # EDModules
+    rhoLabel = cms.InputTag("vertexInfo","rho"),
+    runno    = cms.InputTag("eventInfo", "evtInfoRunNumber"),
+    npvLabel = cms.InputTag("vertexInfo","npv"),
 
-    elselParams                = defaultElectronMakerParameters.clone(
-      elPtMin = cms.double(50),
-      applyIso = cms.bool(False), 
-      ), 
-
-    muselParams                = defaultMuonMakerParameters.clone(
-      muidtype = cms.string("LOOSE"), 
-      muPtMin = cms.double(47),
-      muIsoMin = cms.double(0.00),
-      muIsoMax = cms.double(1000), 
-      ), 
-
-    jetAK4selParams            = defaultAK4JetSelectionParameters,
-    jetAK8selParams            = defaultAK8CHSJetSelectionParameters,
-    jetHTaggedselParams        = defaultCHSHJetSelectionParameters,
-    leadingJetPtMin            = cms.double  (400.), 
-    leadingJetPrunedMassMin    = cms.double  (50.), 
-
-    doBTagSFUnc                = cms.bool(False), 
-    storePreselEvts            = cms.bool(False), 
-    doPreselOnly               = cms.bool(False),
-    applyBTagSFs               = cms.bool(True),
-    btageffmap                 = cms.string("TbtH_1200_LH_btagEff_loose.root"),
-    sjbtagSFcsv                = cms.string('subjet_CSVv2_Moriond17_B_H.csv')
+    # Physics Objects
+    # - labels to access data
+    neutrinoLabels  = neutrinoLabels,
+    muonLabels      = muonLabels,
+    electronLabels  = electronLabels,
+    jetLabels       = jetLabels,
+    largeRjetLabels = largeRJetLabels,
+    METLabels = METLabels,
+    # - selection on objects (pT,eta,ID,b-tagging,etc.)
+    objSelectionParams = objectSelectionParams,
 )
 
 ## THE END

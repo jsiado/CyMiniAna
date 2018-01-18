@@ -7,14 +7,14 @@ daniel.edison.marley@cernSPAMNOT.ch
 Texas A&M University
 -----
 
-Config file for eventSelection
+Config file for eventSelection in CMSSW
 """
 import FWCore.ParameterSet.Config as cms
 
 
-cma = cms.EDFilter("eventSelection",
-    btageffmap                 = cms.string("TbtH_1200_LH_btagEff_loose.root"),
-    sjbtagSFcsv                = cms.string('subjet_CSVv2_Moriond17_B_H.csv')
+evtSel = cms.EDFilter("eventSelection",
+    btageffmap  = cms.string("TbtH_1200_LH_btagEff_loose.root"),
+    sjbtagSFcsv = cms.string('subjet_CSVv2_Moriond17_B_H.csv')
 )
 
 ## THE END

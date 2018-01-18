@@ -35,6 +35,7 @@ class LargeRJets {
     std::vector<Ljet> m_truth_ljets;
 
     // Setup physics information from EDMntuples
+    edm::ParameterSet m_labels;
     bool m_useTruth;
 
     // ************

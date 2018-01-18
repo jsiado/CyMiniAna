@@ -32,6 +32,7 @@
 #include "Analysis/CyMiniAna/interface/LargeRJets.h"
 #include "Analysis/CyMiniAna/interface/Electrons.h"
 #include "Analysis/CyMiniAna/interface/Muons.h"
+#include "Analysis/CyMiniAna/interface/ETMiss.h"
 #include "Analysis/CyMiniAna/interface/Neutrinos.h"
 
 
@@ -58,13 +59,14 @@ class CMAProducer : public edm::EDProducer {
     void initialize_largeRjets(edm::Event& evt);
     void initialize_kinematics(edm::Event& evt);
 
-    Electrons* m_electronsTool;
-    Muons* m_muonsTool;
-    Neutrinos* m_neutrinosTool;
-    Jets* m_jetsTool;
-    LargeRJets* m_ljetsTool;
-    //Trigger* m_triggersTool;
-    objectSelection* m_objectSelectionTool;
+    Electrons m_electronsTool;
+    Muons m_muonsTool;
+    Neutrinos m_neutrinosTool;
+    Jets m_jetsTool;
+    LargeRJets m_ljetsTool;
+    ETMiss m_METTool;
+    //Trigger m_triggersTool;
+    objectSelection m_objectSelectionTool;
 
     // General Parameters
     bool m_isMC;
@@ -93,9 +95,6 @@ class CMAProducer : public edm::EDProducer {
     float m_HT;
     float m_ST;
 
-    // Setup physics information from EDMntuples
-    double m_METPtMin;
-
     // ************
     // Setup to read EDMntuple format
     // -- following this example:
@@ -123,14 +122,6 @@ class CMAProducer : public edm::EDProducer {
     edm::EDGetTokenT<float> t_htHat;
     edm::EDGetTokenT<std::vector<int>> t_lhewtids;
     edm::EDGetTokenT<std::vector<float>> t_lhewts;
-    // MET
-    edm::EDGetTokenT<std::vector<float>> t_metFullPhi;
-    edm::EDGetTokenT<std::vector<float>> t_metFullPt;
-    edm::EDGetTokenT<std::vector<float>> t_metFullPx;
-    edm::EDGetTokenT<std::vector<float>> t_metFullPy;
-    edm::EDGetTokenT<std::vector<float>> t_metFulluncorPhi;
-    edm::EDGetTokenT<std::vector<float>> t_metFulluncorPt;
-    edm::EDGetTokenT<std::vector<float>> t_metFulluncorSumEt;
 
     // Handles
     edm::Handle<float> h_rho;
@@ -151,15 +142,6 @@ class CMAProducer : public edm::EDProducer {
     edm::Handle<float> h_htHat;
     edm::Handle<std::vector<int>> h_lhewtids;
     edm::Handle<std::vector<float>> h_lhewts;
-    // MET
-    edm::Handle<std::vector<float>> h_metFullPhi;
-    edm::Handle<std::vector<float>> h_metFullPt;
-    edm::Handle<std::vector<float>> h_metFullPx;
-    edm::Handle<std::vector<float>> h_metFullPy;
-    edm::Handle<std::vector<float>> h_metFulluncorPhi;
-    edm::Handle<std::vector<float>> h_metFulluncorPt;
-    edm::Handle<std::vector<float>> h_metFulluncorSumEt;
-
 };
 
 #endif

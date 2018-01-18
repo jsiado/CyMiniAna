@@ -25,7 +25,7 @@ def deltaR(tlvA,tlvB,dR=0.75):
     return result
 
 
-def str2bool(self,param):
+def str2bool(param):
     """Convert a string to a boolean"""
     if param in ['true','True','1']:
         return True

@@ -27,24 +27,44 @@ class Configuration(object):
         self.configuration = {}      # hold all values in dictionary (as strings)
         self.script        = script  # the script that calls this class (e..g, createJobs.py)
 
+        self.files    = []
+        self.defaults = {}
+
         self.set_defaults()
 
 
     def initialize(self):
-        """Initialize the configuration"""
-        self.setConfigurations()     # set the configuration options
-
-        return
-
-
-    def setConfigurations(self):
-        """Read the configuration file and set arguments (overwrite default values)"""
+        """
+           Initialize the configuration
+           Read the configuration file and set arguments 
+           (overwrite default values)
+        """
         file = open(self.filename,'r').readlines()
+        line_skip = ["#"," ","\n"]
         for line in file:
+            if any( [line.startswith(i) for i in line_skip] ): continue
+
             param,value = line.split(' ')
             value       = value.rstrip('\n')
 
             self.configuration[param] = value
+
+        # Set some configurations
+        files = self.get("inputfile")
+        files = open(files,"r").readlines()
+        self.configuration["inputfile"] = [i.rstrip("\n") for i in files]
+
+        trees  = self.get("treenames")
+        trees = open(trees,"r").readlines()
+        self.configuration["treenames"] = [i.rstrip("\n") for i in trees]
+
+        self.configuration["NEvents"] = int( self.configuration["NEvents"] )
+
+        # Change boolean config options to bools, not strings
+        for key in self.defaults.keys():
+            value = self.defaults[key]
+            if type( value )==bool:
+                self.configuration[key] = util.str2bool( value )
 
         return
 
@@ -77,14 +97,32 @@ class Configuration(object):
         self.defaults = {
             'verbose_level':"INFO",
             'isMC':False,
-            'nEventsToProcess':-1,
+            'nEvents':-1,
             'outputFileName':'output.root',
-            'dataFilePath':os.environ["$CMSSW_BASE]+"/src/Analysis/CyMiniAna/data",
+            'dataFilePath':os.environ["CMSSW_BASE"]+"/src/Analysis/CyMiniAna/data",
             'jerShift':None,
             'jecShift':None,
-            'filenames':[],
+            'inputfile':[],
+            'useJets':False,
+            'useLargeRJets':False,
+            'useLeptons':False,
+            'useNeutrinos':False,
+            'buildNeutrinos':False,
+            'kinematicReco':False,
+            'metadataFile':"config/sampleMetaData.txt",
+            'LUMI':35900.,
+            'useTruth':False,
+            'getDNN':False,
+            'jet_btag_wkpt':'medium',
+            'treenames':"config/treenames_nominal.txt",
+            'input_selection':'b2g',
+            'makeNewFile':True,
+            'makeHistograms':True,
+            'makeEfficiencies':False,
+            'selection':None,
+            'output_path': "./",
+            'cutsfile':"config/cuts_none.txt",
         }
-
         # copy defaults into the configuration
         self.configuration = dict( (k,self.defaults[k]) for k in self.defaults.keys() )
 
@@ -95,33 +133,114 @@ class Configuration(object):
     def verbose_level(self):
         """Verbosity of output"""
         return self.get("verbose_level")
-    def nEventsToProcess(self):
+    def nEvents(self):
         """Maximum number of events"""
-        return self.get("nEventsToProcess")
+        return self.get("NEvents")
     def dataFilePath(self):
         """Path to 'data/' directory"""
         return self.get("dataFilePath")
 
     ## SAMPLE INFORMATION
-    def isMC(self):
-        """Use if running on MC"""
-        return util.str2bool( self.get("isMC") )
+    def isMC(self,filename=None):
+        """Determine if a file is MC or Data given a filename (or not)"""
+        datanames = ["/SingleElectron","/SingleMuon","/JetHT"]
+        if filename is not None:
+            if any( [i in filename for i in datanames] ):
+                self.configuration["isMC"] = False
+            else:
+                self.configuration["isMC"] = True
+
+        isMC = self.get("isMC")
+        if not isMC and self.get("useTruth"):
+            print " CONFIG : WARNING: 'isMC' is False and 'useTruth' is True!"
+            print " CONFIG : WARNING: Setting 'useTruth' to False "
+            self.configuration["useTruth"] = False
+
+        return isMC
+
+
     def filenames(self):
         """List of filenames to process"""
-        return self.get("filenames") )
+        return self.get("inputfile")
+    def treenames(self):
+        """Treenames to process"""
+        return self.get("treenames")
+
     def outputFileName(self):
         """Naming for the output file"""
         return self.get("outputFileName")
+    def output_path(self):
+        """Destination to save output file"""
+        return self.get("makeNewFile")
 
-    ## LEPTONS
-    ## MET
-    ## JETS
-    def jerShift(self):
-        """Shift from JER"""
-        return self.get("jerShift")
-    def jecShift(self):
-        """Shift from JEC"""
-        return self.get("jecShift")
+    def getDNN(self):
+        """Calculate the DNN score"""
+        return self.get("getDNN")
+
+    def jet_btag(self):
+        """B-tag working point"""
+        return self.get("jet_btag")
+
+    def input_selection(self):
+        """Selection used to process the input"""
+        return self.get("input_selection")
+
+    def makeNewFile(self):
+        """Save TTree information to output file"""
+        return self.get("makeNewFile")
+
+    def makeHistograms(self):
+        """Save Histograms to output file"""
+        return self.get("makeHistograms")
+
+    def makeEffciency(self):
+        """Save TEfficiencies to output file"""
+        return self.get("makeEfficiencies")
+
+    def selection(self):
+        """Selection to apply to input files"""
+        return self.get("selection")
+
+    def cutsfile(self):
+        """File that lists selection to apply"""
+        return self.get("cutsfile")
+
+    def useJets(self):
+        """Use jets in analysis"""
+        return self.get("useJets")
+
+    def useLargeRJets(self):
+        """Use large-R jets in analysis"""
+        return self.get("useLargeRJets")
+
+    def useLeptons(self):
+        """Use leptons in analysis"""
+        return self.get("useLeptons")
+
+    def useNeutrinos(self):
+        """Use neutrinos in analysis"""
+        return self.get("useNeutrinos")
+
+    def buildNeutrinos(self):
+        """Reconstruct neutrinos in analysis"""
+        return self.get("buildNeutrinos")
+
+    def kinematicReco(self):
+        """Kinematic reconstruction in analysis"""
+        return self.get("kinematicReco")
+
+    def metadataFile(self):
+        """Metadata for samples in analysis"""
+        return self.get("metadataFile")
+
+    def LUMI(self):
+        """LUMI in analysis"""
+        return self.get("LUMI")
+
+    def useTruth(self):
+        """Use truth (generator) information in analysis"""
+        return self.get("useTruth")
+
 
 
     ## Functions for just this class
