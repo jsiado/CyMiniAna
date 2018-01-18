@@ -1,0 +1,35 @@
+<lcgdict>
+
+ <class name="Electron"/>
+ <class name="edm::Wrapper<Electron>"/>
+ <class name="std::vector<Electron>"/>
+ <class name="edm::Wrapper<std::vector<Electron> >"/>
+
+ <class name="Muon"/>
+ <class name="edm::Wrapper<Muon>"/>
+ <class name="std::vector<Muon>"/>
+ <class name="edm::Wrapper<std::vector<Muon> >"/> 
+
+ <class name="Jet"/>
+ <class name="edm::Wrapper<Jet>"/>
+ <class name="std::vector<Jet>"/>
+ <class name="edm::Wrapper<std::vector<Jet> >"/> 
+
+ <class name="Ljet"/>
+ <class name="edm::Wrapper<Ljet>"/>
+ <class name="std::vector<Ljet>"/>
+ <class name="edm::Wrapper<std::vector<Ljet> >"/> 
+
+ <class name="Neutrino"/>
+ <class name="edm::Wrapper<Neutrino>"/>
+ <class name="std::vector<Neutrino>"/>
+ <class name="edm::Wrapper<std::vector<Neutrino> >"/> 
+
+ <class name="MET"/>
+ <class name="edm::Wrapper<MET>"/>
+<!-- 
+ <class name="std::vector<MET>"/>
+ <class name="edm::Wrapper<std::vector<MET> >"/>
+-->
+
+</lcgdict>
