@@ -75,6 +75,8 @@ LargeRJets::~LargeRJets() {}
 
 std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build the large-R jets */
+    m_ljets.clear();
+
     evt.getByToken(t_ljetPt,     h_ljetPt);
     evt.getByToken(t_ljetEta,    h_ljetEta);
     evt.getByToken(t_ljetPhi,    h_ljetPhi);
@@ -125,17 +127,19 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
         ljet.tau32 = ljet.tau3 / ljet.tau2;
         ljet.softDropMass = (h_ljetSoftDropMass.product())->at(ijet);
 
-        // Subjets:  2 soft drop subjets
-        ljet.subjets.resize(2);
-        for (unsigned int j=0;j<2;j++){    
-            unsigned int idx = (ijet*2)+j;  // vector has two entries to match single entry for AK8
-                                            // ljet index 0(1) -> subjets indices 0,1 (2,3); etc.
+        // Soft-drop subjets
+        ljet.subjets.clear();
+        std::vector<int> indices = { int((h_ljet_subjetIdx0.product())->at(ijet)),
+                                     int((h_ljet_subjetIdx1.product())->at(ijet)) };
+
+        for (const auto& idx : indices){
+            if (idx < 0) continue;
             Jet subjet;
             subjet.p4.SetPtEtaPhiE( (h_ljet_subjetPt.product())->at(idx), (h_ljet_subjetEta.product())->at(idx), 
                                     (h_ljet_subjetPhi.product())->at(idx), (h_ljet_subjetE.product())->at(idx));
 
             subjet.cMVAv2 = (h_ljet_subjetCMVA.product())->at(idx);
-            ljet.subjets.at(j) = subjet;
+            ljet.subjets.push_back(subjet);
         }
 
         // ID
@@ -147,6 +151,7 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
         ljet.cHadEnergy = (h_ljetcHadEnergy.product())->at(ijet);
         ljet.muonEnergy = (h_ljetMuonEnergy.product())->at(ijet);
 
+        setLjetID(ljet);
        	bool passObjSel	= obj.pass(ljet);
         if (!passObjSel) continue;
 
@@ -180,5 +185,31 @@ std::vector<Ljet> LargeRJets::execute_truth(const edm::Event& evt, const objectS
     return m_truth_ljets;
 }
 
+
+void LargeRJets::setLjetID(Ljet& ljet) const{
+    /* Large-R Jet ID
+       Use the same recommendations as AK4 jets
+         https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2016
+     */
+    float absEta = std::abs(ljet.p4.Eta());
+    float NHF  = ljet.nHadEnergy;
+    float CHF  = ljet.cHadEnergy;
+    float MUF  = ljet.muonEnergy / ljet.p4.E();
+    float CHM  = ljet.cMultip;
+    float CEMF = ljet.cEMEnergy;
+    float NEMF = ljet.nEMEnergy;
+    int NumConst = ljet.cMultip+ljet.nMultip;
+
+    // only care about jets |eta|<2.4
+    bool looseJetID = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((absEta<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || absEta>2.4) && absEta<=2.7;
+    bool tightJetID = (NHF<0.90 && NEMF<0.90 && NumConst>1) && ((absEta<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || absEta>2.4) && absEta<=2.7;
+    bool tightLepVetoJetID = (NHF<0.90 && NEMF<0.90 && NumConst>1 && MUF<0.8) && ((absEta<=2.4 && CHF>0 && CHM>0 && CEMF<0.90) || absEta>2.4) && absEta<=2.7;
+
+    ljet.loose = looseJetID;
+    ljet.tight = tightJetID;
+    ljet.tightlepveto = tightLepVetoJetID;
+
+    return;
+}
 
 // THE END

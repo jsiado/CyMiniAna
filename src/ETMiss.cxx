@@ -43,10 +43,8 @@ MET ETMiss::execute(const edm::Event& evt, const objectSelection& obj){
     evt.getByToken(t_metFulluncorPt,    h_metFulluncorPt);
     evt.getByToken(t_metFulluncorSumEt, h_metFulluncorSumEt);
 
-    float metFullPt = (h_metFullPt.product())->at(0);
-
     m_MET = {};
-    m_MET.p4.SetPtEtaPhiM( metFullPt, 0, h_metFullPhi.product()->at(0), 0);
+    m_MET.p4.SetPtEtaPhiM( (h_metFullPt.product())->at(0), 0, h_metFullPhi.product()->at(0), 0);
     m_MET.uncorrPt    = h_metFulluncorPt.product()->at(0);
     m_MET.uncorrPhi   = h_metFulluncorPhi.product()->at(0);
     m_MET.uncorrSumEt = h_metFulluncorSumEt.product()->at(0);

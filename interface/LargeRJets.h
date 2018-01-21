@@ -28,6 +28,8 @@ class LargeRJets {
     std::vector<Ljet> execute(const edm::Event& evt, const objectSelection& obj);
     std::vector<Ljet> execute_truth(const edm::Event& evt, const objectSelection& obj);
 
+    void setLjetID(Ljet& ljet) const;
+
   private:
 
     // Physics information

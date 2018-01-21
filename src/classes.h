@@ -9,7 +9,13 @@ Allow custom structs to be stored in the Event
 namespace {
   struct dictionary {
 
-edm::Wrapper<JRAEvent> dummy1;
+    edm::Wrapper<CmaBase> cma_dummy;
+    std::vector<CmaBase> v_cma_dummy1;
+    edm::Wrapper<std::vector<CmaBase>> v_cma_dummy2;
+
+    edm::Wrapper<Lepton> lep_dummy;
+    std::vector<Lepton> v_lep_dummy1;
+    edm::Wrapper<std::vector<Lepton>> v_lep_dummy2;
 
     edm::Wrapper<Electron> el_dummy;
     std::vector<Electron> v_el_dummy1;
@@ -29,7 +35,7 @@ edm::Wrapper<JRAEvent> dummy1;
 
     edm::Wrapper<Ljet> ljet_dummy;
     std::vector<Ljet> v_ljet_dummy1;
-    edm::Wrapper<std::vector<Ljet>> v_ljet_dummy1;
+    edm::Wrapper<std::vector<Ljet>> v_ljet_dummy2;
 
     edm::Wrapper<MET> met_dummy;
 

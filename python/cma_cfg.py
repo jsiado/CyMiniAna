@@ -44,7 +44,7 @@ else:
 config = Configuration( sys.argv[argument] )
 config.initialize()
 
-nEventsToProcess = config.nEvents()
+nEventsToProcess = config.NEvents()
 outputFileName   = config.outputFileName()
 filenames = config.filenames()   # list of files
 isMC      = config.isMC( filenames[0] )   # check the first file to see if we are running over MC or Data
@@ -56,19 +56,38 @@ process = cms.Process("CyMiniAna")
 process.source       = cms.Source("PoolSource",fileNames = cms.untracked.vstring(filenames) )
 process.maxEvents    = cms.untracked.PSet( input = cms.untracked.int32(nEventsToProcess) )
 process.TFileService = cms.Service("TFileService",fileName = cms.string(outputFileName) )
+#process.content      = cms.EDAnalyzer('EventContentAnalyzer')
 
-## Histogrammer
+## -- Load Modules
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger = cms.Service("MessageLogger",
+                            destinations = cms.untracked.vstring('cout'),
+                            cout         = cms.untracked.PSet(
+                                           threshold = cms.untracked.string('INFO') ),
+                        )
+
+## -- Histogrammer
 print " Histogrammer "
 process.histogrammer = hist.clone()
+process.histogrammer.isMC = cms.bool(isMC)
 
-## Event Selection
+process.histogrammer.useTruth = cms.bool(config.useTruth())
+process.histogrammer.useJets  = cms.bool(config.useJets())
+process.histogrammer.useLargeRJets  = cms.bool(config.useLargeRJets())
+process.histogrammer.useNeutrinos   = cms.bool(config.useNeutrinos())
+process.histogrammer.useLeptons     = cms.bool(config.useLeptons())
+process.histogrammer.useSystWeights = cms.bool(config.useSystWeights())
+process.histogrammer.weightSystematicsFile = cms.string(config.weightSystematicsFile())
+process.histogrammer.weightVectorSystematicsFile = cms.string(config.weightVectorSystematicsFile())
+
+## -- Event Selection
 print " Event selection "
 process.evtSel = evtSel.clone()
+process.evtSel.selection = config.selection()
+process.evtSel.cutsfile  = config.cutsfile()
 
-## CMAProducer
+## -- Setup CMAProducer
 process.ana = cma.clone()
-
-# set CMAProducer options
 process.ana.isMC = cms.bool(isMC)
 process.ana.useJets  = cms.bool(config.useJets())
 process.ana.useLargeRJets  = cms.bool(config.useLargeRJets())
@@ -80,36 +99,19 @@ process.ana.metadataFile   = cms.string(config.metadataFile())
 process.ana.LUMI = cms.double(config.LUMI())
 process.ana.useTruth = cms.bool(config.useTruth())
 
-process.initial = eventCounter.clone(isData=(not isMC))
-process.final   = eventCounter.clone(isData=(not isMC))
-
-# CHS Jets
-# process.anaCHS = process.ana.clone()#set any different options)
-# PUPPI Jets
-#process.anaPuppi = process.ana.clone(
-#    jetAK8selParams = defaultAK8PuppiJetSelectionParameters,
-#    )
+## -- Count events before & after selection
+##    https://github.com/dmajumder/EventCounter
+process.initial = eventCounter.clone( isData=(not isMC) )
+process.final   = eventCounter.clone( isData=(not isMC) )
 
 
-## PROCESS PATHS
-#  - CHS
-#  - Count events; event cleaning; count events; anaCHS; count events
-#process.p = cms.Path(
-#      process.allEvents*
-#      process.cleanedEvents*
-#      process.anaCHS*
-#      process.finalEvents
-#    )
-#  - PUPPI (same as CHS Jets)
-
-
-# CMA
-# use EventCounter from Devdatta
+## PATH
 print " Set the path "
 process.p = cms.Path(
     process.initial*
     process.ana*
     process.evtSel*
+    #process.content*
     process.histogrammer*
     process.final
 )

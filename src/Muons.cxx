@@ -60,6 +60,8 @@ Muons::~Muons() {}
 
 std::vector<Muon> Muons::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build Muons */
+    m_muons.clear();
+
     evt.getByToken(t_muDxy, h_muDxy);
     evt.getByToken(t_muDz,  h_muDz);
     evt.getByToken(t_muE,   h_muE);

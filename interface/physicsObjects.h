@@ -48,6 +48,11 @@ struct Jet : CmaBase{
 
     float charge;
     int index;    // index in vector of jets
+
+    bool loose;
+    bool medium;
+    bool tight;
+    bool tightlepveto;
 };
 
 struct Ljet : Jet{
@@ -64,11 +69,6 @@ struct Ljet : Jet{
     float charge;
     float vSubjetIndex0;
     float vSubjetIndex1;
-};
-
-struct Tjet : Jet{
-    // Track Jets not used in CMS -- here as a placeholder
-    int numConstituents;
 };
 
 

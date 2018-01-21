@@ -64,7 +64,7 @@ class Configuration(object):
         for key in self.defaults.keys():
             value = self.defaults[key]
             if type( value )==bool:
-                self.configuration[key] = util.str2bool( value )
+                self.configuration[key] = util.str2bool( self.configuration[key] )
 
         return
 
@@ -97,7 +97,7 @@ class Configuration(object):
         self.defaults = {
             'verbose_level':"INFO",
             'isMC':False,
-            'nEvents':-1,
+            'NEvents':-1,
             'outputFileName':'output.root',
             'dataFilePath':os.environ["CMSSW_BASE"]+"/src/Analysis/CyMiniAna/data",
             'jerShift':None,
@@ -122,6 +122,9 @@ class Configuration(object):
             'selection':None,
             'output_path': "./",
             'cutsfile':"config/cuts_none.txt",
+            'useSystWeights':False,
+            'weightSystematicsFile':"config/weightSystematics.txt",
+            'weightVectorSystematicsFile':"config/weightVectorSystematics.txt",
         }
         # copy defaults into the configuration
         self.configuration = dict( (k,self.defaults[k]) for k in self.defaults.keys() )
@@ -133,7 +136,7 @@ class Configuration(object):
     def verbose_level(self):
         """Verbosity of output"""
         return self.get("verbose_level")
-    def nEvents(self):
+    def NEvents(self):
         """Maximum number of events"""
         return self.get("NEvents")
     def dataFilePath(self):
@@ -241,6 +244,17 @@ class Configuration(object):
         """Use truth (generator) information in analysis"""
         return self.get("useTruth")
 
+    def useSystWeights(self):
+        """Use systematic weights in histograms"""
+        return self.get("useSystWeights")
+
+    def weightSystematicsFile(self):
+        """Name of file that contains names of systematics stored as weights"""
+        return self.get("weightSystematicsFile")
+
+    def weightVectorSystematicsFile(self):
+        """Name of file that contains names of systematics stored as vectors of weights"""
+        return self.get("weightVectorSystematicsFile")
 
 
     ## Functions for just this class

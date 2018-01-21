@@ -27,6 +27,8 @@ class Jets {
     std::vector<Jet> execute(const edm::Event& evt, const objectSelection& obj);
     std::vector<Jet> execute_truth(const edm::Event& evt, const objectSelection& obj);
 
+    void setJetID(Jet& jet) const;
+
   private:
 
     // Physics information

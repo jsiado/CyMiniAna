@@ -24,6 +24,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
@@ -50,6 +51,8 @@ class CMAProducer : public edm::EDProducer {
     virtual void beginJob(const edm::EventSetup&);
     virtual void produce(edm::Event&, const edm::EventSetup&);
     virtual void endJob();
+
+    void clearObjects();
 
     // Build physics objects
     void initialize_electrons(edm::Event& evt);
@@ -92,8 +95,8 @@ class CMAProducer : public edm::EDProducer {
     std::vector<Ljet> m_ljets;
     std::vector<Ljet> m_truth_ljets;
     MET m_MET;
-    float m_HT;
-    float m_ST;
+    double m_HT;
+    double m_ST;
 
     // ************
     // Setup to read EDMntuple format

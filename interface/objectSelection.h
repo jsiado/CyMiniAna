@@ -10,6 +10,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
 
@@ -34,16 +35,13 @@ class objectSelection {
     bool pass( const Ljet& ljet,   bool isGen=false ) const;
 
     // ID and Isolation Functions
-    void electronID( Electron& el ) const;
-    bool electronISO( const Electron& el, const std::string& ID ) const;
+    bool electronID( const Electron& el ) const;
+    bool applyElectronIsolation() const;
 
     bool muonID( const Muon& mu ) const;
     bool muonISO( const Muon& mu ) const;
 
-    void setJetID();
     bool jetID( const Jet& jet ) const;
-
-    void setLjetID();
     bool ljetID( const Ljet& ljet ) const;
 
   private:
@@ -51,7 +49,6 @@ class objectSelection {
     const edm::ParameterSet* m_config;
 
     // Electron
-    double m_barrel_eta = 1.479;  // parameters depend on detector region
     bool m_applyIso;
     double m_el_pt;
     double m_el_eta;
@@ -78,29 +75,12 @@ class objectSelection {
     // Large-R Jets
     double m_ljet_pt;
     double m_ljet_eta;
+    unsigned int m_ljet_nsubjets=2;
     std::string m_ljet_ID; // tagging, substructure
 
 
 
     // ID/Isolation values
-    // JETS
-    float m_jetindexNEF;
-    float m_jetIndexCHF;
-    float m_jetindexNHF;
-    float m_jetIndexCEF;
-    float m_jetIndexNCH;
-    float m_jetIndexMUE;
-    float m_jetindexNConstituents;
-
-    // Large-R Jets
-    float m_ljetindexNEF;
-    float m_ljetIndexCHF;
-    float m_ljetindexNHF;
-    float m_ljetIndexCEF;
-    float m_ljetIndexNCH;
-    float m_ljetIndexMUE;
-    float m_ljetindexNConstituents;
-
 
     // ELECTRONS
     // -- different values for each ID if the electron is in the barrel or endcap

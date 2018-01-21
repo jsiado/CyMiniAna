@@ -1,6 +1,6 @@
 """
 Created:        14 January   2018
-Last Updated:   15 January   2018
+Last Updated:   18 January   2018
 
 Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
@@ -13,8 +13,16 @@ import FWCore.ParameterSet.Config as cms
 
 
 hist = cms.EDAnalyzer("histogrammer",
-    btageffmap  = cms.string("TbtH_1200_LH_btagEff_loose.root"),
-    sjbtagSFcsv = cms.string('subjet_CSVv2_Moriond17_B_H.csv')
+    isMC = cms.bool(False),
+    useTruth = cms.bool(False),
+    useJets  = cms.bool(False),
+    useLargeRJets = cms.bool(False),
+    useNeutrinos  = cms.bool(False),
+    useLeptons    = cms.bool(False),
+
+    useSystWeights = cms.bool(False),
+    weightSystematicsFile = cms.string("SetMe"),
+    weightVectorSystematicsFile = cms.string("SetMe"),
 )
 
 ## THE END

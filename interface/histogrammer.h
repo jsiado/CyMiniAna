@@ -11,6 +11,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TROOT.h"
@@ -21,6 +22,8 @@
 #include "TSystem.h"
 
 #include "Analysis/CyMiniAna/interface/tools.h"
+#include "Analysis/CyMiniAna/interface/physicsObjects.h"
+
 
 class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   public:
@@ -77,6 +80,7 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     bool m_putUnderflowInFirstBin;
 
     bool m_useJets;
+    bool m_useLargeRJets;
     bool m_useLeptons;
     bool m_useNeutrinos;
 
@@ -86,6 +90,26 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     std::map<std::string, TH1D*> m_map_histograms1D;
     std::map<std::string, TH2D*> m_map_histograms2D;
     std::map<std::string, TH3D*> m_map_histograms3D;
+
+
+    // Handles and Tokens
+    edm::EDGetTokenT<std::vector<Electron>> t_electrons;
+    edm::EDGetTokenT<std::vector<Muon>> t_muons;
+    edm::EDGetTokenT<std::vector<Neutrino>> t_neutrinos;
+    edm::EDGetTokenT<std::vector<Jet>> t_jets;
+    edm::EDGetTokenT<std::vector<Ljet>> t_ljets;
+    edm::EDGetTokenT<MET> t_met;
+    edm::EDGetTokenT<double> t_HT;
+    edm::EDGetTokenT<double> t_ST;
+
+    edm::Handle<std::vector<Electron>> m_electrons;
+    edm::Handle<std::vector<Muon>> m_muons;
+    edm::Handle<std::vector<Neutrino>> m_neutrinos;
+    edm::Handle<std::vector<Jet>> m_jets;
+    edm::Handle<std::vector<Ljet>> m_ljets;
+    edm::Handle<MET> m_met;
+    edm::Handle<double> m_HT;
+    edm::Handle<double> m_ST;
 };
 
 #endif

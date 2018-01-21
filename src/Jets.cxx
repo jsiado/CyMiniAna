@@ -53,7 +53,8 @@ Jets::~Jets() {}
 
 std::vector<Jet> Jets::execute(const edm::Event& evt, const objectSelection& obj){
     /* Build the jets */
-    evt.getByToken(t_rho,    h_rho);
+    m_jets.clear();
+
     evt.getByToken(t_jetY,   h_jetY);
     evt.getByToken(t_jetPt,  h_jetPt);
     evt.getByToken(t_jetEta, h_jetEta);
@@ -92,7 +93,9 @@ std::vector<Jet> Jets::execute(const edm::Event& evt, const objectSelection& obj
         jet.muonEnergy = (h_jetcMultip.product())->at(ijet);
         jet.index      = ijet;
 
+        setJetID(jet);
         bool passObjSel = obj.pass(jet);
+
         if (!passObjSel) continue;
 
         m_jets.push_back(jet);
@@ -124,6 +127,32 @@ std::vector<Jet> Jets::execute_truth(const edm::Event& evt, const objectSelectio
     }
 
     return m_truth_jets;
+}
+
+
+void Jets::setJetID(Jet& jet) const{
+    /* Jet ID
+       https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2016
+     */
+    float absEta = std::abs(jet.p4.Eta());
+    float NHF  = jet.nHadEnergy;
+    float CHF  = jet.cHadEnergy;
+    float MUF  = jet.muonEnergy / jet.p4.E();
+    float CHM  = jet.cMultip;
+    float CEMF = jet.cEMEnergy;
+    float NEMF = jet.nEMEnergy;
+    int NumConst = jet.cMultip+jet.nMultip;
+
+    // only care about jets |eta|<2.4
+    bool looseJetID = (NHF<0.99 && NEMF<0.99 && NumConst>1) && ((absEta<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || absEta>2.4) && absEta<=2.7;
+    bool tightJetID = (NHF<0.90 && NEMF<0.90 && NumConst>1) && ((absEta<=2.4 && CHF>0 && CHM>0 && CEMF<0.99) || absEta>2.4) && absEta<=2.7;
+    bool tightLepVetoJetID = (NHF<0.90 && NEMF<0.90 && NumConst>1 && MUF<0.8) && ((absEta<=2.4 && CHF>0 && CHM>0 && CEMF<0.90) || absEta>2.4) && absEta<=2.7;
+
+    jet.loose = looseJetID;
+    jet.tight = tightJetID;
+    jet.tightlepveto = tightLepVetoJetID;
+
+    return;
 }
 
 // THE END

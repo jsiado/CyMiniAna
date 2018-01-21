@@ -1,4 +1,4 @@
-NEvents 101
+NEvents 100
 verboseLevel INFO
 
 # Neural Network
@@ -8,8 +8,8 @@ getDNN false
 useJets true
 useLeptons true
 useNeutrinos false
-buildNeutrinos true
-useLargeRJets false
+buildNeutrinos false
+useLargeRJets true
 useRCJets false
 useTruth false
 jet_btag_wkpt medium

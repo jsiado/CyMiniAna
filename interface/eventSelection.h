@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TROOT.h"
@@ -16,10 +17,8 @@
 #include "TSystem.h"
 #include "TCanvas.h"
 #include "TRandom3.h"
-#include "TEfficiency.h"
 #include "TF1.h"
 #include "TMath.h"
-#include "TRandom.h"
 #include "TLorentzVector.h"
 
 #include <vector>

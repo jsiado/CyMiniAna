@@ -55,8 +55,8 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
     produces<std::vector<Ljet>>("ljets").setBranchAlias( "ljets" );
     produces<std::vector<Neutrino>>("neutrinos").setBranchAlias( "neutrinos" );
     produces<MET>("MET").setBranchAlias( "MET" );
-    produces<float>("HT").setBranchAlias( "HT" );
-    produces<float>("ST").setBranchAlias( "ST" );
+    produces<double>("HT").setBranchAlias( "HT" );
+    produces<double>("ST").setBranchAlias( "ST" );
     /* Add information from kinematics reconstruction once available */
 } // end constructor
 
@@ -78,7 +78,13 @@ CMAProducer::~CMAProducer() {
 void CMAProducer::beginJob(const edm::EventSetup&){
     /* Producer setup before the event loop */
     m_objectSelectionTool.initialize();
+    clearObjects();
+    return;
+}
 
+
+void CMAProducer::clearObjects(){
+    /* Clear physics objects for the new event */
     m_electrons.clear();
     m_muons.clear();
     m_leptons.clear();    // contain electrons and muons
@@ -98,22 +104,25 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
        - Build the different physics objects
        - Store for easy access in other EDModules
     */
+    clearObjects();
+
     // Setup objects for output
+    // Requires creating src/classes_def.xml & src/classes.h
+    // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideCreatingNewProducts
     std::auto_ptr< std::vector<Electron> > e_electrons( new std::vector<Electron> );
     std::auto_ptr< std::vector<Muon> > e_muons( new std::vector<Muon> );
     std::auto_ptr< std::vector<Neutrino> > e_neutrinos( new std::vector<Neutrino> );
     std::auto_ptr< std::vector<Jet> > e_jets( new std::vector<Jet> );
     std::auto_ptr< std::vector<Ljet> > e_ljets( new std::vector<Ljet> );
     std::auto_ptr< MET > e_MET( new MET );
-    std::auto_ptr< float > e_HT( new float );
-    std::auto_ptr< float > e_ST( new float );
+    std::auto_ptr< double > e_HT( new double );
+    std::auto_ptr< double > e_ST( new double );
 
 
     // Event information
 //    edm::Handle<int> h_runno;
 //    evt.getByToken(t_runno, h_runno);
 //    const int runno(*h_runno.product());
-
 
     // Build physics objects
     // - pass 'evt' to each function to access handles
@@ -136,12 +145,14 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
 
     if (m_useJets){
         m_jets = m_jetsTool.execute(evt,m_objectSelectionTool);             // AK4 jets
+        edm::LogInfo("Jets built "+std::to_string(m_jets.size()));
         for (auto& jet : m_jets)
             e_jets->push_back(jet);
     }
 
     if (m_useLargeRJets){
         m_ljets = m_ljetsTool.execute(evt,m_objectSelectionTool);           // AK8 jets
+        edm::LogInfo("LJets built "+std::to_string(m_jets.size()));
         for (auto& jet : m_ljets)
             e_ljets->push_back(jet);
     }

@@ -16,9 +16,17 @@ to go into plots || Combine
 using namespace edm;
 
 histogrammer::histogrammer( const ParameterSet & cfg ) :
-  m_src( cfg.getUntrackedParameter<edm::InputTag>("src") ),
+  //m_src( cfg.getUntrackedParameter<edm::InputTag>("src") ),
   m_putOverflowInLastBin(true),
-  m_putUnderflowInFirstBin(true){
+  m_putUnderflowInFirstBin(true),
+  t_electrons(consumes<std::vector<Electron>>(edm::InputTag("ana","electrons","CyMiniAna"))),
+  t_muons(consumes<std::vector<Muon>>(edm::InputTag("ana","muons","CyMiniAna"))),
+  t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("ana","neutrinos","CyMiniAna"))),
+  t_jets(consumes<std::vector<Jet>>(edm::InputTag("ana","jets","CyMiniAna"))),
+  t_ljets(consumes<std::vector<Ljet>>(edm::InputTag("ana","ljets","CyMiniAna"))),
+  t_met(consumes<MET>(edm::InputTag("ana","MET","CyMiniAna"))),
+  t_HT(consumes<double>(edm::InputTag("ana","HT","CyMiniAna"))),
+  t_ST(consumes<double>(edm::InputTag("ana","ST","CyMiniAna"))){
     usesResource("TFileService");
 
     m_map_histograms1D.clear();
@@ -28,6 +36,7 @@ histogrammer::histogrammer( const ParameterSet & cfg ) :
     // options set by config
     m_isMC           = cfg.getParameter<bool>("isMC");
     m_useJets        = cfg.getParameter<bool>("useJets");
+    m_useLargeRJets  = cfg.getParameter<bool>("useLargeRJets");
     m_useLeptons     = cfg.getParameter<bool>("useLeptons");
     m_useNeutrinos   = cfg.getParameter<bool>("useNeutrinos");
     m_useSystWeights = cfg.getParameter<bool>("useSystWeights");
@@ -121,20 +130,28 @@ void histogrammer::bookHists( const std::string name ){
         init_hist("n_jets_"+name,   31, -0.5,  30.5);
         init_hist("n_btags_"+name,  11, -0.5,  10.5);
 
-        init_hist("jet1_pt_"+name,  500, 0.0, 2000);
-        init_hist("jet1_eta_"+name,  50, -2.5, 2.5);
-        init_hist("jet1_phi_"+name,  64, -3.2, 3.2);
-        init_hist("jet1_cMVAv2_"+name, 200, -1,1);
-        init_hist("jet2_pt_"+name,  500, 0.0, 2000);
-        init_hist("jet2_eta_"+name,  50, -2.5, 2.5);
-        init_hist("jet2_phi_"+name,  64, -3.2, 3.2);
-        init_hist("jet2_cMVAv2_"+name, 200, -1,1);
+        init_hist("jet_pt_"+name,  500, 0.0, 2000);
+        init_hist("jet_eta_"+name,  50, -2.5, 2.5);
+        init_hist("jet_phi_"+name,  64, -3.2, 3.2);
+        init_hist("jet_CSVv2_"+name, 200, -1,1);
+    }
+
+    if (m_useLargeRJets){
+        init_hist("n_ljets_"+name,   11, -0.5,  10.5);
+
+        init_hist("ljet_pt_"+name,  500, 0.0, 2000);
+        init_hist("ljet_eta_"+name,  50, -2.5, 2.5);
+        init_hist("ljet_phi_"+name,  64, -3.2, 3.2);
+        init_hist("ljet_SDmass_"+name, 300,0.0,300);
     }
 
     if (m_useLeptons){
-        init_hist("lep_pt_"+name,  500, 0.0, 2000);
-        init_hist("lep_eta_"+name,  50, -2.5, 2.5);
-        init_hist("lep_phi_"+name,  64, -3.2, 3.2);
+        init_hist("el_pt_"+name,  500, 0.0, 2000);
+        init_hist("el_eta_"+name,  50, -2.5, 2.5);
+        init_hist("el_phi_"+name,  64, -3.2, 3.2);
+        init_hist("mu_pt_"+name,  500, 0.0, 2000);
+        init_hist("mu_eta_"+name,  50, -2.5, 2.5);
+        init_hist("mu_phi_"+name,  64, -3.2, 3.2);
     }
 
     if (m_useNeutrinos){
@@ -148,9 +165,8 @@ void histogrammer::bookHists( const std::string name ){
     init_hist("met_phi_"+name, 6.4, -3.2,  3.2);
     init_hist("ht_"+name,     5000,  0.0, 5000);
 
-    // HME && DNN && AMWT
-    //init_hist("hme_"+name, 2000, 0.0, 2000);
-    //init_hist("dnn_"+name,  100, 0.0,   1.);
+    // DNN
+    init_hist("dnn_"+name,  100, 0.0,   1.);
 
 /*  VLQ/Wprime
     init_hist("top_pt_"+name,  2000, 0.0, 2000);
@@ -170,13 +186,10 @@ void histogrammer::bookHists( const std::string name ){
 
 void histogrammer::beginJob(){
     /* Setup some values and book histograms */
-    std::string treename("nominal");
-    bookHists( m_name+treename );    // Book histograms for "nominal" events
+    bookHists( m_name );    // Book histograms for "nominal" events
 
-    // weight systematics
+    // weight systematics in the nominal tree
     if (m_isMC && m_useSystWeights){
-        // In ATLAS these were only necessary for the nominal tree.
-        // Do not need to make them for every systematic variation!
         for (const auto& syst : m_listOfWeightSystematics){
             bookHists( m_name+syst );
         } // end weight systematics
@@ -233,67 +246,61 @@ void histogrammer::fill( const std::string& name, const edm::Event& event, doubl
     /* Fill histograms -- just use information from the event and fill histogram
        This is the function to modify / inherit for analysis-specific purposes
     */
-    cma::DEBUG("HISTOGRAMMER : Fill histograms.");
-    cma::DEBUG("HISTOGRAMMER : event weight = "+std::to_string(event_weight) );
-
-//    Handle<TrackCollection> tracks;
-//    event.getByLabel( m_src, tracks );
-
-//    for( TrackCollection::const_iterator t = tracks->begin(); t != tracks->end(); ++ t ) {
-//        double pt = t->pt(), eta = t->eta(), phi = t->phi();
-//        h_phi->Fill( phi );
-//    }
-
-
-
+    float HT(0.0);
     if (m_useJets){
-        cma::DEBUG("HISTOGRAMMER : Fill small-R jets");
-        fill("n_btags_"+name, 0/*event.btag_jets().size()*/, event_weight );
+        fill("n_jets_"+name,  (*m_jets.product()).size(), event_weight);
+        fill("n_btags_"+name, 0, event_weight);
 
-        std::vector<Jet> jets;// = event.jets();
-        fill("n_jets_"+name, jets.size(), event_weight );  // reflects the "nJetsL" variables, not 2
-
-        fill("jet1_pt_"+name,  jets.at(0).p4.Pt(),   event_weight);
-        fill("jet1_eta_"+name, jets.at(0).p4.Eta(),  event_weight);
-        fill("jet1_phi_"+name, jets.at(0).p4.Phi(),  event_weight);
-        fill("jet1_cMVAv2_"+name, jets.at(0).cMVAv2, event_weight);
-        fill("jet2_pt_"+name,  jets.at(1).p4.Pt(),   event_weight);
-        fill("jet2_eta_"+name, jets.at(1).p4.Eta(),  event_weight);
-        fill("jet2_phi_"+name, jets.at(1).p4.Phi(),  event_weight);
-        fill("jet2_cMVAv2_"+name, jets.at(1).cMVAv2, event_weight);
+        for (const auto& jet : *m_jets.product()){
+            fill("jet_pt_"+name,   jet.p4.Pt(),  event_weight);
+            fill("jet_eta_"+name,  jet.p4.Eta(), event_weight);
+            fill("jet_phi_"+name,  jet.p4.Phi(), event_weight);
+            fill("jet_CSVv2_"+name, jet.CSVv2,   event_weight);
+            HT+=jet.p4.Pt();
+        }
     }
 
+    if (m_useLargeRJets){
+        fill("n_ljets_"+name,  (*m_ljets.product()).size(), event_weight);
+
+        for (const auto& jet : *m_ljets.product()){
+            fill("ljet_pt_"+name,   jet.p4.Pt(),  event_weight);
+            fill("ljet_eta_"+name,  jet.p4.Eta(), event_weight);
+            fill("ljet_phi_"+name,  jet.p4.Phi(), event_weight);
+            fill("ljet_SDmass_"+name, jet.softDropMass,   event_weight);
+        }
+    }
 
     if (m_useLeptons){
-        cma::DEBUG("HISTOGRAMMER : Fill leptons");
-        std::vector<Lepton> leptons; // = event.leptons();
-        fill("lep_pt_"+name,  leptons.at(0).p4.Pt(), event_weight);
-        fill("lep_eta_"+name, leptons.at(0).p4.Eta(), event_weight);
-        fill("lep_phi_"+name, leptons.at(0).p4.Phi(), event_weight);
+        for (const auto& el : *m_electrons.product()){
+            fill("el_pt_"+name,  el.p4.Pt(),  event_weight);
+            fill("el_eta_"+name, el.p4.Eta(), event_weight);
+            fill("el_phi_"+name, el.p4.Phi(), event_weight);
+        }
+        for (const auto& mu : *m_muons.product()){
+            fill("mu_pt_"+name,  mu.p4.Pt(),  event_weight);
+            fill("mu_eta_"+name, mu.p4.Eta(), event_weight);
+            fill("mu_phi_"+name, mu.p4.Phi(), event_weight);
+        }
     }
-
 
     if (m_useNeutrinos){
-        cma::DEBUG("HISTOGRAMMER : Fill neutrinos");
-        std::vector<Neutrino> nus;// = event.neutrinos();
-
-        fill("nu_pt_"+name,  nus.at(0).p4.Pt(),  event_weight);
-        fill("nu_eta_"+name, nus.at(0).p4.Eta(), event_weight);
-        fill("nu_phi_"+name, nus.at(0).p4.Phi(), event_weight);
+        for (const auto& nu : *m_neutrinos.product()){
+            fill("nu_pt_"+name,  nu.p4.Pt(),  event_weight);
+            fill("nu_eta_"+name, nu.p4.Eta(), event_weight);
+            fill("nu_phi_"+name, nu.p4.Phi(), event_weight);
+        }
     }
 
-
     // kinematics
-    cma::DEBUG("HISTOGRAMMER : Fill kinematics");
-    fill("met_met_"+name, 0 /*event.met("met")*/, event_weight);
-    fill("met_phi_"+name, 0 /*event.met("phi")*/, event_weight);
-    fill("ht_"+name,      0 /*event.HT()*/,       event_weight);
+    fill("ht_"+name,      HT /*(m_HT.product())*/, event_weight);
+    fill("met_met_"+name, (*m_met.product()).p4.Phi(), event_weight);
+    fill("met_phi_"+name, (*m_met.product()).p4.Pt(),  event_weight);
 
-    // HME && DNN && AMWT
-    cma::DEBUG("HISTOGRAMMER : Fill AMWT");
-    //fill("dnn_"+name, 1.0 /*event.dnn()*/, event_weight); // N/A
+    // DNN
+    fill("dnn_"+name, 1.0, event_weight); // N/A
 
-    cma::DEBUG("HISTOGRAMMER : Fill VLQ/Wprime");
+    LogDebug("Fill VLQ/Wprime");
 /*    fill("top_pt_"+name,  top.p4.Pt(),  event_weight);
     fill("top_eta_"+name, top.p4.Eta(), event_weight);
     fill("top_phi_"+name, top.p4.Phi(), event_weight);
@@ -306,7 +313,7 @@ void histogrammer::fill( const std::string& name, const edm::Event& event, doubl
     fill("mttbar_"+name,  (top.p4+antitop.p4).M(), event_weight);
     fill("pTttbar_"+name, (top.p4+antitop.p4).Pt(), event_weight);
 */
-    cma::DEBUG("HISTOGRAMMER : End histograms");
+    LogDebug("End histograms");
 
     return;
 }
@@ -316,17 +323,24 @@ void histogrammer::analyze( const edm::Event& event, const edm::EventSetup& ) {
     /* Fill histograms -- fill histograms based on treename or systematic weights ("nominal" but different weight)
        This is the function to modify / inherit for analysis-specific purposes
     */
-    std::string treeName("");  // = event.treeName();
+    event.getByToken( t_electrons, m_electrons );
+    event.getByToken( t_muons, m_muons );
+    event.getByToken( t_neutrinos, m_neutrinos );
+    event.getByToken( t_jets, m_jets );
+    event.getByToken( t_ljets, m_ljets );
+    event.getByToken( t_met, m_met );
+    event.getByToken( t_HT,  m_HT );
+    event.getByToken( t_ST,  m_ST );
+
     double event_weight(1.0);  // = event.nominal_weight();
 
-    fill( m_name+treeName, event, event_weight );
+    fill( m_name, event, event_weight );
 
 
     // if there are systematics stored as weights (e.g., b-tagging, pileup, etc.)
     // the following calls the fill() function with different event weights
     // to make histograms
-    // In ATLAS, these weights only existed in the 'nominal' tree
-    bool isNominal(true); // = m_config->isNominalTree( treeName );
+    bool isNominal(true);
     if (m_isMC && isNominal && m_useSystWeights){
         // weight systematics
         event_weight = 1.0;
@@ -365,7 +379,6 @@ void histogrammer::overUnderFlow(){
 void histogrammer::overFlow() {
     /* Add overflow to last bin */
     if (!m_putOverflowInLastBin){
-        cma::INFO("HISTOGRAMMER : Not putting overflow in last bin(s)");
         return;
     }
     else{
@@ -409,7 +422,6 @@ void histogrammer::overFlow() {
 void histogrammer::underFlow() {
     /* Add underflow to first bin */
     if (!m_putUnderflowInFirstBin){
-        cma::INFO("HISTOGRAMMER : Not putting underflow in first bin(s)");
         return;
     }
     else{

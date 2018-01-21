@@ -47,9 +47,6 @@ objectSelection::~objectSelection() {}
 
 void objectSelection::initialize() {
     /* Initialize values for object selection */
-    setJetID();
-    setLjetID();
-
     return;
 }
 
@@ -63,23 +60,13 @@ bool objectSelection::pass( const Electron& el, bool isGen ) const{
         pass = true;
     }
     else{
-        pass = true;
         // kinematics
-        if (el.p4.Pt() < m_el_pt || std::abs(el.p4.Eta()) > m_el_eta)
-            pass = false;
+        bool passKin = (el.p4.Pt() > m_el_pt && std::abs(el.p4.Eta()) < m_el_eta);
 
         // id
-        if (m_el_ID.compare("veto")==0 && !el.vidVeto)
-            pass = false;
-        else if (m_el_ID.compare("loose")==0 && !el.vidLoose)
-            pass = false;
-        else if (m_el_ID.compare("medium")==0 && !el.vidMedium)
-            pass = false;
-        else if (m_el_ID.compare("tight")==0 && !el.vidTight)
-            pass = false;
+        bool passID = electronID(el);
 
-        // iso -- not applicable 11 Jan 2018 (looking for recommendations)
-        // used in ID
+        pass = passKin && passID;
     }
 
     return pass;
@@ -93,16 +80,16 @@ bool objectSelection::pass( const Muon& mu, bool isGen ) const{
         pass = true;
     }
     else{
-        pass = true;
         // kinematics
-        if (mu.p4.Pt() < m_mu_pt || std::abs(mu.p4.Eta()) > m_mu_eta)
-            pass = false;
+        bool passKin = (mu.p4.Pt() > m_mu_pt && std::abs(mu.p4.Eta()) < m_mu_eta);
+
         // id
-        if (!muonID(mu))
-            pass = false;
+        bool passID = muonID(mu);
+
         // iso
-        if (!muonISO(mu))
-            pass = false;
+        bool passISO = muonISO(mu);
+
+        pass = passKin && passID && passISO;
     }
 
     return pass;
@@ -131,13 +118,13 @@ bool objectSelection::pass( const Jet& jet, bool isGen ) const{
         pass = true;
     }
     else{
-        pass = true;
         // kinematics
-        if (jet.p4.Pt() < m_jet_pt || std::abs(jet.p4.Eta()) > m_jet_eta)
-            pass = false;
+        bool passKin = (jet.p4.Pt() > m_jet_pt && std::abs(jet.p4.Eta()) < m_jet_eta);
+
         // id
-        if (!jetID(jet))
-            pass = false;
+        bool passID = jetID(jet);
+
+        pass = passKin && passID;
     }
 
     return pass;
@@ -151,13 +138,13 @@ bool objectSelection::pass( const Ljet& ljet, bool isGen ) const{
         pass = true;
     }
     else{
-        pass = true;
         // kinematics
-        if (ljet.p4.Pt() < m_ljet_pt || std::abs(ljet.p4.Eta()) > m_ljet_eta)
-            pass = false;
+        bool passKin = (ljet.p4.Pt() > m_ljet_pt || std::abs(ljet.p4.Eta()) < m_ljet_eta || ljet.subjets.size() >= m_ljet_nsubjets);
+
         // id
-        if (!ljetID(ljet))
-            pass = false;
+        bool passID = ljetID(ljet);
+
+        pass = passKin && passID;
     }
 
     return pass;
@@ -166,75 +153,33 @@ bool objectSelection::pass( const Ljet& ljet, bool isGen ) const{
 
 
 /* ID AND ISOLATION FUNCTIONS */
-
-
-void objectSelection::electronID( Electron& el ) const{
-    /* Determine electron ID */
-    int missHits = el.missHits;
-    bool isEB = (std::abs(el.scEta) <= m_barrel_eta);
-    bool conv = el.hasMatchedConVeto;
-    float Dz  = std::abs(el.Dz);
-    float Dxy = std::abs(el.Dxy);
-    float HoE = el.HoE;
-    float dPhiIn   = std::abs(el.dPhiIn);
-    float ooEmooP  = el.ooEmooP;
-    float dEtaInSeed  = std::abs(el.dEtaInSeed);
-    float full5x5siee = el.full5x5siee;
-
-    // All ID must pass this parameter!
-    if (conv) {
-        el.vidVeto   = false;
-        el.vidLoose  = false;
-        el.vidMedium = false;
-        el.vidTight  = false;
-        return;
-    }
-
-    // RelIsoEA requires special treatment in barrel vs endcap
-    bool elISO_veto   = electronISO(el,"veto");
-    bool elISO_loose  = electronISO(el,"loose");
-    bool elISO_medium = electronISO(el,"medium");
-    bool elISO_tight  = electronISO(el,"tight");
-
-    // loop over different isolations to reduce code duplication
-    // 12 Jan: Need smarter way to do this that is simpler and uses less CPU
-    std::map<std::string,bool> isos = { {"veto",elISO_veto}, {"loose",elISO_loose}, 
-                                        {"medium",elISO_medium}, {"tight",elISO_tight} };
-    std::map<std::string,bool> ids  = { {"veto",false}, {"loose",false}, {"medium",false}, {"tight",false} };
-
-    for (const auto& iso : isos){
-        bool isVETO = (dEtaInSeed < m_dEtaInSeed.at(iso.first).at(isEB)) &&
-                  (dPhiIn < m_dPhiIn.at(iso.first).at(isEB)) && 
-                  (full5x5siee < m_full5x5siee.at(iso.first).at(isEB)) && 
-                  (HoE < m_HoE.at(iso.first).at(isEB)) && 
-                  (Dxy < m_Dxy.at(iso.first).at(isEB)) && 
-                  (Dz  < m_Dz.at(iso.first).at(isEB))  && 
-                  (ooEmooP < m_ooEmooP.at(iso.first).at(isEB)) && 
-                  (missHits <= m_missHits.at(iso.first).at(isEB)) && 
-                  (iso.second);
-        ids.at(iso.first) = isVETO;
-    }
-
-    el.vidVeto   = ids.at("veto");
-    el.vidLoose  = ids.at("loose");
-    el.vidMedium = ids.at("medium");
-    el.vidTight  = ids.at("tight");
-
-    return;
+bool objectSelection::applyElectronIsolation() const{
+    /* Return electron isolation 
+       This informs the 'Electrons' class on parameters
+       needed for the ID calculation.
+    */
+    return m_applyIso;
 }
 
+bool objectSelection::electronID(const Electron& el) const{
+    /* Electron ID */
+    bool pass(false);
 
-bool objectSelection::electronISO( const Electron& el, const std::string& ID ) const{
-    /* Electron Isolation */
-    bool elISO(false);
-    float RelIsoEA = el.RelIsoEA;
+    if (m_el_ID.compare("veto")==0)
+        pass = (el.vidVeto) ? true : false;
+    else if (m_el_ID.compare("loose")==0)
+        pass = (el.vidLoose) ? true : false;
+    else if (m_el_ID.compare("medium")==0)
+        pass = (el.vidMedium) ? true : false;
+    else if (m_el_ID.compare("tight")==0)
+        pass = (el.vidTight) ? true : false;
+    else{
+        edm::LogWarning("Unsupported electron ID type ") << m_el_ID;
+        edm::LogWarning("Please check your electron ID configuration ");
+        pass = false;
+    }
 
-    if ( std::abs(el.scEta) <= m_barrel_eta )
-        elISO = (RelIsoEA < m_RelIsoEA.at(ID).at(true));
-    else
-        elISO = m_applyIso ? (RelIsoEA < m_RelIsoEA.at(ID).at(false)) : true;
-
-    return elISO;
+    return pass;
 }
 
 
@@ -246,8 +191,11 @@ bool objectSelection::muonID( const Muon& mu ) const{
         pass = true;
     else if (m_mu_ID.compare("tight")==0 && mu.tight)
         pass = true;
-    else
+    else{
+        edm::LogWarning("Unsupported muon ID type ") << m_mu_ID;
+        edm::LogWarning("Please check your muon ID configuration ");
         pass = false;
+    }
 
     return pass;
 }
@@ -264,110 +212,44 @@ bool objectSelection::muonISO( const Muon& mu ) const{
 }
 
 
-
-void objectSelection::setJetID(){
-    /* Set values for the jet ID */
-    m_jetindexNEF = 0.9;
-    m_jetIndexCHF = 0.0;
-    m_jetindexNHF = 0.9;
-    m_jetIndexCEF = 0.99;
-    m_jetIndexNCH = 0;
-    m_jetIndexMUE = 0.8;
-    m_jetindexNConstituents = 1;
-
-    if ( m_jet_ID == "loose" ) {
-        m_jetindexNHF = 0.99;
-        m_jetindexNEF = 0.99;
-        m_jetIndexMUE = 0.0;
-    }
-    else if ( m_jet_ID == "tight" ) {
-        m_jetIndexMUE = 0.0;
-    }
-    else if ( m_jet_ID == "tightlepveto" ) {
-        m_jetIndexCEF = 0.9;
-    }
-
-    return;
-}
-
-
-bool objectSelection::jetID( const Jet& jet ) const{
+bool objectSelection::jetID(const Jet& jet) const{
     /* Jet ID */
     bool pass(false);
 
-    int nconstituents = jet.cMultip+jet.nMultip;
-
-    // Cuts for all |eta|:
-    if ( nconstituents > m_jetindexNConstituents && jet.nEMEnergy < m_jetindexNEF &&
-         jet.nHadEnergy < m_jetindexNHF ){
-        pass = true;
-    }
-
-    // Cuts for |eta| < 2.4:
-    if ( std::abs(jet.p4.Eta()) < 2.4 ){
-        if ( jet.cEMEnergy < m_jetIndexCEF  && jet.cHadEnergy > m_jetIndexCHF &&
-             jet.cMultip > m_jetIndexNCH    && jet.muonEnergy / jet.p4.E() < m_jetIndexMUE ){
-            pass = true;
-        }
-        else{
-            pass = false;
-        }
+    if (m_jet_ID.compare("loose")==0)
+        pass = (jet.loose) ? true : false;
+    else if (m_jet_ID.compare("tight")==0)
+        pass = (jet.tight) ? true : false;
+    else if (m_jet_ID.compare("tightlepveto")==0)
+        pass = (jet.tightlepveto) ? true : false;
+    else{
+        edm::LogWarning("Unsupported jet ID type ");
+        edm::LogWarning("ID = ") << m_jet_ID << m_jet_ID.compare("loose");
+        edm::LogWarning("Please check your jet ID configuration ");
+        pass = false;
     }
 
     return pass;
 }
 
 
-void objectSelection::setLjetID(){
-    /* Set values for the jet ID */
-    m_ljetindexNEF = 0.9;
-    m_ljetIndexCHF = 0.0;
-    m_ljetindexNHF = 0.9;
-    m_ljetIndexCEF = 0.99;
-    m_ljetIndexNCH = 0;
-    m_ljetIndexMUE = 0.8;
-    m_ljetindexNConstituents = 1;
-
-    if ( m_ljet_ID == "loose" ) {
-        m_ljetindexNHF = 0.99;
-        m_ljetindexNEF = 0.99;
-        m_ljetIndexMUE = 0.0;
-    }
-    else if ( m_ljet_ID == "tight" ) {
-        m_ljetIndexMUE = 0.0;
-    }
-    else if ( m_ljet_ID == "tightlepveto" ) {
-        m_ljetIndexCEF = 0.9;
-    }
-
-    return;
-}
-
-bool objectSelection::ljetID( const Ljet& ljet ) const{
-    /* Large-R Jet ID */
+bool objectSelection::ljetID(const Ljet& ljet) const{
+    /* Large-R jet ID */
     bool pass(false);
 
-    int nconstituents = ljet.cMultip+ljet.nMultip;
-
-    // Cuts for all |eta|:
-    if ( nconstituents > m_jetindexNConstituents && ljet.nEMEnergy < m_jetindexNEF &&
-         ljet.nHadEnergy < m_jetindexNHF ){
-        pass = true;
-    }
-
-    // Cuts for |eta| < 2.4:
-    if ( std::abs(ljet.p4.Eta()) < 2.4 ){
-        if ( ljet.cEMEnergy < m_jetIndexCEF && ljet.cHadEnergy > m_jetIndexCHF &&
-             ljet.cMultip > m_jetIndexNCH   && ljet.muonEnergy / ljet.p4.E() < m_jetIndexMUE ){
-            pass = true;
-        }
-        else{
-            pass = false;
-        }
+    if (m_ljet_ID.compare("loose")==0)
+        pass = (ljet.loose) ? true : false;
+    else if (m_ljet_ID.compare("tight")==0)
+        pass = (ljet.tight) ? true : false;
+    else if (m_ljet_ID.compare("tightlepveto")==0)
+        pass = (ljet.tightlepveto) ? true : false;
+    else{
+        edm::LogWarning("Unsupported large-R jet ID type ") << m_ljet_ID;
+        edm::LogWarning("Please check your ljet ID configuration ");
+        pass = false;
     }
 
     return pass;
 }
-
 
 // THE END

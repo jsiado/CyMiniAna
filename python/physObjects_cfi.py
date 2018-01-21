@@ -27,19 +27,19 @@ import FWCore.ParameterSet.Config as cms
 
 objectSelectionParams = cms.PSet(
 
- # muonParameters 
-    mu_id     = cms.string("LOOSE"), 
+ # muonParameters
+    mu_id     = cms.string("loose"),
     mu_pt     = cms.double(25),
     mu_eta    = cms.double(2.4),
     mu_IsoMin = cms.double(-100),
-    mu_IsoMax = cms.double(0.30), 
+    mu_IsoMax = cms.double(100),
 
  # electronParameters
     el_pt  = cms.double(25),
     el_eta = cms.double(2.4),
-    el_id  = cms.string("TIGHT"),
+    el_id  = cms.string("tight"),
     el_iso = cms.string(""),
-    el_applyIso = cms.bool(True), 
+    el_applyIso = cms.bool(True),
 
  # neutrinoParameters
     nu_pt  = cms.double(0.0),
@@ -52,7 +52,7 @@ objectSelectionParams = cms.PSet(
     jet_CSVv2 = cms.string('loose'),
 
  # largeRJetParameters AK8
-    ljet_id  = cms.string('tight'),
+    ljet_id  = cms.string('loose'),
     ljet_pt  = cms.double(200),
     ljet_eta = cms.double(2.0),
     ljet_subCSVv2 = cms.string('loose'),

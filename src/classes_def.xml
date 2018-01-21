@@ -1,31 +1,67 @@
 <lcgdict>
 
- <class name="Electron"/>
+ <class name="CmaBase" ClassVersion="13">
+  <version ClassVersion="13" checksum="1328335697"/>
+        <version ClassVersion="12" checksum="1359310673"/>
+ </class>
+ <class name="edm::Wrapper<CmaBase>"/>
+ <class name="std::vector<CmaBase>"/>
+ <class name="edm::Wrapper<std::vector<CmaBase> >"/>
+
+ <class name="Lepton" ClassVersion="13">
+  <version ClassVersion="13" checksum="332990388"/>
+        <version ClassVersion="12" checksum="1359310673"/>
+ </class>
+ <class name="edm::Wrapper<Lepton>"/>
+ <class name="std::vector<Lepton>"/>
+ <class name="edm::Wrapper<std::vector<Lepton> >"/>
+
+ <class name="Electron" ClassVersion="13">
+  <version ClassVersion="13" checksum="2873762588"/>
+        <version ClassVersion="12" checksum="4182755459"/>
+ </class>
  <class name="edm::Wrapper<Electron>"/>
  <class name="std::vector<Electron>"/>
  <class name="edm::Wrapper<std::vector<Electron> >"/>
 
- <class name="Muon"/>
+ <class name="Muon" ClassVersion="13">
+  <version ClassVersion="13" checksum="2785921976"/>
+        <version ClassVersion="12" checksum="2653987949"/>
+ </class>
  <class name="edm::Wrapper<Muon>"/>
  <class name="std::vector<Muon>"/>
  <class name="edm::Wrapper<std::vector<Muon> >"/> 
 
- <class name="Jet"/>
+ <class name="Jet" ClassVersion="13">
+  <version ClassVersion="13" checksum="275272349"/>
+        <version ClassVersion="12" checksum="2767043855"/>
+        <version ClassVersion="11" checksum="1194251980"/>
+ </class>
  <class name="edm::Wrapper<Jet>"/>
  <class name="std::vector<Jet>"/>
  <class name="edm::Wrapper<std::vector<Jet> >"/> 
 
- <class name="Ljet"/>
+ <class name="Ljet" ClassVersion="13">
+  <version ClassVersion="13" checksum="1972469959"/>
+        <version ClassVersion="12" checksum="1380754953"/>
+        <version ClassVersion="11" checksum="312497102"/>
+ </class>
  <class name="edm::Wrapper<Ljet>"/>
  <class name="std::vector<Ljet>"/>
  <class name="edm::Wrapper<std::vector<Ljet> >"/> 
 
- <class name="Neutrino"/>
+ <class name="Neutrino" ClassVersion="12">
+  <version ClassVersion="12" checksum="3208360427"/>
+        <version ClassVersion="11" checksum="1880111018"/>
+ </class>
  <class name="edm::Wrapper<Neutrino>"/>
  <class name="std::vector<Neutrino>"/>
  <class name="edm::Wrapper<std::vector<Neutrino> >"/> 
 
- <class name="MET"/>
+ <class name="MET" ClassVersion="12">
+  <version ClassVersion="12" checksum="654958641"/>
+        <version ClassVersion="11" checksum="4190889974"/>
+ </class>
  <class name="edm::Wrapper<MET>"/>
 <!-- 
  <class name="std::vector<MET>"/>
