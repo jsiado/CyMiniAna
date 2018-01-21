@@ -55,7 +55,15 @@ perform your work.
 _The master branch is only used to make new tags!_
 
 To get started, you first need a proper CMSSW release environment and other packages to work with CyMiniAna.  
-This package has been developed within an environment that includes the most recent CMSSW80X [B2GAnaFW](https://github.com/cmsb2g/B2GAnaFW/tree/CMSSW_8_0_X_V3).  It is not completely necessary to include it.
+This package has been developed within an environment that includes the most recent CMSSW80X 
+[B2GAnaFW](https://github.com/cmsb2g/B2GAnaFW/tree/CMSSW_8_0_X_V3).  
+It is not completely necessary to include it, but it is recommended.
+
+This package depends on the [EventCounter](https://github.com/dmajumder/EventCounter) 
+and [lwtnn](https://github.com/lwtnn/lwtnn) packages.  
+To include the `lwtnn` package, please follow the steps
+[here](https://github.com/demarley/lwtnn/tree/CMSSW_8_0_X-compatible#cmssw-compatibility).
+The `lwtnn` package is not currently used, but the dependency exists for future use.
 
 ```shell
 ## setup CMSSW (slc6_amd64_gcc530)
@@ -65,8 +73,8 @@ cmsenv
 git cms-init
 
 ## add necessary packages
-# Clone the lwtnn package using [these](https://github.com/demarley/lwtnn/tree/CMSSW_8_0_X-compatible#cmssw-compatibility) steps
-# Add the "EventCounter" package
+# 1. Clone the lwtnn package 
+# 2. Add the "EventCounter" package
 mkdir Analysis
 cd Analysis/
 git clone https://github.com/dmajumder/EventCounter.git
