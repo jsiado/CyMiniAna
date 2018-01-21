@@ -1,4 +1,4 @@
-14 October 2017  
+18 January 2018  
 Dan Marley  
 
 
@@ -30,8 +30,10 @@ The CyMiniAna Analysis Framework is structured as follows:
 
 Directory  | About
 ---------  | ---------
-python/    | plotting, neural network, and running scripts
-src/       | `*.cxx` files
+python/    | plotting, neural network, CMSSW configuration, and running scripts
+plugins/   | EDAnalyzers, EDProducers, and EDFilters
+python/    | plotting, neural network, CMSSW configuration, and running scripts
+src/       | `*.cxx` files (classes)
 interface/ | `*.h` files
 examples/  | Example scripts demonstrating how to use framework or general coding
 config/    | text files and generic information
@@ -52,41 +54,39 @@ perform your work.
 
 _The master branch is only used to make new tags!_
 
-To get started, you first need a proper CMSSW release environment and other packages to work with CyMiniAna.
+To get started, you first need a proper CMSSW release environment and other packages to work with CyMiniAna.  
+This package has been developed within an environment that includes the most recent CMSSW80X [B2GAnaFW](https://github.com/cmsb2g/B2GAnaFW/tree/CMSSW_8_0_X_V3).  It is not completely necessary to include it.
 
 ```shell
 ## setup CMSSW (slc6_amd64_gcc530)
-cmsrel CMSSW_8_0_24_patch1
-cd CMSSW_8_0_24_patch1/src/
+cmsrel CMSSW_8_0_26_patch1
+cd CMSSW_8_0_26_patch1/src/
 cmsenv
-git cms-init  # I think this links to your Github repository (?)
+git cms-init
 
 ## add necessary packages
-git cms-addpkg CondFormats/JetMETObjects  # not explicitly used, but needed for Matrix Weighting
-git cms-addpkg DataFormats/JetReco        # not explicitly used, available for using official "Jet" objects
-git cms-addpkg JetMETCorrections/Modules  # Jet resolution smearing functions
-mkdir cms-jet
-cd cms-jet
-git clone https://github.com/cms-jet/JRDatabase.git  # values for Jet resolution smearing
-cd ../
+# Clone the lwtnn package using [these](https://github.com/demarley/lwtnn/tree/CMSSW_8_0_X-compatible#cmssw-compatibility) steps
+# Add the "EventCounter" package
+mkdir Analysis
+cd Analysis/
+git clone https://github.com/dmajumder/EventCounter.git
+cd ..
 
-## add our code - the cms-ttbarAC packages!
-mkdir cms-ttbarAC
-cd cms-ttbarAC
-git clone https://gitlab.cern.ch/cms-ttbarAC/CyMiniAna.git
-git clone https://gitlab.cern.ch/cms-ttbarAC/lwtnn.git     # Keras Neural Networks in c++
+## add our code
+cd Analysis/
+git clone hhttps://github.com/b2g-wprime-qQ/CyMiniAna.git
 ```
 
 Once everything is checked out, compile it all!
 
 ```
-scram b  # Add the '-j' argument if you need this to go faster
+scram b -j8
 ```
 
 For setting up the environment after the first time and whenever you open a new shell:
 
 ```shell
-source diHiggs/CyMiniAna/setup.sh   # ALWAYS DO THIS FIRST! (initializes everything)
+source Analysis/CyMiniAna/setup.csh   # ALWAYS DO THIS FIRST! (initializes everything)
 ```
 
 And anytime you modify `*.cxx` or `*.h` code:
