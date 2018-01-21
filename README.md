@@ -1,4 +1,4 @@
-18 January 2018  
+21 January 2018  
 Dan Marley  
 
 
@@ -15,16 +15,17 @@ Dependencies (available in CMSSW):
 
 ## Overview
 
-CyMiniAna is built for (and designed around) two main tasks in the ttbar charge asymmetry analyses:
+CyMiniAna is built to process EDMNtuples 
+from the [B2GAnaFW](https://github.com/cmsb2g/B2GAnaFW/tree/CMSSW_8_0_X_V3) and flat ntuples.
 
-  1. Event Loop (c++-based framework for speed)
-     - Make smaller root files based on a selection criteria ("skimming" or "slimming")
-     - Make histograms from existing root files (with or without applying an event selection)
-     - Make efficiency curves from existing root files (with or without applying an event selection)
-  2. Data/MC Plots (Python-based framework for improved aesthetics & ease-of-use)
-     - Make stacked histogram plots that compare the (MC/data-driven) prediction with Data
-     - Generic histograms (with support for ratio plots)
-     - General efficiency curves (with support for drawing the underlying distribution)
+  1. EDMNtuples
+     - Output flat ntuple based on an event/object selection with histograms
+  2. Flat ntuples
+
+Additionally, it is possible to generate publication-quality figures using python:
+     - Make stacked histogram plots that compare the prediction with Data
+     - Plot generic histograms (with support for ratio plots, including significance)
+     - Plot general efficiency curves (with support for drawing the underlying distribution)
 
 The CyMiniAna Analysis Framework is structured as follows:
 
@@ -32,7 +33,6 @@ Directory  | About
 ---------  | ---------
 python/    | plotting, neural network, CMSSW configuration, and running scripts
 plugins/   | EDAnalyzers, EDProducers, and EDFilters
-python/    | plotting, neural network, CMSSW configuration, and running scripts
 src/       | `*.cxx` files (classes)
 interface/ | `*.h` files
 examples/  | Example scripts demonstrating how to use framework or general coding
