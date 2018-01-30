@@ -86,7 +86,7 @@ cd ..
 
 ## add our code
 cd Analysis/
-git clone hhttps://github.com/b2g-wprime-qQ/CyMiniAna.git
+git clone https://github.com/b2g-wprime-qQ/CyMiniAna.git
 ```
 
 Once everything is checked out, compile it all!
