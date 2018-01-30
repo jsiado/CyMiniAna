@@ -1,0 +1,195 @@
+#ifndef EVENTSAVERFLATNTUPLE_H
+#define EVENTSAVERFLATNTUPLE_H
+
+#include <string>
+#include <map>
+#include <vector>
+#include <memory>
+
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Utilities/interface/EDMException.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Provenance/interface/EventAuxiliary.h"
+
+#include "TROOT.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TSystem.h"
+
+#include "Analysis/CyMiniAna/interface/tools.h"
+#include "Analysis/CyMiniAna/interface/physicsObjects.h"
+
+
+class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResources> {
+//class EventSaverFlatNtuple : public edm::EDProducer {
+  public:
+
+    EventSaverFlatNtuple( const edm::ParameterSet & );
+    virtual ~EventSaverFlatNtuple();
+
+  private:
+
+    void initialize_branches();
+    virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+    //virtual void produce(edm::Event&, const edm::EventSetup&);
+
+    edm::Service<TFileService> m_fs;
+    TTree* m_ttree;
+    //std::unique_ptr<TTree> m_ttree;
+
+    std::string m_name;
+    bool m_isMC;
+    bool m_useSystWeights;
+    bool m_putOverflowInLastBin;
+    bool m_putUnderflowInFirstBin;
+
+    bool m_useJets;
+    bool m_useLargeRJets;
+    bool m_useLeptons;
+    bool m_useNeutrinos;
+
+
+    // Handles and Tokens
+    edm::EDGetTokenT<std::vector<Electron>> t_electrons;
+    edm::EDGetTokenT<std::vector<Muon>> t_muons;
+    edm::EDGetTokenT<std::vector<Neutrino>> t_neutrinos;
+    edm::EDGetTokenT<std::vector<Jet>> t_jets;
+    edm::EDGetTokenT<std::vector<Ljet>> t_ljets;
+    edm::EDGetTokenT<MET> t_met;
+    edm::EDGetTokenT<double> t_HT;
+    edm::EDGetTokenT<double> t_ST;
+
+    edm::Handle<std::vector<Electron>> m_electrons;
+    edm::Handle<std::vector<Muon>> m_muons;
+    edm::Handle<std::vector<Neutrino>> m_neutrinos;
+    edm::Handle<std::vector<Jet>> m_jets;
+    edm::Handle<std::vector<Ljet>> m_ljets;
+    edm::Handle<MET> m_met;
+    edm::Handle<double> m_HT;
+    edm::Handle<double> m_ST;
+
+
+    // Branches
+    std::vector<float> m_jet_pt;
+    std::vector<float> m_jet_eta;
+    std::vector<float> m_jet_phi;
+    std::vector<float> m_jet_e;
+    std::vector<float> m_jet_CSV;
+    std::vector<float> m_jet_charge;
+    std::vector<int> m_jet_ID_loose;
+    std::vector<int> m_jet_ID_medium;
+    std::vector<int> m_jet_ID_tight;
+    std::vector<int> m_jet_ID_tightlepveto;
+    std::vector<int> m_jet_true_flavor;
+
+    std::vector<float> m_ljet_pt;
+    std::vector<float> m_ljet_eta;
+    std::vector<float> m_ljet_phi;
+    std::vector<float> m_ljet_e;
+    std::vector<float> m_ljet_CSV;
+    std::vector<float> m_ljet_tau1;
+    std::vector<float> m_ljet_tau2;
+    std::vector<float> m_ljet_tau3;
+    std::vector<float> m_ljet_tau21;
+    std::vector<float> m_ljet_tau32;
+    std::vector<float> m_ljet_charge;
+    std::vector<float> m_ljet_SDmass;
+    std::vector<int> m_ljet_ID_loose;
+    std::vector<int> m_ljet_ID_medium;
+    std::vector<int> m_ljet_ID_tight;
+    std::vector<int> m_ljet_ID_tightlepveto;
+    std::vector<int> m_ljet_subjetIndex0;
+    std::vector<int> m_ljet_subjetIndex1;
+    std::vector<float> m_ljet_subjet_pt;
+    std::vector<float> m_ljet_subjet_eta;
+    std::vector<float> m_ljet_subjet_phi;
+    std::vector<float> m_ljet_subjet_e;
+    std::vector<float> m_ljet_subjet_CSV;
+    std::vector<float> m_ljet_subjet_charge;
+
+    std::vector<float> m_el_pt;
+    std::vector<float> m_el_eta;
+    std::vector<float> m_el_phi;
+    std::vector<float> m_el_e;
+    std::vector<int> m_el_iso;
+    std::vector<float> m_el_charge;
+    std::vector<int> m_el_ID_loose;
+    std::vector<int> m_el_ID_medium;
+    std::vector<int> m_el_ID_tight;
+
+    std::vector<float> m_mu_pt;
+    std::vector<float> m_mu_eta;
+    std::vector<float> m_mu_phi;
+    std::vector<float> m_mu_e;
+    std::vector<int> m_mu_iso;
+    std::vector<float> m_mu_charge;
+    std::vector<int> m_mu_ID_loose;
+    std::vector<int> m_mu_ID_medium;
+    std::vector<int> m_mu_ID_tight;
+
+    std::vector<float> m_nu_pt;
+    std::vector<float> m_nu_eta;
+    std::vector<float> m_nu_phi;
+    std::vector<float> m_nu_e;
+
+    float m_met_met;
+    float m_met_phi;
+    float m_HT_branch;
+    float m_ST_branch;
+
+    int m_runNumber;
+    int m_eventNumber;
+    int m_lumiblock;
+    float m_rho;
+    int m_nGoodVtx;
+    int m_LHA_PDF_ID;
+    int m_nIsoTrk;
+    int m_true_pileup;
+
+    float m_weight_mc;
+    float m_weight_btag;
+    float m_weight_pileup;
+    float m_weight_jet_jer;
+    float m_weight_ljet_jer;
+
+    float m_xsection;
+    float m_kfactor;
+    float m_sumOfWeights;
+
+    float m_met_met_sf;
+    float m_met_phi_sf;
+    std::vector<float> m_jet_jec;
+    std::vector<float> m_jet_jer_up;
+    std::vector<float> m_jet_jer_down;
+    std::vector<float> m_ljet_jec;
+    std::vector<float> m_ljet_jer_up;
+    std::vector<float> m_ljet_jer_down;
+
+    std::vector<float> m_mc_pt;
+    std::vector<float> m_mc_eta;
+    std::vector<float> m_mc_phi;
+    std::vector<float> m_mc_e;
+    std::vector<float> m_mc_pdgId;
+    std::vector<float> m_mc_charge;
+    std::vector<float> m_mc_mom_idx;
+    std::vector<float> m_truth_jet_pt;
+    std::vector<float> m_truth_jet_eta;
+    std::vector<float> m_truth_jet_phi;
+    std::vector<float> m_truth_jet_e;
+    std::vector<float> m_truth_jet_charge;
+    std::vector<float> m_truth_ljet_pt;
+    std::vector<float> m_truth_ljet_eta;
+    std::vector<float> m_truth_ljet_phi;
+    std::vector<float> m_truth_ljet_e;
+    std::vector<float> m_truth_ljet_charge;
+};
+
+#endif
