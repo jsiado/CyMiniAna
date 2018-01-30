@@ -30,6 +30,7 @@ from Analysis.CyMiniAna.CMAProducer_cfi import *  # 'cma'
 from Analysis.CyMiniAna.configuration import Configuration
 from Analysis.CyMiniAna.histogrammer_cfi import hist
 from Analysis.CyMiniAna.eventSelection_cfi import evtSel
+from Analysis.CyMiniAna.EventSaverFlatNtuple_cfi import flat
 import Analysis.CyMiniAna.physObjects_cfi as phys
 import Analysis.CyMiniAna.physObjectsEDMLabels as labels
 
@@ -55,7 +56,9 @@ process = cms.Process("CyMiniAna")
 
 process.source       = cms.Source("PoolSource",fileNames = cms.untracked.vstring(filenames) )
 process.maxEvents    = cms.untracked.PSet( input = cms.untracked.int32(nEventsToProcess) )
-process.TFileService = cms.Service("TFileService",fileName = cms.string(outputFileName) )
+process.TFileService = cms.Service("TFileService",
+                                   fileName = cms.string(outputFileName),
+                                   closeFileFast = cms.untracked.bool(True) )
 #process.content      = cms.EDAnalyzer('EventContentAnalyzer')
 
 ## -- Load Modules
@@ -63,7 +66,7 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger = cms.Service("MessageLogger",
                             destinations = cms.untracked.vstring('cout'),
                             cout         = cms.untracked.PSet(
-                                           threshold = cms.untracked.string('INFO') ),
+                                           threshold = cms.untracked.string('WARNING') ),
                         )
 
 ## -- Histogrammer
@@ -86,6 +89,17 @@ process.evtSel = evtSel.clone()
 process.evtSel.selection = config.selection()
 process.evtSel.cutsfile  = config.cutsfile()
 
+## -- EventSaverFlatNtuple
+print " Event saver to flat ntuple "
+process.EventSaverFlatNtuple = flat.clone()
+process.EventSaverFlatNtuple.isMC = cms.bool(isMC)
+process.EventSaverFlatNtuple.useTruth = cms.bool(config.useTruth())
+process.EventSaverFlatNtuple.useJets  = cms.bool(config.useJets())
+process.EventSaverFlatNtuple.useLargeRJets  = cms.bool(config.useLargeRJets())
+process.EventSaverFlatNtuple.useNeutrinos   = cms.bool(config.useNeutrinos())
+process.EventSaverFlatNtuple.useLeptons     = cms.bool(config.useLeptons())
+
+
 ## -- Setup CMAProducer
 process.ana = cma.clone()
 process.ana.isMC = cms.bool(isMC)
@@ -107,21 +121,27 @@ process.final   = eventCounter.clone( isData=(not isMC) )
 
 ## PATH
 print " Set the path "
+
 process.p = cms.Path(
     process.initial*
     process.ana*
     process.evtSel*
-    #process.content*
     process.histogrammer*
+    process.EventSaverFlatNtuple*
     process.final
 )
+# Add to process.p to inspect content:
+#     process.content*
 
 
 ## OUTPUTMODULE
 print " Set the output "
 process.out      = cms.OutputModule("PoolOutputModule")
+
+print " Set the schedule"
 process.schedule = cms.Schedule(process.p)
 #process.outpath = cms.EndPath(process.out)
+
 
 print " Dump python "
 open('dump.py','w').write(process.dumpPython())
