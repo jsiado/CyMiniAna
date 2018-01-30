@@ -191,7 +191,7 @@ bool objectSelection::muonID( const Muon& mu ) const{
         pass = true;
     else if (m_mu_ID.compare("tight")==0 && mu.tight)
         pass = true;
-    else{
+    else if(m_mu_ID.compare("loose")!=0 && m_mu_ID.compare("tight")!=0){
         edm::LogWarning("Unsupported muon ID type ") << m_mu_ID;
         edm::LogWarning("Please check your muon ID configuration ");
         pass = false;

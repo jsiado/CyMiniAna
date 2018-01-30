@@ -31,16 +31,13 @@ from Analysis.CyMiniAna.configuration import Configuration
 from Analysis.CyMiniAna.histogrammer_cfi import hist
 from Analysis.CyMiniAna.eventSelection_cfi import evtSel
 from Analysis.CyMiniAna.EventSaverFlatNtuple_cfi import flat
-import Analysis.CyMiniAna.physObjects_cfi as phys
-import Analysis.CyMiniAna.physObjectsEDMLabels as labels
 
 ## Configuration options ##
 print " Setup configuration "
 
-if sys.argv[0] == "cmsRun":
-    argument = 2
-else:
-    argument = 1
+
+
+argument = 2 if sys.argv[0]=="cmsRun" else 1  # name of script to pass to configuration
 
 config = Configuration( sys.argv[argument] )
 config.initialize()
@@ -56,9 +53,9 @@ process = cms.Process("CyMiniAna")
 
 process.source       = cms.Source("PoolSource",fileNames = cms.untracked.vstring(filenames) )
 process.maxEvents    = cms.untracked.PSet( input = cms.untracked.int32(nEventsToProcess) )
-process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string(outputFileName),
-                                   closeFileFast = cms.untracked.bool(True) )
+#process.TFileService = cms.Service("TFileService",
+#                                   fileName = cms.string(outputFileName),
+#                                   closeFileFast = cms.untracked.bool(True) )
 #process.content      = cms.EDAnalyzer('EventContentAnalyzer')
 
 ## -- Load Modules
@@ -125,8 +122,8 @@ print " Set the path "
 process.p = cms.Path(
     process.initial*
     process.ana*
-    process.evtSel*
-    process.histogrammer*
+#    process.evtSel*
+#    process.histogrammer*
     process.EventSaverFlatNtuple*
     process.final
 )
@@ -135,15 +132,25 @@ process.p = cms.Path(
 
 
 ## OUTPUTMODULE
-print " Set the output "
-process.out      = cms.OutputModule("PoolOutputModule")
-
-print " Set the schedule"
-process.schedule = cms.Schedule(process.p)
-#process.outpath = cms.EndPath(process.out)
+#print " Set the output "
+#process.out = cms.OutputModule("PoolOutputModule",
+#                               outputCommands = cms.untracked.vstring('drop *'))
+#print " Set the schedule"
+#process.schedule = cms.Schedule(process.p)
+#process.outpath  = cms.EndPath(process.out)
 
 
 print " Dump python "
 open('dump.py','w').write(process.dumpPython())
+
+
+process.TFileService = cms.Service("TFileService", fileName = cms.string("histo.root") )
+
+#process.out = cms.OutputModule("PoolOutputModule",
+#                               fileName = cms.untracked.string("output.root"),
+#                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+#                               outputCommands = cms.untracked.vstring('drop *')
+#                               )
+#process.outpath = cms.EndPath(process.out)
 
 ## THE END ##

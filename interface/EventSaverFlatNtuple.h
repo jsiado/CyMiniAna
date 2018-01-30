@@ -35,9 +35,11 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     EventSaverFlatNtuple( const edm::ParameterSet & );
     virtual ~EventSaverFlatNtuple();
 
+    void initialize_branches();
+
   private:
 
-    void initialize_branches();
+    virtual void beginJob() override;
     virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
     //virtual void produce(edm::Event&, const edm::EventSetup&);
 

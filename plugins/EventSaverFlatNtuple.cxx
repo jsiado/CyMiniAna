@@ -25,30 +25,54 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
   t_ST(consumes<double>(edm::InputTag("ana","ST","CyMiniAna"))){
     usesResource("TFileService");
 
-    std::cout << " EVENT SAVER CONSTRUCTOR " << std::endl;
-
-//    edm::Service<TFileService> m_fs;
-//    m_ttree = std::unique_ptr<TTree> ( new TTree( "events","events" ) );
-    m_ttree = m_fs->make<TTree>("Events", "Events");
-
-    std::cout << " EVENT SAVER CONSTRUCTOR -- made m_ttree " << std::endl;
-
     // options set by config
     m_isMC           = cfg.getParameter<bool>("isMC");           // filling truth branches
     m_useJets        = cfg.getParameter<bool>("useJets");        // filling jet branches
     m_useLargeRJets  = cfg.getParameter<bool>("useLargeRJets");  // filling large-R jet branches
     m_useLeptons     = cfg.getParameter<bool>("useLeptons");     // filling lepton branches
     m_useNeutrinos   = cfg.getParameter<bool>("useNeutrinos");   // filling neutrino branches 
-
-    std::cout << " EVENT SAVER CONSTRUCTOR -- init branches" << std::endl;
-
-    initialize_branches();
-
-    std::cout << " EVENT SAVER CONSTRUCTOR -- done" << std::endl;
 }
 
 
 EventSaverFlatNtuple::~EventSaverFlatNtuple() {}
+
+
+
+void EventSaverFlatNtuple::beginJob(){
+    /* Initialize TTree */
+    m_ttree = m_fs->make<TTree>("events","events");
+    std::cout << " EVENT SAVER BEGINJOB -- made m_ttree " << std::endl;
+
+    initialize_branches();
+    std::cout << " EVENT SAVER BEGINJOB -- init branches" << std::endl;
+    return;
+}
+
+
+void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSetup& ) {
+//void EventSaverFlatNtuple::produce(edm::Event& event, const edm::EventSetup& ){
+    /* Fill TTree 
+       This is the function to modify / inherit for analysis-specific purposes
+    */
+    // load objects from the event
+    event.getByToken( t_electrons, m_electrons );
+    event.getByToken( t_muons, m_muons );
+    event.getByToken( t_neutrinos, m_neutrinos );
+    event.getByToken( t_jets, m_jets );
+    event.getByToken( t_ljets, m_ljets );
+    event.getByToken( t_met, m_met );
+    event.getByToken( t_HT,  m_HT );
+    event.getByToken( t_ST,  m_ST );
+
+
+    // Set branch values
+
+
+    // Fill output tree
+    m_ttree->Fill();
+
+    return;
+}
 
 
 void EventSaverFlatNtuple::initialize_branches(){
@@ -187,32 +211,6 @@ void EventSaverFlatNtuple::initialize_branches(){
     m_ttree->Branch("truth_ljet_phi",    &m_truth_ljet_phi);    // vector of floats
     m_ttree->Branch("truth_ljet_e",      &m_truth_ljet_e);      // vector of floats
     m_ttree->Branch("truth_ljet_charge", &m_truth_ljet_charge); // vector of floats
-
-    return;
-}
-
-
-void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSetup& ) {
-//void EventSaverFlatNtuple::produce(edm::Event& event, const edm::EventSetup& ){
-    /* Fill TTree 
-       This is the function to modify / inherit for analysis-specific purposes
-    */
-    // load objects from the event
-    event.getByToken( t_electrons, m_electrons );
-    event.getByToken( t_muons, m_muons );
-    event.getByToken( t_neutrinos, m_neutrinos );
-    event.getByToken( t_jets, m_jets );
-    event.getByToken( t_ljets, m_ljets );
-    event.getByToken( t_met, m_met );
-    event.getByToken( t_HT,  m_HT );
-    event.getByToken( t_ST,  m_ST );
-
-
-    // Set branch values
-
-
-    // Fill output tree
-    m_ttree->Fill();
 
     return;
 }
