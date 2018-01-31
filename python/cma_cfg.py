@@ -1,6 +1,6 @@
 """
 Created:      13 December 2017
-Last Updated: 14 January  2018
+Last Updated: 30 January  2018
 
 Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
@@ -15,142 +15,153 @@ Based on VLQAna:
   Requires a CMSSW environment!
 
 To run:
-  cmsRun python/cma_cfg.py <config.txt>
-
-where <config.txt> is the configuration file
-for basic options.
+  cmsRun python/cma_cfg.py
 """
 import os
 import sys
 
 import FWCore.ParameterSet.Config as cms
-
+from FWCore.ParameterSet.VarParsing import VarParsing
 from Analysis.EventCounter.eventcounter_cfi import eventCounter
-from Analysis.CyMiniAna.CMAProducer_cfi import *  # 'cma'
-from Analysis.CyMiniAna.configuration import Configuration
-from Analysis.CyMiniAna.histogrammer_cfi import hist
-from Analysis.CyMiniAna.eventSelection_cfi import evtSel
-from Analysis.CyMiniAna.EventSaverFlatNtuple_cfi import flat
-
-## Configuration options ##
-print " Setup configuration "
+from Analysis.CyMiniAna.physObjects_cfi import *
+from Analysis.CyMiniAna.physObjectsEDMLabels import *
 
 
+## STANDARD OPTIONS
+options = VarParsing('analysis')
 
-argument = 2 if sys.argv[0]=="cmsRun" else 1  # name of script to pass to configuration
+options.register('isMC', True,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Monte Carlo sample" )
+options.register('useTruth', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Use truth information" )
+options.register('useJets', True,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Use AK4 jets" )
+options.register('useLargeRJets', True,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Use AK8 jets" )
+options.register('useLeptons', True,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Use leptons" )
+options.register('useNeutrinos', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Use neutrinos" )
+options.parseArguments()
 
-config = Configuration( sys.argv[argument] )
-config.initialize()
-
-nEventsToProcess = config.NEvents()
-outputFileName   = config.outputFileName()
-filenames = config.filenames()   # list of files
-isMC      = config.isMC( filenames[0] )   # check the first file to see if we are running over MC or Data
 
 ## PROCESS
-print " Begin the process "
+
 process = cms.Process("CyMiniAna")
 
-process.source       = cms.Source("PoolSource",fileNames = cms.untracked.vstring(filenames) )
-process.maxEvents    = cms.untracked.PSet( input = cms.untracked.int32(nEventsToProcess) )
-#process.TFileService = cms.Service("TFileService",
-#                                   fileName = cms.string(outputFileName),
-#                                   closeFileFast = cms.untracked.bool(True) )
-#process.content      = cms.EDAnalyzer('EventContentAnalyzer')
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
-## -- Load Modules
-process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger = cms.Service("MessageLogger",
-                            destinations = cms.untracked.vstring('cout'),
-                            cout         = cms.untracked.PSet(
-                                           threshold = cms.untracked.string('WARNING') ),
-                        )
-
-## -- Histogrammer
-print " Histogrammer "
-process.histogrammer = hist.clone()
-process.histogrammer.isMC = cms.bool(isMC)
-
-process.histogrammer.useTruth = cms.bool(config.useTruth())
-process.histogrammer.useJets  = cms.bool(config.useJets())
-process.histogrammer.useLargeRJets  = cms.bool(config.useLargeRJets())
-process.histogrammer.useNeutrinos   = cms.bool(config.useNeutrinos())
-process.histogrammer.useLeptons     = cms.bool(config.useLeptons())
-process.histogrammer.useSystWeights = cms.bool(config.useSystWeights())
-process.histogrammer.weightSystematicsFile = cms.string(config.weightSystematicsFile())
-process.histogrammer.weightVectorSystematicsFile = cms.string(config.weightVectorSystematicsFile())
-
-## -- Event Selection
-print " Event selection "
-process.evtSel = evtSel.clone()
-process.evtSel.selection = config.selection()
-process.evtSel.cutsfile  = config.cutsfile()
-
-## -- EventSaverFlatNtuple
-print " Event saver to flat ntuple "
-process.EventSaverFlatNtuple = flat.clone()
-process.EventSaverFlatNtuple.isMC = cms.bool(isMC)
-process.EventSaverFlatNtuple.useTruth = cms.bool(config.useTruth())
-process.EventSaverFlatNtuple.useJets  = cms.bool(config.useJets())
-process.EventSaverFlatNtuple.useLargeRJets  = cms.bool(config.useLargeRJets())
-process.EventSaverFlatNtuple.useNeutrinos   = cms.bool(config.useNeutrinos())
-process.EventSaverFlatNtuple.useLeptons     = cms.bool(config.useLeptons())
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(101) )
+process.source    = cms.Source("PoolSource",
+        fileNames = cms.untracked.vstring(
+          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
+	)
+)
 
 
-## -- Setup CMAProducer
-process.ana = cma.clone()
-process.ana.isMC = cms.bool(isMC)
-process.ana.useJets  = cms.bool(config.useJets())
-process.ana.useLargeRJets  = cms.bool(config.useLargeRJets())
-process.ana.useLeptons     = cms.bool(config.useLeptons())
-process.ana.useNeutrinos   = cms.bool(config.useNeutrinos())
-process.ana.buildNeutrinos = cms.bool(config.buildNeutrinos())
-process.ana.kinematicReco  = cms.bool(config.kinematicReco())
-process.ana.metadataFile   = cms.string(config.metadataFile())
-process.ana.LUMI = cms.double(config.LUMI())
-process.ana.useTruth = cms.bool(config.useTruth())
+process.TFileService = cms.Service("TFileService", fileName = cms.string("output.root") )
+
+
+## CMA Producer
+process.CMAProducer = cms.EDProducer('CMAProducer',
+    isMC = cms.bool(options.isMC),
+    useJets  = cms.bool(options.useJets),
+    useTruth = cms.bool(options.useTruth),
+    useLargeRJets = cms.bool(options.useLargeRJets),
+    useLeptons    = cms.bool(options.useLeptons),
+    useNeutrinos  = cms.bool(options.useNeutrinos),
+    buildNeutrinos = cms.bool(False),
+    kinematicReco  = cms.bool(False),
+    LUMI = cms.double(1.0),
+    cleanEvents  = cms.bool(False),
+    metadataFile = cms.string(""),
+
+    # Physics Objects
+    # - labels to access data
+    neutrinoLabels  = neutrinoLabels,
+    muonLabels      = muonLabels,
+    electronLabels  = electronLabels,
+    jetLabels       = jetLabels,
+    largeRjetLabels = largeRJetLabels,
+    METLabels = METLabels,
+
+    # - selection on objects (pT,eta,ID,b-tagging,etc.)
+    objSelectionParams = objectSelectionParams,
+)
+
+
+## EVENT SELECTION
+process.selection = cms.EDFilter("eventSelection",
+    selection = cms.string("none"),
+    cutsfile  = cms.string("config/cuts_none.txt"),
+)
+
+
+## HISTOGRAMMER
+process.histograms = cms.EDAnalyzer("histogrammer",
+    isMC = cms.bool(options.isMC),
+    useTruth = cms.bool(options.useTruth),
+    useJets  = cms.bool(options.useJets),
+    useLargeRJets = cms.bool(options.useLargeRJets),
+    useLeptons    = cms.bool(options.useLeptons),
+    useNeutrinos  = cms.bool(options.useNeutrinos),
+    useSystWeights = cms.bool(False),
+    weightSystematicsFile       = cms.string("config/weightSystematics.txt"),
+    weightVectorSystematicsFile = cms.string("config/weightVectorSystematics.txt"),
+)
+
+
+## EVENT SAVER FLAT NTUPLE
+process.tree = cms.EDAnalyzer("EventSaverFlatNtuple",
+    isMC = cms.bool(options.isMC),
+    useTruth = cms.bool(options.useTruth),
+    useJets  = cms.bool(options.useJets),
+    useLargeRJets = cms.bool(options.useLargeRJets),
+    useLeptons    = cms.bool(options.useLeptons),
+    useNeutrinos  = cms.bool(options.useNeutrinos),
+    rhoLabel = cms.InputTag("vertexInfo","rho"),
+    npvLabel = cms.InputTag("vertexInfo","npv"),
+    runnoLabel      = cms.InputTag("eventInfo", "evtInfoRunNumber"),
+    lumisecLabel    = cms.InputTag("eventInfo", "evtInfoLumiBlock"),
+    evtnoLabel      = cms.InputTag("eventInfo", "evtInfoEventNumber"),
+    puNtrueIntLabel = cms.InputTag("eventUserData", "puNtrueInt"),
+)
+
 
 ## -- Count events before & after selection
 ##    https://github.com/dmajumder/EventCounter
-process.initial = eventCounter.clone( isData=(not isMC) )
-process.final   = eventCounter.clone( isData=(not isMC) )
+process.initial = eventCounter.clone( isData=(not options.isMC) )
+process.final   = eventCounter.clone( isData=(not options.isMC) )
 
-
-## PATH
-print " Set the path "
-
-process.p = cms.Path(
-    process.initial*
-    process.ana*
-#    process.evtSel*
-#    process.histogrammer*
-    process.EventSaverFlatNtuple*
-    process.final
-)
-# Add to process.p to inspect content:
-#     process.content*
-
-
-## OUTPUTMODULE
-#print " Set the output "
-#process.out = cms.OutputModule("PoolOutputModule",
-#                               outputCommands = cms.untracked.vstring('drop *'))
-#print " Set the schedule"
-#process.schedule = cms.Schedule(process.p)
-#process.outpath  = cms.EndPath(process.out)
-
-
-print " Dump python "
-open('dump.py','w').write(process.dumpPython())
-
-
-process.TFileService = cms.Service("TFileService", fileName = cms.string("histo.root") )
 
 #process.out = cms.OutputModule("PoolOutputModule",
-#                               fileName = cms.untracked.string("output.root"),
+#                               fileName = cms.untracked.string("ana_out.root"),
 #                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
 #                               outputCommands = cms.untracked.vstring('drop *')
 #                               )
 #process.outpath = cms.EndPath(process.out)
 
-## THE END ##
+process.p = cms.Path(
+    process.initial*
+    process.CMAProducer*
+    process.selection*
+    process.histograms*
+    process.tree*
+    process.final
+)
+
+
+## THE END

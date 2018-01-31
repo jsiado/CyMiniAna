@@ -8,7 +8,7 @@ Texas A&M University
 
 -----
 
-Build Electrons from EDMntuples
+Build MET from EDMntuples
 */
 #include "Analysis/CyMiniAna/interface/ETMiss.h"
 

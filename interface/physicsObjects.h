@@ -29,6 +29,10 @@ struct Jet : CmaBase{
     float CvsL;
     float CvsB;
     std::map<std::string, bool> isbtagged;
+    int true_flavor;
+    float btagSF;
+    float btagSF_UP;
+    float btagSF_DN;
 
     float partonFlavour;
     float hadronFlavour;

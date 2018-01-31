@@ -13,6 +13,7 @@
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
 #include "Analysis/CyMiniAna/interface/objectSelection.h"
+#include "Analysis/CyMiniAna/interface/BTagTools.h"
 
 // Jets Class
 class Jets {
@@ -39,6 +40,7 @@ class Jets {
     edm::ParameterSet m_labels;
     bool m_useTruth;
 
+    BTagTools *m_btagTool;
 
     // ************
     // Setup to read EDMntuple format

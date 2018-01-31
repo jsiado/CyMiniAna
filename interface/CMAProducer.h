@@ -46,6 +46,8 @@ class CMAProducer : public edm::EDProducer {
     // Destructor
     virtual ~CMAProducer();
 
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
   private:
 
     virtual void beginJob(const edm::EventSetup&);
@@ -107,9 +109,6 @@ class CMAProducer : public edm::EDProducer {
     edm::InputTag m_src;
 
     // Tokens
-    edm::EDGetTokenT<float> t_rho;
-    edm::EDGetTokenT<int> t_runno;
-    edm::EDGetTokenT<int> t_lumisec;
     edm::EDGetTokenT<int> t_evtno;
     edm::EDGetTokenT<bool> t_isData;
     edm::EDGetTokenT<bool> t_hltdecision;
@@ -127,9 +126,6 @@ class CMAProducer : public edm::EDProducer {
     edm::EDGetTokenT<std::vector<float>> t_lhewts;
 
     // Handles
-    edm::Handle<float> h_rho;
-    edm::Handle<int> h_runno;
-    edm::Handle<int> h_lumisec;
     edm::Handle<int> h_evtno;
     edm::Handle<bool> h_isData;
     edm::Handle<bool> h_hltdecision;

@@ -49,7 +49,6 @@ objectSelectionParams = cms.PSet(
     jet_id    = cms.string('loose'),
     jet_pt    = cms.double(25),
     jet_eta   = cms.double(2.5),
-    jet_CSVv2 = cms.string('loose'),
 
  # largeRJetParameters AK8
     ljet_id  = cms.string('loose'),

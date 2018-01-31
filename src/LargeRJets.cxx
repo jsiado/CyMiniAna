@@ -68,6 +68,8 @@ LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector 
         t_ljet_subjetGenE   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenELabel"));
         t_ljet_subjetGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenChargeLabel"));
     }
+
+    m_btagTool = new BTagTools(true);
 }
 
 LargeRJets::~LargeRJets() {}
@@ -126,6 +128,7 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
         ljet.tau21 = ljet.tau2 / ljet.tau1;
         ljet.tau32 = ljet.tau3 / ljet.tau2;
         ljet.softDropMass = (h_ljetSoftDropMass.product())->at(ijet);
+        ljet.CSVv2 = (h_ljetCSV.product())->at(ijet);
 
         // Soft-drop subjets
         ljet.subjets.clear();
@@ -139,6 +142,16 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
                                     (h_ljet_subjetPhi.product())->at(idx), (h_ljet_subjetE.product())->at(idx));
 
             subjet.cMVAv2 = (h_ljet_subjetCMVA.product())->at(idx);
+            subjet.CSVv2  = (h_ljet_subjetCSV.product())->at(idx);
+
+            subjet.isbtagged = { {"L",false}, {"M",false}, {"T",false} };
+            m_btagTool->getBtagDecisions(subjet);
+            std::map<std::string,double> SFs = m_btagTool->execute(subjet);
+
+            subjet.btagSF    = SFs.at("central");
+            subjet.btagSF_UP = SFs.at("up");
+            subjet.btagSF_DN = SFs.at("down");
+
             ljet.subjets.push_back(subjet);
         }
 

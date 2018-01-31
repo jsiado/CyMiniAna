@@ -55,6 +55,9 @@ class configuration {
     float cMVAv2L() {return m_cMVAv2L;}
     float cMVAv2M() {return m_cMVAv2M;}
     float cMVAv2T() {return m_cMVAv2T;}
+    float CSVv2L()  {return m_CSVv2L;}
+    float CSVv2M()  {return m_CSVv2M;}
+    float CSVv2T()  {return m_CSVv2T;}
 
     // functions about the TTree
     virtual bool isNominalTree();
@@ -197,6 +200,9 @@ class configuration {
     float m_cMVAv2L=-0.5884;
     float m_cMVAv2M=0.4432;
     float m_cMVAv2T=0.9432;
+    float m_CSVv2L=0.5426;
+    float m_CSVv2M=0.8484;
+    float m_CSVv2T=0.9535;
 
     std::vector<std::string> m_filesToProcess;
     std::vector<std::string> m_treeNames;

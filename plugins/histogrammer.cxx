@@ -19,15 +19,15 @@ histogrammer::histogrammer( const ParameterSet & cfg ) :
   //m_src( cfg.getUntrackedParameter<edm::InputTag>("src") ),
   m_putOverflowInLastBin(true),
   m_putUnderflowInFirstBin(true),
-  t_electrons(consumes<std::vector<Electron>>(edm::InputTag("ana","electrons","CyMiniAna"))),
-  t_muons(consumes<std::vector<Muon>>(edm::InputTag("ana","muons","CyMiniAna"))),
-  t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("ana","neutrinos","CyMiniAna"))),
-  t_jets(consumes<std::vector<Jet>>(edm::InputTag("ana","jets","CyMiniAna"))),
-  t_ljets(consumes<std::vector<Ljet>>(edm::InputTag("ana","ljets","CyMiniAna"))),
-  t_met(consumes<MET>(edm::InputTag("ana","MET","CyMiniAna"))),
-  t_HT(consumes<double>(edm::InputTag("ana","HT","CyMiniAna"))),
-  t_ST(consumes<double>(edm::InputTag("ana","ST","CyMiniAna"))){
-    usesResource("TFileService");
+  t_electrons(consumes<std::vector<Electron>>(edm::InputTag("CMAProducer","electrons","CyMiniAna"))),
+  t_muons(consumes<std::vector<Muon>>(edm::InputTag("CMAProducer","muons","CyMiniAna"))),
+  t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("CMAProducer","neutrinos","CyMiniAna"))),
+  t_jets(consumes<std::vector<Jet>>(edm::InputTag("CMAProducer","jets","CyMiniAna"))),
+  t_ljets(consumes<std::vector<Ljet>>(edm::InputTag("CMAProducer","ljets","CyMiniAna"))),
+  t_met(consumes<MET>(edm::InputTag("CMAProducer","MET","CyMiniAna"))),
+  t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
+  t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))){
+//    usesResource("TFileService");
 
     m_map_histograms1D.clear();
     m_map_histograms2D.clear();
@@ -458,6 +458,20 @@ void histogrammer::underFlow() {
         } // end 2D histogram underflow
     } // end else put underflow in first bin
 }
+
+
+void histogrammer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+    /* Method fills 'descriptions' with the allowed parameters for the module
+       The following says we do not know what parameters are allowed so do no validation
+       Please change this to state exactly what you do use, even if it is no parameters
+    */
+    edm::ParameterSetDescription desc;
+    desc.setUnknown();
+    descriptions.addDefault(desc);
+
+    return;
+}
+
 
 DEFINE_FWK_MODULE(histogrammer);
 // THE END

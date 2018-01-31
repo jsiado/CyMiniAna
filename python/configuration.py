@@ -14,7 +14,6 @@ import os
 import sys
 import util
 
-
 class Configuration(object):
     """Configuration object that handles the setup"""
     def __init__(self,configfile,script='cma_cfg.py',verbose_level="INFO"):
@@ -153,13 +152,13 @@ class Configuration(object):
             else:
                 self.configuration["isMC"] = True
 
-        isMC = self.get("isMC")
-        if not isMC and self.get("useTruth"):
+        is_MC = self.get("isMC")
+        if not is_MC and self.get("useTruth"):
             print " CONFIG : WARNING: 'isMC' is False and 'useTruth' is True!"
             print " CONFIG : WARNING: Setting 'useTruth' to False "
             self.configuration["useTruth"] = False
 
-        return isMC
+        return is_MC
 
 
     def filenames(self):

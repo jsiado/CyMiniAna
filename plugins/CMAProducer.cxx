@@ -39,11 +39,7 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   m_buildNeutrinos(iConfig.getParameter<bool>("buildNeutrinos")),
   m_kinematicReco(iConfig.getParameter<bool>("kinematicReco")),
   m_metadataFile(iConfig.getParameter<std::string>("metadataFile")),
-  m_LUMI(iConfig.getParameter<double>("LUMI")),
-  // EDModules
-  t_rho(consumes<float>(iConfig.getParameter<edm::InputTag>("rhoLabel"))),
-  t_runno(consumes<int>(iConfig.getParameter<edm::InputTag>("runno"))),
-  t_npv(consumes<unsigned int>(iConfig.getParameter<edm::InputTag>("npvLabel"))){
+  m_LUMI(iConfig.getParameter<double>("LUMI")){
     // Generator information (parton-level information)
     if (m_isMC){
     }
@@ -118,11 +114,6 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     std::auto_ptr< double > e_HT( new double );
     std::auto_ptr< double > e_ST( new double );
 
-
-    // Event information
-//    edm::Handle<int> h_runno;
-//    evt.getByToken(t_runno, h_runno);
-//    const int runno(*h_runno.product());
 
     // Build physics objects
     // - pass 'evt' to each function to access handles
@@ -222,6 +213,20 @@ void CMAProducer::initialize_kinematics(edm::Event& evt){
 
     return;
 }
+
+
+void CMAProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+    /* Method fills 'descriptions' with the allowed parameters for the module
+       The following says we do not know what parameters are allowed so do no validation
+       Please change this to state exactly what you do use, even if it is no parameters
+    */
+    edm::ParameterSetDescription desc;
+    desc.setUnknown();
+    descriptions.addDefault(desc);
+
+    return;
+}
+
 
 DEFINE_FWK_MODULE(CMAProducer);
 // THE END

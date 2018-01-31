@@ -29,11 +29,6 @@ cma = cms.EDProducer("CMAProducer",
     cleanEvents  = cms.bool(False),
     metadataFile = cms.string(""),
 
-    # EDModules
-    rhoLabel = cms.InputTag("vertexInfo","rho"),
-    runno    = cms.InputTag("eventInfo", "evtInfoRunNumber"),
-    npvLabel = cms.InputTag("vertexInfo","npv"),
-
     # Physics Objects
     # - labels to access data
     neutrinoLabels  = neutrinoLabels,

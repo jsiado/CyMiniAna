@@ -46,6 +46,8 @@ Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
       t_jetGenE   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenELabel"));
       t_jetGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenChargeLabel"));
     }
+
+    m_btagTool = new BTagTools();
 }
 
 Jets::~Jets() {}
@@ -82,21 +84,32 @@ std::vector<Jet> Jets::execute(const edm::Event& evt, const objectSelection& obj
         jet.p4.SetPtEtaPhiE((h_jetPt.product())->at(ijet),  (h_jetEta.product())->at(ijet), 
                             (h_jetPhi.product())->at(ijet), (h_jetE.product())->at(ijet));
 
-        jet.cMVAv2     = (h_jetCMVA.product())->at(ijet);
+        jet.cMVAv2      = (h_jetCMVA.product())->at(ijet);
+        jet.CSVv2       = (h_jetCSV.product())->at(ijet);
 
-        jet.cMultip    = (h_jetcMultip.product())->at(ijet);
-        jet.nMultip    = (h_jetnMultip.product())->at(ijet);
-        jet.nEMEnergy  = (h_jetnEMEnergy.product())->at(ijet);
-        jet.nHadEnergy = (h_jetnHadEnergy.product())->at(ijet);
-        jet.cEMEnergy  = (h_jetcEMEnergy.product())->at(ijet);
-        jet.cHadEnergy = (h_jetcHadEnergy.product())->at(ijet);
-        jet.muonEnergy = (h_jetcMultip.product())->at(ijet);
-        jet.index      = ijet;
+        jet.cMultip     = (h_jetcMultip.product())->at(ijet);
+        jet.nMultip     = (h_jetnMultip.product())->at(ijet);
+        jet.nEMEnergy   = (h_jetnEMEnergy.product())->at(ijet);
+        jet.nHadEnergy  = (h_jetnHadEnergy.product())->at(ijet);
+        jet.cEMEnergy   = (h_jetcEMEnergy.product())->at(ijet);
+        jet.cHadEnergy  = (h_jetcHadEnergy.product())->at(ijet);
+        jet.muonEnergy  = (h_jetcMultip.product())->at(ijet);
+        jet.true_flavor = int((h_jetHadronFlavour.product())->at(ijet));
+        jet.index       = ijet;
 
         setJetID(jet);
         bool passObjSel = obj.pass(jet);
 
         if (!passObjSel) continue;
+
+        // b-tagging SF
+        jet.isbtagged = { {"L",false}, {"M",false}, {"T",false} };
+        m_btagTool->getBtagDecisions(jet);
+        std::map<std::string,double> SFs = m_btagTool->execute(jet);
+
+        jet.btagSF    = SFs.at("central");
+        jet.btagSF_UP = SFs.at("up");
+        jet.btagSF_DN = SFs.at("down");
 
         m_jets.push_back(jet);
     }

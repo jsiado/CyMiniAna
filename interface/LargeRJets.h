@@ -13,6 +13,7 @@
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
 #include "Analysis/CyMiniAna/interface/objectSelection.h"
+#include "Analysis/CyMiniAna/interface/BTagTools.h"
 
 
 // LargeRJets Class
@@ -39,6 +40,8 @@ class LargeRJets {
     // Setup physics information from EDMntuples
     edm::ParameterSet m_labels;
     bool m_useTruth;
+
+    BTagTools *m_btagTool;
 
     // ************
     // Setup to read EDMntuple format

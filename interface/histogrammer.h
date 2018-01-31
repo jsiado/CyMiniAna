@@ -66,6 +66,8 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     virtual void overFlow();
     virtual void underFlow();
 
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
   private:
     virtual void beginJob() override;
     virtual void analyze(const edm::Event&, const edm::EventSetup&) override;

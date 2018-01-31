@@ -10,6 +10,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include <boost/dynamic_bitset.hpp>
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -41,6 +42,8 @@ class eventSelection : public edm::EDFilter {
     // External access to information in this class
     virtual std::vector<std::string> cutNames();     // Return a vector of the cut names (for labeling bins in cutflow histograms)
     virtual unsigned int numberOfCuts();             // Return the number of cuts (for binning cutflow histograms)
+
+    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
   private:
 
@@ -83,6 +86,31 @@ class eventSelection : public edm::EDFilter {
     bool m_allHadDNNSelection;
     bool m_exampleSelection;
     bool m_example2Selection;
+
+    std::vector<std::string> m_hltPaths;
+
+    // Handles and Tokens
+    edm::EDGetTokenT<std::vector<Electron>> t_electrons;
+    edm::EDGetTokenT<std::vector<Muon>> t_muons;
+    edm::EDGetTokenT<std::vector<Neutrino>> t_neutrinos;
+    edm::EDGetTokenT<std::vector<Jet>> t_jets;
+    edm::EDGetTokenT<std::vector<Ljet>> t_ljets;
+    edm::EDGetTokenT<MET> t_met;
+    edm::EDGetTokenT<double> t_HT;
+    edm::EDGetTokenT<double> t_ST;
+    edm::EDGetTokenT<std::vector<std::string>> t_trigName;
+    edm::EDGetTokenT<std::vector<float>> t_trigBit;
+
+    edm::Handle<std::vector<Electron>> m_electrons;
+    edm::Handle<std::vector<Muon>> m_muons;
+    edm::Handle<std::vector<Neutrino>> m_neutrinos;
+    edm::Handle<std::vector<Jet>> m_jets;
+    edm::Handle<std::vector<Ljet>> m_ljets;
+    edm::Handle<MET> m_met;
+    edm::Handle<double> m_HT;
+    edm::Handle<double> m_ST;
+    edm::Handle<std::vector<std::string>> h_trigName;
+    edm::Handle<std::vector<float>> h_trigBit;
 };
 
 #endif

@@ -20,12 +20,39 @@ eventSelection::eventSelection(const edm::ParameterSet& cfg) :
   m_cutsfile("SetMe"),
   m_numberOfCuts(0),
   m_dummySelection(false),
-  m_allHadDNNSelection(false){
+  m_allHadDNNSelection(false),
+  t_electrons(consumes<std::vector<Electron>>(edm::InputTag("CMAProducer","electrons","CyMiniAna"))),
+  t_muons(consumes<std::vector<Muon>>(edm::InputTag("CMAProducer","muons","CyMiniAna"))),
+  t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("CMAProducer","neutrinos","CyMiniAna"))),
+  t_jets(consumes<std::vector<Jet>>(edm::InputTag("CMAProducer","jets","CyMiniAna"))),
+  t_ljets(consumes<std::vector<Ljet>>(edm::InputTag("CMAProducer","ljets","CyMiniAna"))),
+  t_met(consumes<MET>(edm::InputTag("CMAProducer","MET","CyMiniAna"))),
+  t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
+  t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
+  t_trigName(consumes<std::vector<std::string>,edm::InRun>(edm::InputTag("trigNameLabel"))),
+  t_trigBit(consumes<std::vector<float>>(edm::InputTag("trigBitLabel"))){
     m_cuts.resize(0);
     m_cutflowNames.clear();
 
     m_selection = cfg.getParameter<std::string>("selection");
     m_cutsfile  = cfg.getParameter<std::string>("cutsfile");
+
+    m_hltPaths  = cfg.getParameter<std::vector<std::string>>("HLTPaths");
+/*
+access physics objects, triggers:
+
+python
+    trigNameLabel              = cms.InputTag("TriggerUserData", "triggerNameTree"), 
+    trigBitLabel               = cms.InputTag("TriggerUserData", "triggerBitTree"),
+hltpathsOr = ["HLT_AK8PFJet360_TrimMass30_v", 
+              "HLT_AK8DiPFJet300_200_TrimMass30_v",
+              "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50_v",
+              "HLT_AK8PFJet450_v",
+              "HLT_AK8DiPFJet280_200_TrimMass30_v",
+              "HLT_PFHT800_v",
+              "HLT_PFHT900_v",
+             ]
+*/
   }
 
 eventSelection::~eventSelection() {}
@@ -101,6 +128,36 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
           if (n_jets==3 && n_ljets<1)  FAIL
           else :                       PASS & fill cutflows
     */
+    evt.getByToken( t_electrons, m_electrons );
+    evt.getByToken( t_muons, m_muons );
+    evt.getByToken( t_neutrinos, m_neutrinos );
+    evt.getByToken( t_jets, m_jets );
+    evt.getByToken( t_ljets, m_ljets );
+    evt.getByToken( t_met, m_met );
+    evt.getByToken( t_HT,  m_HT );
+    evt.getByToken( t_ST,  m_ST );
+    evt.getByToken( t_trigBit,  h_trigBit);
+    evt.getByToken( t_trigName, h_trigName);
+
+//    for (const auto& el : *m_electrons.product()){
+
+
+    const size_t ntrigs (m_hltPaths.size());
+    boost::dynamic_bitset<> hltdecisions(std::max(int(ntrigs),1)); // true if any bits are set, otherwise false.
+    if ( ntrigs > 0 ) { 
+        for ( size_t i = 0; i < ntrigs; ++i) {
+            const std::string& myhltpath = m_hltPaths.at(i);
+            std::vector<std::string>::const_iterator it;
+            for (it = h_trigName.product()->begin(); it != (h_trigName.product())->end(); ++it ) {
+                if ( it->find(myhltpath) < std::string::npos) {
+                    hltdecisions[i] = (h_trigBit.product())->at( it - (h_trigName.product())->begin() );
+                } // end if the trigger is in the path
+            } // end loop over trigger name
+        } // end loop over triggers
+    }
+
+
+
     bool passSelection(true);         // use a bool rather than return after a failed cut
                                       // to examine all cuts in cutflow (make N-1 plots,
                                       // sequential plots)
@@ -159,6 +216,18 @@ std::vector<std::string> eventSelection::cutNames(){
 unsigned int eventSelection::numberOfCuts(){
     /* Return the number of cuts (number of bins in cutflow histograms) */
     return m_numberOfCuts;
+}
+
+void eventSelection::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+    /* Method fills 'descriptions' with the allowed parameters for the module
+       The following says we do not know what parameters are allowed so do no validation
+       Please change this to state exactly what you do use, even if it is no parameters
+    */
+    edm::ParameterSetDescription desc;
+    desc.setUnknown();
+    descriptions.addDefault(desc);
+
+    return;
 }
 
 DEFINE_FWK_MODULE(eventSelection);

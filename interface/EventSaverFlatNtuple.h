@@ -43,9 +43,7 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
     //virtual void produce(edm::Event&, const edm::EventSetup&);
 
-    edm::Service<TFileService> m_fs;
     TTree* m_ttree;
-    //std::unique_ptr<TTree> m_ttree;
 
     std::string m_name;
     bool m_isMC;
@@ -68,6 +66,40 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::EDGetTokenT<MET> t_met;
     edm::EDGetTokenT<double> t_HT;
     edm::EDGetTokenT<double> t_ST;
+    edm::EDGetTokenT<std::vector<float>> t_rho;
+    edm::EDGetTokenT<int> t_runno;
+    edm::EDGetTokenT<int> t_npv;
+    edm::EDGetTokenT<int> t_npuTrue;
+    edm::EDGetTokenT<int> t_evtno;
+    edm::EDGetTokenT<int> t_lumisec;
+
+    edm::EDGetTokenT<bool> t_isData;
+    edm::EDGetTokenT<bool> t_hltdecision;
+    edm::EDGetTokenT<std::string> t_evttype;
+    edm::EDGetTokenT<float> t_evtwtGen;
+    edm::EDGetTokenT<float> t_evtwtPV;
+    edm::EDGetTokenT<float> t_evtwtPVBG;
+    edm::EDGetTokenT<float> t_evtwtPVH;
+    edm::EDGetTokenT<float> t_evtwtPVLow;
+    edm::EDGetTokenT<float> t_evtwtPVHigh;
+    edm::EDGetTokenT<float> t_htHat;
+    edm::EDGetTokenT<std::vector<int>> t_lhewtids;
+    edm::EDGetTokenT<std::vector<float>> t_lhewts;
+
+    // Handles
+    edm::Handle<bool> h_isData;
+    edm::Handle<bool> h_hltdecision;
+    edm::Handle<std::string> h_evttype;
+    edm::Handle<float> h_evtwtGen;
+    edm::Handle<float> h_evtwtPV;
+    edm::Handle<float> h_evtwtPVBG;
+    edm::Handle<float> h_evtwtPVH;
+    edm::Handle<float> h_evtwtPVLow;
+    edm::Handle<float> h_evtwtPVHigh;
+    edm::Handle<float> h_htHat;
+    edm::Handle<std::vector<int>> h_lhewtids;
+    edm::Handle<std::vector<float>> h_lhewts;
+
 
     edm::Handle<std::vector<Electron>> m_electrons;
     edm::Handle<std::vector<Muon>> m_muons;
@@ -77,6 +109,12 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<MET> m_met;
     edm::Handle<double> m_HT;
     edm::Handle<double> m_ST;
+    edm::Handle<std::vector<float>> h_rho;
+    edm::Handle<int> h_runno;
+    edm::Handle<int> h_npv;
+    edm::Handle<int> h_npuTrue;
+    edm::Handle<int> h_evtno;
+    edm::Handle<int> h_lumisec;
 
 
     // Branches
@@ -150,11 +188,12 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     int m_runNumber;
     int m_eventNumber;
     int m_lumiblock;
-    float m_rho;
+    std::vector<float> m_rho;
     int m_nGoodVtx;
     int m_LHA_PDF_ID;
     int m_nIsoTrk;
     int m_true_pileup;
+    unsigned int m_npv;
 
     float m_weight_mc;
     float m_weight_btag;

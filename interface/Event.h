@@ -180,6 +180,9 @@ class Event {
     float m_cMVAv2L;
     float m_cMVAv2M;
     float m_cMVAv2T;
+    float m_CSVv2L;
+    float m_CSVv2M;
+    float m_CSVv2T;
 
     // kinematics
     float m_HT;
