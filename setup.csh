@@ -1,7 +1,7 @@
 ## Some software is readily available on cvmfs / cmssw
 
 setenv CERN_USER ${USER} # put your CERN username if different from environment name
-
+setenv GIT_CMA_TAG `git describe --tags`
 echo ""
 echo " * ------------------------------------------------- * "
 echo " *                  Wprime -> qQ                     * "
