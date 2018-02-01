@@ -26,7 +26,7 @@ BTagTools::BTagTools(bool isBoosted) :
     }
     else{
         m_calib = new BTagCalibration("CSVv2", "config/CSVv2_Moriond17_B_H.csv");
-        measurement_type = "lt";
+        measurement_type = "mujets";
     }
 
 

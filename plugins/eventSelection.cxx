@@ -19,8 +19,7 @@ eventSelection::eventSelection(const edm::ParameterSet& cfg) :
   m_selection("SetMe"),
   m_cutsfile("SetMe"),
   m_numberOfCuts(0),
-  m_dummySelection(false),
-  m_allHadDNNSelection(false),
+  m_preSelection(false),
   t_electrons(consumes<std::vector<Electron>>(edm::InputTag("CMAProducer","electrons","CyMiniAna"))),
   t_muons(consumes<std::vector<Muon>>(edm::InputTag("CMAProducer","muons","CyMiniAna"))),
   t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("CMAProducer","neutrinos","CyMiniAna"))),
@@ -29,30 +28,16 @@ eventSelection::eventSelection(const edm::ParameterSet& cfg) :
   t_met(consumes<MET>(edm::InputTag("CMAProducer","MET","CyMiniAna"))),
   t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
   t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
-  t_trigName(consumes<std::vector<std::string>,edm::InRun>(edm::InputTag("trigNameLabel"))),
-  t_trigBit(consumes<std::vector<float>>(edm::InputTag("trigBitLabel"))){
+  t_trigBit(consumes<std::vector<float>>(cfg.getParameter<edm::InputTag>("trigBitLabel"))),
+  t_trigName(cfg.getParameter<edm::InputTag>("trigNameLabel")){
     m_cuts.resize(0);
     m_cutflowNames.clear();
 
     m_selection = cfg.getParameter<std::string>("selection");
     m_cutsfile  = cfg.getParameter<std::string>("cutsfile");
-
     m_hltPaths  = cfg.getParameter<std::vector<std::string>>("HLTPaths");
-/*
-access physics objects, triggers:
 
-python
-    trigNameLabel              = cms.InputTag("TriggerUserData", "triggerNameTree"), 
-    trigBitLabel               = cms.InputTag("TriggerUserData", "triggerBitTree"),
-hltpathsOr = ["HLT_AK8PFJet360_TrimMass30_v", 
-              "HLT_AK8DiPFJet300_200_TrimMass30_v",
-              "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50_v",
-              "HLT_AK8PFJet450_v",
-              "HLT_AK8DiPFJet280_200_TrimMass30_v",
-              "HLT_PFHT800_v",
-              "HLT_PFHT900_v",
-             ]
-*/
+    consumes<std::vector<std::string>, edm::InRun>(t_trigName);  // treat this with label rather than token
   }
 
 eventSelection::~eventSelection() {}
@@ -100,16 +85,16 @@ void eventSelection::beginJob() {
 }
 
 
+void eventSelection::beginRun(edm::Run const& run, edm::EventSetup const& es){
+    /* Start of each run */
+    run.getByLabel(t_trigName, h_trigName);
+    return;
+}
+
+
 void eventSelection::identifySelection(){
     /* Set the booleans for applying the selection below */
-    m_dummySelection     = false;
-    m_allHadDNNSelection = false;
-
-    // Define selections to be exclusive (if/else if), but this could be modified
-    if (m_selection.compare("allHadDNN")==0) 
-        m_allHadDNNSelection = true;
-    else
-        m_dummySelection = true;
+    m_preSelection = (m_selection.compare("pre")==0);
 
     return;
 }
@@ -137,15 +122,32 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
     evt.getByToken( t_HT,  m_HT );
     evt.getByToken( t_ST,  m_ST );
     evt.getByToken( t_trigBit,  h_trigBit);
-    evt.getByToken( t_trigName, h_trigName);
 
-//    for (const auto& el : *m_electrons.product()){
+    bool passSelection(true);         // use a bool rather than return after a failed cut
+                                      // to examine all cuts in cutflow (make N-1 plots,
+                                      // sequential plots)
+    std::vector<bool> passSels;       // bookkeeping for each of the individual cuts
+    double first_bin(0.5);            // first bin value in cutflow histogram ("INITIAL")
+    double second_bin(1.5);           // second bin value in cutflow histogram (the first actual cut)
 
+    float nominal_weight(1.0);
+    if (!evt.isRealData()){
+        // do something to get a proper weight (CMAProducer?)
+    }
 
-    const size_t ntrigs (m_hltPaths.size());
-    boost::dynamic_bitset<> hltdecisions(std::max(int(ntrigs),1)); // true if any bits are set, otherwise false.
-    if ( ntrigs > 0 ) { 
-        for ( size_t i = 0; i < ntrigs; ++i) {
+    // fill cutflow histograms with initial value (before any cuts)
+    m_hists["cutflow"]->Fill(first_bin,nominal_weight); // event weights
+    m_hists["cutflow_unw"]->Fill( first_bin );          // raw event numbers
+
+    // no selection applied
+    if (m_preSelection){
+        passSels.resize(2);
+
+        // Cut1 : Triggers
+        const size_t ntrigs (m_hltPaths.size());
+        boost::dynamic_bitset<> hltdecisions(std::max(int(ntrigs),1)); // true if any bits are set, otherwise false.
+
+        for ( size_t i=0; i<ntrigs; ++i) {
             const std::string& myhltpath = m_hltPaths.at(i);
             std::vector<std::string>::const_iterator it;
             for (it = h_trigName.product()->begin(); it != (h_trigName.product())->end(); ++it ) {
@@ -154,41 +156,31 @@ bool eventSelection::filter(edm::Event& evt, const edm::EventSetup& iSetup) {
                 } // end if the trigger is in the path
             } // end loop over trigger name
         } // end loop over triggers
-    }
+
+        passSels.at(0) = ( !hltdecisions.any() );   // if !any(), then all triggers failed
+
+
+        // Cut2 : Exactly 1 lepton
+        unsigned int NElectrons = (*m_electrons.product()).size();
+        unsigned int NMuons     = (*m_muons.product()).size();
+
+        passSels.at(1) = (NElectrons + NMuons != 1); // if this is more than 1, then we have too many leptons!
 
 
 
-    bool passSelection(true);         // use a bool rather than return after a failed cut
-                                      // to examine all cuts in cutflow (make N-1 plots,
-                                      // sequential plots)
-    double first_bin(0.5);            // first bin value in cutflow histogram ("INITIAL")
-
-    float nominal_weight(1.0);        // = event.nominal_weight();
-
-    // fill cutflow histograms with initial value (before any cuts)
-    m_hists["cutflow"]->Fill(first_bin,nominal_weight); // event weights
-    m_hists["cutflow_unw"]->Fill( first_bin );          // raw event numbers
-
-    // no selection applied
-    if (m_dummySelection)
-        passSelection = true;                           // event 'passed'  
-
-    // selection for all-hadronic DNN 
-    else if (m_allHadDNNSelection){
-        std::vector<Jet> jets;// = event.jets();        // access some event information
-
-        // cut0 :: >=1 jets 
-        if ( jets.size()<1 )                            // check if the event passes the cut!
-            passSelection = false;
-        else{
-            if (passSelection){
-                // only fill cutflow if the event is still 'good'
-                m_hists["cutflow"]->Fill(first_bin+1,nominal_weight);
-                m_hists["cutflow_unw"]->Fill(first_bin+1);
+        // fill cutflows (sequentially)
+        // break once a cut fails
+        for (unsigned int c=0;c<m_numberOfCuts;c++){
+            if (passSels.at(c)){
+                m_hists["cutflow"]->Fill(second_bin+c,nominal_weight);  // fill cutflow
+                m_hists["cutflow_unw"]->Fill(second_bin+c);             // first bin is "INITIAL"
             }
-            passSelection = true;
+            else{
+                passSelection = false;
+                break;
+            }
         }
-    }
+    } // end pre-selection
 
     return passSelection;
 }

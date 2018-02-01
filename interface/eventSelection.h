@@ -9,6 +9,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include <boost/dynamic_bitset.hpp>
 #include "TROOT.h"
@@ -50,6 +51,7 @@ class eventSelection : public edm::EDFilter {
     virtual void beginJob() override;
     virtual bool filter(edm::Event&, const edm::EventSetup&) override;
     virtual void endJob() override;
+    virtual void beginRun(edm::Run const& run, edm::EventSetup const& es);
 
     // Run once at the start of the job to setup the cuts: called from beginJob()
     virtual void identifySelection();
@@ -82,6 +84,7 @@ class eventSelection : public edm::EDFilter {
     std::vector<Cut> m_cuts;
 
     // booleans for each selection
+    bool m_preSelection;
     bool m_dummySelection;
     bool m_allHadDNNSelection;
     bool m_exampleSelection;
@@ -98,8 +101,9 @@ class eventSelection : public edm::EDFilter {
     edm::EDGetTokenT<MET> t_met;
     edm::EDGetTokenT<double> t_HT;
     edm::EDGetTokenT<double> t_ST;
-    edm::EDGetTokenT<std::vector<std::string>> t_trigName;
     edm::EDGetTokenT<std::vector<float>> t_trigBit;
+    edm::InputTag t_trigName;
+    edm::EDGetTokenT<GenEventInfoProduct> t_genEvtInfoProd;
 
     edm::Handle<std::vector<Electron>> m_electrons;
     edm::Handle<std::vector<Muon>> m_muons;
@@ -109,8 +113,9 @@ class eventSelection : public edm::EDFilter {
     edm::Handle<MET> m_met;
     edm::Handle<double> m_HT;
     edm::Handle<double> m_ST;
-    edm::Handle<std::vector<std::string>> h_trigName;
     edm::Handle<std::vector<float>> h_trigBit;
+    edm::Handle<std::vector<std::string>> h_trigName;
+    edm::Handle<GenEventInfoProduct> h_genEvtInfoProd;
 };
 
 #endif

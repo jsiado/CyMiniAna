@@ -15,6 +15,9 @@ import FWCore.ParameterSet.Config as cms
 evtSel = cms.EDFilter("eventSelection",
     selection = cms.string("SetMe"),
     cutsfile  = cms.string("SetMe"),
+    trigNameLabel = cms.InputTag("TriggerUserData", "triggerNameTree"),
+    trigBitLabel  = cms.InputTag("TriggerUserData", "triggerBitTree"),
+    HLTPaths = cms.vstring(hltPaths)
 )
 
 ## THE END

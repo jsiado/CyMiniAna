@@ -29,13 +29,13 @@ objectSelectionParams = cms.PSet(
 
  # muonParameters
     mu_id     = cms.string("loose"),
-    mu_pt     = cms.double(25),
+    mu_pt     = cms.double(30),
     mu_eta    = cms.double(2.4),
     mu_IsoMin = cms.double(-100),
     mu_IsoMax = cms.double(100),
 
  # electronParameters
-    el_pt  = cms.double(25),
+    el_pt  = cms.double(30),
     el_eta = cms.double(2.4),
     el_id  = cms.string("tight"),
     el_iso = cms.string(""),
@@ -54,5 +54,4 @@ objectSelectionParams = cms.PSet(
     ljet_id  = cms.string('loose'),
     ljet_pt  = cms.double(200),
     ljet_eta = cms.double(2.0),
-    ljet_subCSVv2 = cms.string('loose'),
 )

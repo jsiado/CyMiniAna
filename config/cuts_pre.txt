@@ -1,1 +1,2 @@
-N_JETS > 1
+TRIGGER > 0
+NLEPTONS == 1

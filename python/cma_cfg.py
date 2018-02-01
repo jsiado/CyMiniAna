@@ -64,10 +64,12 @@ process = cms.Process("CyMiniAna")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(101) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.source    = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
+#          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
+#           'file:config/B2GEDMNtuple_1.root'
+           'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
 	)
 )
 
@@ -104,9 +106,23 @@ process.CMAProducer = cms.EDProducer('CMAProducer',
 
 
 ## EVENT SELECTION
+#  triggers
+#  https://twiki.cern.ch/twiki/bin/view/CMS/TopTrigger#TOP_trigger_80X_reHLT_samples
+#  looking at isolated triggers for now, will need higher-pT for non-iso triggers
+
+hltPaths = ["HLT_Ele32_eta2p1_WPTight_Gsf_v8",
+            "HLT_IsoMu24_v4",
+            "HLT_IsoTkMu24_v4"
+           ]
+if not options.isMC:
+    hltPaths = [i.replace(i[-1],"*") for i in hltPaths]
+
 process.selection = cms.EDFilter("eventSelection",
-    selection = cms.string("none"),
-    cutsfile  = cms.string("config/cuts_none.txt"),
+    selection = cms.string("pre"),
+    cutsfile  = cms.string("config/cuts_pre.txt"),
+    trigNameLabel = cms.InputTag("TriggerUserData", "triggerNameTree"),
+    trigBitLabel  = cms.InputTag("TriggerUserData", "triggerBitTree"),
+    HLTPaths = cms.vstring(hltPaths)  
 )
 
 
