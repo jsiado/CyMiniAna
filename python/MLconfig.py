@@ -43,14 +43,6 @@ class Config(object):
         return value
 
 
-    def str2bool(self,param):
-        """Convert a string to a boolean"""
-        if param in ['true','True','1']:
-            return True
-        else:
-            return False
-
-
     def getConfiguration(self):
         """Read the configuration file and set arguments"""
         for line in self.file:

@@ -27,11 +27,11 @@ Recommended Use:
   Contact Dan with any questions about using this
   or suggestions for your specific use case
 */
-#include "Analysis/CyMiniAna/interface/eventSelection.h"
+#include "Analysis/CyMiniAna/interface/eventSelectionFlatNtuple.h"
 
 
 
-eventSelection::eventSelection(configuration &cmaConfig, const std::string &level) :
+eventSelectionFlatNtuple::eventSelectionFlatNtuple(configuration &cmaConfig, const std::string &level) :
   m_config(&cmaConfig),
   m_level(level),
   m_selection("SetMe"),
@@ -46,16 +46,16 @@ eventSelection::eventSelection(configuration &cmaConfig, const std::string &leve
     m_cutsfile  = m_config->cutsfile();
   }
 
-eventSelection::~eventSelection() {}
+eventSelectionFlatNtuple::~eventSelectionFlatNtuple() {}
 
 
-void eventSelection::initialize() {
+void eventSelectionFlatNtuple::initialize() {
     /* Build the cuts using the cut file from configuration */
     initialize( m_cutsfile );
     return;
 }
 
-void eventSelection::initialize(const std::string &cutsfile) {
+void eventSelectionFlatNtuple::initialize(const std::string &cutsfile) {
     /* Load cut values using specific name for cutsfile */
     std::ifstream file = cma::open_file(cutsfile);
 
@@ -88,7 +88,7 @@ void eventSelection::initialize(const std::string &cutsfile) {
 }
 
 
-void eventSelection::identifySelection(){
+void eventSelectionFlatNtuple::identifySelection(){
     /* Set the booleans for applying the selection below */
     m_allHadDNNSelection  = false;
 
@@ -101,7 +101,7 @@ void eventSelection::identifySelection(){
 }
 
 
-bool eventSelection::applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_unweighted) {
+bool eventSelectionFlatNtuple::applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_unweighted) {
     /* Apply cuts 
 
        Two cutflows:  
@@ -148,7 +148,7 @@ bool eventSelection::applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_u
 }
 
 
-void eventSelection::getCutNames(){
+void eventSelectionFlatNtuple::getCutNames(){
     /* Get the cut names (for labeling bins in cutflow histograms) and store in vector */
     m_cutflowNames.clear();
     for (const auto& cut : m_cuts)
@@ -157,12 +157,12 @@ void eventSelection::getCutNames(){
     return;
 }
 
-std::vector<std::string> eventSelection::cutNames(){
+std::vector<std::string> eventSelectionFlatNtuple::cutNames(){
     /* Return a vector of the cut names (for labeling bins in cutflow histograms) */
     return m_cutflowNames;
 }
 
-unsigned int eventSelection::numberOfCuts(){
+unsigned int eventSelectionFlatNtuple::numberOfCuts(){
     /* Return the number of cuts (number of bins in cutflow histograms) */
     return m_numberOfCuts;
 }

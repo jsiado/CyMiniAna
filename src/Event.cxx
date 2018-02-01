@@ -1,6 +1,6 @@
 /*
 Created:        --
-Last Updated:   22 August 2017
+Last Updated:   13 December 2017
 
 Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
@@ -10,6 +10,7 @@ University of Michigan, Ann Arbor, MI 48109
 
 Event class
 Contains all the objects (& structs) with event information
+Assumes a flat ntuple data structure
 
 */
 #include "Analysis/CyMiniAna/interface/Event.h"
@@ -39,7 +40,9 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     m_cMVAv2L = m_config->cMVAv2L();
     m_cMVAv2M = m_config->cMVAv2M();
     m_cMVAv2T = m_config->cMVAv2T();
-
+    m_CSVv2L  = m_config->CSVv2L();
+    m_CSVv2M  = m_config->CSVv2M();
+    m_CSVv2T  = m_config->CSVv2T();
 
     //** Access branches from Tree **//
     m_eventNumber  = new TTreeReaderValue<int>(m_ttree,"evt_EventNumber");
@@ -592,17 +595,15 @@ void Event::initialize_ljets(){
         ljet.p4.SetPtEtaPhiE( m_ljet_pt->At(i),m_ljet_eta->At(i),m_ljet_phi->At(i),m_ljet_e->At(i));
         ljet.charge    = m_ljet_charge->At(i);
 
-        ljet.tau1_CHS  = m_ljet_tau1_CHS->At(i);
-        ljet.tau2_CHS  = m_ljet_tau2_CHS->At(i);
-        ljet.tau3_CHS  = m_ljet_tau3_CHS->At(i);
-        ljet.tau21_CHS = ljet.tau2_CHS / ljet.tau1_CHS;
-        ljet.tau32_CHS = ljet.tau3_CHS / ljet.tau2_CHS;
+        ljet.tau1  = m_ljet_tau1_CHS->At(i);
+        ljet.tau2  = m_ljet_tau2_CHS->At(i);
+        ljet.tau3  = m_ljet_tau3_CHS->At(i);
+        ljet.tau21 = ljet.tau2 / ljet.tau1;
+        ljet.tau32 = ljet.tau3 / ljet.tau2;
 
-        ljet.softDropMass_CHS = m_ljet_softDropMass_CHS->At(i);
-        ljet.vSubjetIndex0    = m_ljet_vSubjetIndex0->At(i);
-        ljet.vSubjetIndex1    = m_ljet_vSubjetIndex1->At(i);
-
-        ljet.isGood    = (ljet.p4.Pt()>200000. && fabs(ljet.p4.Eta())<2.0) ? 1 : 0;
+        ljet.softDropMass  = m_ljet_softDropMass_CHS->At(i);
+        ljet.vSubjetIndex0 = m_ljet_vSubjetIndex0->At(i);
+        ljet.vSubjetIndex1 = m_ljet_vSubjetIndex1->At(i);
 
         m_ljets[i] = ljet;
     }
@@ -614,10 +615,6 @@ void Event::initialize_ljets(){
 void Event::initialize_leptons(){
     /* Setup struct of lepton and relevant information */
     m_leptons.clear();
-
-    Lepton lep;
-    m_leptons.push_back(lep);
-
     return;
 }
 
@@ -738,13 +735,13 @@ void Event::getBtaggedJets( Jet& jet ){
     jet.isbtagged["M"] = false;
     jet.isbtagged["T"] = false;
 
-    if (jet.cMVAv2 > m_cMVAv2L){
+    if (jet.CSVv2 > m_CSVv2L){
         jet.isbtagged["L"] = true;
         m_btag_jets["L"].push_back(jet.index);  // 0 = index of this jet
-        if (jet.cMVAv2 > m_cMVAv2M){
+        if (jet.CSVv2 > m_CSVv2M){
             jet.isbtagged["M"] = true;
             m_btag_jets["M"].push_back(jet.index);
-            if (jet.cMVAv2 > m_cMVAv2T){
+            if (jet.CSVv2 > m_CSVv2T){
                 jet.isbtagged["T"] = true;
                 m_btag_jets["T"].push_back(jet.index);
             }

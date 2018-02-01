@@ -180,6 +180,9 @@ class Event {
     float m_cMVAv2L;
     float m_cMVAv2M;
     float m_cMVAv2T;
+    float m_CSVv2L;
+    float m_CSVv2M;
+    float m_CSVv2T;
 
     // kinematics
     float m_HT;
@@ -200,9 +203,9 @@ class Event {
 
     // TTree variables [all possible ones]
     // ************
-    // the following are from root files accessed 
-    //  on 6 November 2017 (N. Eminizer)
-    //  /store/user/eminizer/B2GTTrees_Jun19/
+    // Setup to read EDMntuple format
+    // -- following this example:
+    //    https://github.com/dmajumder/VLQAna
     unsigned int m_array_size = 500;
 
     TTreeReaderValue<float> * m_weight_mc;          // evt_Gen_Weight

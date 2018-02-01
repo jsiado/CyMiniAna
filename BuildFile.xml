@@ -1,6 +1,16 @@
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="FWCore/Utilities"/>
 <use   name="JetMETCorrections/Modules"/>
+<use   name="CommonTools/UtilAlgos"/>
 <use   name="CondFormats/JetMETObjects"/>
+<use   name="CondFormats/BTauObjects"/>
+<use   name="CondTools/BTau"/>
 <use   name="DataFormats/JetReco"/>
+<use   name="DataFormats/Provenance"/>
+
 <use   name="lwtnn/lwtnn"/>
 
 <use   name="boost"/>

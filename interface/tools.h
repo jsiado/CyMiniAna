@@ -48,6 +48,9 @@ namespace cma{
                            std::map<std::string,float> &m_mapAMI,
                            std::map<std::string,unsigned int>& m_mapNEvents );
 
+    /* Determine if the file is MC or Data */
+    void checkFileType( TFile& file );
+
     /* Convert string to boolean */
     bool str2bool( const std::string value );
 
