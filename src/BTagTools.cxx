@@ -21,11 +21,11 @@ BTagTools::BTagTools(bool isBoosted) :
     */
     std::string measurement_type("");
     if (m_isBoosted){
-        m_calib = new BTagCalibration("CSVv2", /*"config/*/"subjet_CSVv2_Moriond17_B_H.csv");
+        m_calib = new BTagCalibration("CSVv2", /*"data/*/"subjet_CSVv2_Moriond17_B_H.csv");
         measurement_type = "lt";
     }
     else{
-        m_calib = new BTagCalibration("CSVv2", /*"config/*/"CSVv2_Moriond17_B_H.csv");
+        m_calib = new BTagCalibration("CSVv2", /*"data/*/"CSVv2_Moriond17_B_H.csv");
         measurement_type = "mujets";
     }
 
