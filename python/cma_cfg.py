@@ -69,7 +69,7 @@ process.source    = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
 #          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
 #           'file:config/B2GEDMNtuple_1.root'
-           'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
+#           'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
 	)
 )
 
@@ -119,7 +119,7 @@ if not options.isMC:
 
 process.selection = cms.EDFilter("eventSelection",
     selection = cms.string("pre"),
-    cutsfile  = cms.string("config/cuts_pre.txt"),
+    cutsfile  = cms.string("cuts_pre.txt"),
     trigNameLabel = cms.InputTag("TriggerUserData", "triggerNameTree"),
     trigBitLabel  = cms.InputTag("TriggerUserData", "triggerBitTree"),
     HLTPaths = cms.vstring(hltPaths)  
@@ -135,8 +135,8 @@ process.histograms = cms.EDAnalyzer("histogrammer",
     useLeptons    = cms.bool(options.useLeptons),
     useNeutrinos  = cms.bool(options.useNeutrinos),
     useSystWeights = cms.bool(False),
-    weightSystematicsFile       = cms.string("config/weightSystematics.txt"),
-    weightVectorSystematicsFile = cms.string("config/weightVectorSystematics.txt"),
+    weightSystematicsFile       = cms.string("weightSystematics.txt"),
+    weightVectorSystematicsFile = cms.string("weightVectorSystematics.txt"),
 )
 
 
@@ -171,12 +171,12 @@ process.final   = eventCounter.clone( isData=(not options.isMC) )
 #process.outpath = cms.EndPath(process.out)
 
 process.p = cms.Path(
-    process.initial*
+#    process.initial*
     process.CMAProducer*
     process.selection*
     process.histograms*
-    process.tree*
-    process.final
+    process.tree
+#    process.final
 )
 
 

@@ -509,7 +509,7 @@ class HepPlotter(object):
 
                 if self.ratio_type=="ratio":
                     residual     = deepcopy( num_hist / den_hist )
-                    residual_err = deepcopy( np.sqrt(num_hist) / den_hist )
+                    residual_err = deepcopy( self.hists2plot[histName]['error']  / den_hist ) #np.sqrt(num_hist) / den_hist )
                 elif self.ratio_type == "significance":
                     residual     = deepcopy( num_hist / np.sqrt(den_hist) )
                     residual_err = [0 for _ in residual] # don't know how to estimate this
