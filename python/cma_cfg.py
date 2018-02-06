@@ -54,26 +54,43 @@ options.register('useNeutrinos', False,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Use neutrinos" )
+options.register('isCRABJob', False,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.bool,
+    "Running CRAB job")
 options.parseArguments()
 
 
-## PROCESS
+## Set some basic options for running
+fileanames = [
+#          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
+          'file:config/B2GEDMNtuple_1.root'
+#          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
+]
+config_path = 'config/'   # path to files needed in CyMiniAna
 
+hltPaths    = ["HLT_Ele32_eta2p1_WPTight_Gsf_v8",
+               "HLT_IsoMu24_v4",
+               "HLT_IsoTkMu24_v4"
+              ]
+if not options.isMC:
+    hltPaths = [i.replace(i[-1],"*") for i in hltPaths]
+
+
+if options.isCRABJob:
+    # Different options for CRAB jobs
+    filenames   = []
+    config_path = ''      # for CRAB jobs, these are put in the same directory
+
+
+## PROCESS
 process = cms.Process("CyMiniAna")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
-process.source    = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(
-#          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
-#           'file:config/B2GEDMNtuple_1.root'
-#           'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
-	)
-)
-
-
+process.source       = cms.Source("PoolSource",fileNames = cms.untracked.vstring(filenames))
+process.maxEvents    = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.TFileService = cms.Service("TFileService", fileName = cms.string("output.root") )
 
 
@@ -88,9 +105,7 @@ process.CMAProducer = cms.EDProducer('CMAProducer',
     buildNeutrinos = cms.bool(False),
     kinematicReco  = cms.bool(False),
     LUMI = cms.double(1.0),
-    cleanEvents  = cms.bool(False),
-    metadataFile = cms.string(""),
-
+    metadataFile = cms.string(config_path+"metadataFile.txt"),
     # Physics Objects
     # - labels to access data
     neutrinoLabels  = neutrinoLabels,
@@ -99,7 +114,6 @@ process.CMAProducer = cms.EDProducer('CMAProducer',
     jetLabels       = jetLabels,
     largeRjetLabels = largeRJetLabels,
     METLabels = METLabels,
-
     # - selection on objects (pT,eta,ID,b-tagging,etc.)
     objSelectionParams = objectSelectionParams,
 )
@@ -109,17 +123,9 @@ process.CMAProducer = cms.EDProducer('CMAProducer',
 #  triggers
 #  https://twiki.cern.ch/twiki/bin/view/CMS/TopTrigger#TOP_trigger_80X_reHLT_samples
 #  looking at isolated triggers for now, will need higher-pT for non-iso triggers
-
-hltPaths = ["HLT_Ele32_eta2p1_WPTight_Gsf_v8",
-            "HLT_IsoMu24_v4",
-            "HLT_IsoTkMu24_v4"
-           ]
-if not options.isMC:
-    hltPaths = [i.replace(i[-1],"*") for i in hltPaths]
-
 process.selection = cms.EDFilter("eventSelection",
     selection = cms.string("pre"),
-    cutsfile  = cms.string("cuts_pre.txt"),
+    cutsfile  = cms.string(config+"cuts_pre.txt"),
     trigNameLabel = cms.InputTag("TriggerUserData", "triggerNameTree"),
     trigBitLabel  = cms.InputTag("TriggerUserData", "triggerBitTree"),
     HLTPaths = cms.vstring(hltPaths)  
@@ -134,9 +140,6 @@ process.histograms = cms.EDAnalyzer("histogrammer",
     useLargeRJets = cms.bool(options.useLargeRJets),
     useLeptons    = cms.bool(options.useLeptons),
     useNeutrinos  = cms.bool(options.useNeutrinos),
-    useSystWeights = cms.bool(False),
-    weightSystematicsFile       = cms.string("weightSystematics.txt"),
-    weightVectorSystematicsFile = cms.string("weightVectorSystematics.txt"),
 )
 
 
@@ -154,29 +157,16 @@ process.tree = cms.EDAnalyzer("EventSaverFlatNtuple",
     lumisecLabel    = cms.InputTag("eventInfo", "evtInfoLumiBlock"),
     evtnoLabel      = cms.InputTag("eventInfo", "evtInfoEventNumber"),
     puNtrueIntLabel = cms.InputTag("eventUserData", "puNtrueInt"),
+    metadataFile = cms.string(config_path+"metadataFile.txt"),
 )
 
 
-## -- Count events before & after selection
-##    https://github.com/dmajumder/EventCounter
-process.initial = eventCounter.clone( isData=(not options.isMC) )
-process.final   = eventCounter.clone( isData=(not options.isMC) )
-
-
-#process.out = cms.OutputModule("PoolOutputModule",
-#                               fileName = cms.untracked.string("ana_out.root"),
-#                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
-#                               outputCommands = cms.untracked.vstring('drop *')
-#                               )
-#process.outpath = cms.EndPath(process.out)
-
+## PROCESS PATH
 process.p = cms.Path(
-#    process.initial*
     process.CMAProducer*
     process.selection*
     process.histograms*
     process.tree
-#    process.final
 )
 
 

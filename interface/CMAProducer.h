@@ -83,7 +83,6 @@ class CMAProducer : public edm::EDProducer {
     bool m_useNeutrinos;
     bool m_buildNeutrinos;
     bool m_kinematicReco;
-    std::string m_metadataFile;
     double m_LUMI;
 
     // Physics information
@@ -99,6 +98,11 @@ class CMAProducer : public edm::EDProducer {
     MET m_MET;
     double m_HT;
     double m_ST;
+
+    std::string m_metadataFile;
+    std::map<std::string, float> m_XSection;	   // map sample name to XSection
+    std::map<std::string, float> m_KFactor;        // map sample name to KFactor
+    std::map<std::string, float> m_sumOfWeights;   // map sample name to sum of weights
 
     // ************
     // Setup to read EDMntuple format

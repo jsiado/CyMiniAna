@@ -41,9 +41,10 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
 
     virtual void beginJob() override;
     virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
-    //virtual void produce(edm::Event&, const edm::EventSetup&);
+    virtual void endJob() override;
 
-    TTree* m_ttree;
+    TTree* m_ttree;                // physics information
+    TTree* m_metadata_ttree;       // metadata
 
     std::string m_name;
     bool m_isMC;
@@ -55,7 +56,6 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     bool m_useLargeRJets;
     bool m_useLeptons;
     bool m_useNeutrinos;
-
 
     // Handles and Tokens
     edm::EDGetTokenT<std::vector<Electron>> t_electrons;
@@ -86,6 +86,12 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::EDGetTokenT<std::vector<int>> t_lhewtids;
     edm::EDGetTokenT<std::vector<float>> t_lhewts;
 
+    edm::EDGetTokenT<std::string> t_sampleName;
+    edm::EDGetTokenT<float> t_xsection;
+    edm::EDGetTokenT<float> t_kfactor;
+    edm::EDGetTokenT<float> t_sumOfWeights;
+    edm::EDGetTokenT<float> t_LUMI;
+
     // Handles
     edm::Handle<bool> h_isData;
     edm::Handle<bool> h_hltdecision;
@@ -99,7 +105,6 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<float> h_htHat;
     edm::Handle<std::vector<int>> h_lhewtids;
     edm::Handle<std::vector<float>> h_lhewts;
-
 
     edm::Handle<std::vector<Electron>> m_electrons;
     edm::Handle<std::vector<Muon>> m_muons;
@@ -116,8 +121,19 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<int> h_evtno;
     edm::Handle<int> h_lumisec;
 
+    edm::Handle<std::string> h_sampleName;
+    edm::Handle<float> h_xsection;
+    edm::Handle<float> h_kfactor;
+    edm::Handle<float> h_sumOfWeights;
+    edm::Handle<float> h_LUMI;
+
 
     // Branches
+    std::string m_sampleName;
+    float m_xsection;
+    float m_kfactor;
+    float m_sumOfWeights;
+
     std::vector<float> m_jet_pt;
     std::vector<float> m_jet_eta;
     std::vector<float> m_jet_phi;
@@ -200,10 +216,6 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     float m_weight_pileup;
     float m_weight_jet_jer;
     float m_weight_ljet_jer;
-
-    float m_xsection;
-    float m_kfactor;
-    float m_sumOfWeights;
 
     float m_met_met_sf;
     float m_met_phi_sf;
