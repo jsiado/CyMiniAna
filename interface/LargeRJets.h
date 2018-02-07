@@ -40,6 +40,7 @@ class LargeRJets {
     // Setup physics information from EDMntuples
     edm::ParameterSet m_labels;
     bool m_useTruth;
+    std::string m_data_path;
 
     BTagTools *m_btagTool;
 

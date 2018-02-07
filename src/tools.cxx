@@ -113,6 +113,7 @@ void getSampleWeights( std::string metadata_file,
                        std::map<std::string,float>& m_mapAMI,
                        std::map<std::string,unsigned int>& m_mapNEvents ){
     /* Calculate XSection, KFactor, and sum of weights (AMI) */
+    std::cout << " GET SAMPLE WEIGHT " << std::endl;
     cma::INFO("TOOLS : Get sample weights (including sum of weights)");
 
     // get the absolute path (in case of batch job)
@@ -123,16 +124,17 @@ void getSampleWeights( std::string metadata_file,
         cma::WARNING("TOOLS :    'CYMINIANADIR' " );
         cma::WARNING("TOOLS : is not set.  Relative paths will be used " );
         cma::WARNING("TOOLS : This may cause problems submitting batch jobs." );
-        cma_absPath = "./";
+        cma_absPath = "";
         cma::WARNING("TOOLS : path set to: "+cma_absPath );
     }
     else{
         cma_absPath = cma_path;
+        cma_absPath += "/";
     }
 
 
     std::string weightsFile(metadata_file);
-    std::string weightsFileFull(cma_absPath+"/"+metadata_file);
+    std::string weightsFileFull(cma_absPath+metadata_file);
 
     std::ifstream in( weightsFile.c_str());
     if (!in){
@@ -222,7 +224,7 @@ bool deltaRMatch( TLorentzVector &particle1, TLorentzVector &particle2, double d
 }
 
 
-std::string m_debugLevel = "SetMe";
+std::string m_debugLevel = "INFO";
 void setVerboseLevel( const std::string& verboseLevel ) {
     m_debugLevel = verboseLevel;
     return;

@@ -17,8 +17,9 @@ using namespace edm;
 
 
 LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  m_labels(iConfig.getParameter<edm::ParameterSet>("largeRjetLabels")){
-    m_useTruth = iConfig.getParameter<bool>("useTruth");
+  m_labels(iConfig.getParameter<edm::ParameterSet>("largeRjetLabels")),
+  m_useTruth(iConfig.getParameter<bool>("useTruth")),
+  m_data_path(iConfig.getParameter<std::string>("data_path")){
     t_ljetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPtLabel"));
     t_ljetEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetEtaLabel"));
     t_ljetPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPhiLabel"));
@@ -69,7 +70,7 @@ LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector 
         t_ljet_subjetGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetGenChargeLabel"));
     }
 
-    m_btagTool = new BTagTools(true);
+    m_btagTool = new BTagTools(true,m_data_path);
 }
 
 LargeRJets::~LargeRJets() {}

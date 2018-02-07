@@ -13,19 +13,20 @@ Interface with btagging tools to get SFs and uncertainties
 #include "Analysis/CyMiniAna/interface/BTagTools.h"
 
 
-BTagTools::BTagTools(bool isBoosted) : 
-  m_isBoosted(isBoosted){
+BTagTools::BTagTools(const bool& isBoosted, const std::string& data_path) :
+  m_isBoosted(isBoosted),
+  m_data_path(data_path){
     /* Setup btagging tools
        CSV files downloaded on 31Jan2018 from
         https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco#Boosted_event_topologies
     */
     std::string measurement_type("");
     if (m_isBoosted){
-        m_calib = new BTagCalibration("CSVv2", /*"data/*/"subjet_CSVv2_Moriond17_B_H.csv");
+        m_calib = new BTagCalibration("CSVv2", m_data_path+"subjet_CSVv2_Moriond17_B_H.csv");
         measurement_type = "lt";
     }
     else{
-        m_calib = new BTagCalibration("CSVv2", /*"data/*/"CSVv2_Moriond17_B_H.csv");
+        m_calib = new BTagCalibration("CSVv2", m_data_path+"CSVv2_Moriond17_B_H.csv");
         measurement_type = "mujets";
     }
 

@@ -30,7 +30,6 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   //m_triggersTool(iConfig,consumesCollector()){
   // General Parameters
   m_isMC(iConfig.getParameter<bool>("isMC")),
-  m_cleanFlags(iConfig.getParameter<bool>("cleanEvents")),
   m_useTruth(iConfig.getParameter<bool>("useTruth")),
   m_useJets(iConfig.getParameter<bool>("useJets")),
   m_useLargeRJets(iConfig.getParameter<bool>("useLargeRJets")),
@@ -38,13 +37,19 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   m_useNeutrinos(iConfig.getParameter<bool>("useNeutrinos")),
   m_buildNeutrinos(iConfig.getParameter<bool>("buildNeutrinos")),
   m_kinematicReco(iConfig.getParameter<bool>("kinematicReco")),
+  m_LUMI(iConfig.getParameter<double>("LUMI")),
   m_metadataFile(iConfig.getParameter<std::string>("metadataFile")),
-  m_LUMI(iConfig.getParameter<double>("LUMI")){
+  m_sampleName(iConfig.getParameter<std::string>("sampleName")){
     // Generator information (parton-level information)
+    m_XSection.clear();
+    m_KFactor.clear();
+    m_sumOfWeights.clear();
+    m_NEvents.clear();
     if (m_isMC){
+        cma::getSampleWeights( m_metadataFile,m_XSection,m_KFactor,m_sumOfWeights,m_NEvents );
     }
 
-    // Register products (physics objects)
+    // Register products (physics objects & information)
     produces<std::vector<Electron>>("electrons").setBranchAlias( "electrons" );
     produces<std::vector<Muon>>("muons").setBranchAlias( "muons" );
     produces<std::vector<Jet>>("jets").setBranchAlias( "jets" );
@@ -53,7 +58,9 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
     produces<MET>("MET").setBranchAlias( "MET" );
     produces<double>("HT").setBranchAlias( "HT" );
     produces<double>("ST").setBranchAlias( "ST" );
-    /* Add information from kinematics reconstruction once available */
+    produces<double>("eventweight").setBranchAlias( "eventweight" );
+
+    /* Add information from kinematic reconstruction once available */
 } // end constructor
 
 
@@ -90,6 +97,7 @@ void CMAProducer::clearObjects(){
     m_MET = {};
     m_HT = 0;
     m_ST = 0;
+    m_event_weight = 1;   // nominal event weight for histograms
 
     return;
 }
@@ -113,7 +121,7 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     std::auto_ptr< MET > e_MET( new MET );
     std::auto_ptr< double > e_HT( new double );
     std::auto_ptr< double > e_ST( new double );
-
+    std::auto_ptr< double > e_event_weight( new double );
 
     // Build physics objects
     // - pass 'evt' to each function to access handles
@@ -148,7 +156,7 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
             e_ljets->push_back(jet);
     }
 
-    initialize_kinematics(evt);                                           // MET, HT
+    initialize_kinematics(evt);                                             // MET, HT
 
     if (m_useNeutrinos){
         // Neutrinos (reconstruct or grab from ntuple)
@@ -164,7 +172,15 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     /* 
      * do kinematic reconstruction, event weight calculations here 
      */
+    m_event_weight  = 1.0;
+    m_event_weight *= m_XSection.at(m_sampleName) * m_KFactor.at(m_sampleName) / m_sumOfWeights.at(m_sampleName);
+// btag SF
+// pileup
+// generator weight
+    m_event_weight /= m_LUMI;
 
+
+    /* Set values to store in the event */
     (*e_MET).p4 = m_MET.p4;
     (*e_MET).uncorrPt    = m_MET.uncorrPt;
     (*e_MET).uncorrPhi   = m_MET.uncorrPhi;
@@ -173,6 +189,9 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     *e_HT = m_HT;
     *e_ST = m_ST;
 
+    *e_event_weight = m_event_weight;
+
+    /* Store values in the event to use in analyzers/filters */
     evt.put(e_electrons, "electrons");
     evt.put(e_muons,     "muons");
     evt.put(e_neutrinos, "neutrinos");
@@ -181,6 +200,7 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     evt.put(e_MET,       "MET");
     evt.put(e_HT,        "HT");
     evt.put(e_ST,        "ST");
+    evt.put(e_event_weight, "eventweight");
 
     return;
 }

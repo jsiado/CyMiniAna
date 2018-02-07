@@ -41,9 +41,10 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
 
     virtual void beginJob() override;
     virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
-    //virtual void produce(edm::Event&, const edm::EventSetup&);
+    virtual void endJob() override;
 
-    TTree* m_ttree;
+    TTree* m_ttree;                // physics information
+    TTree* m_metadata_ttree;       // metadata
 
     std::string m_name;
     bool m_isMC;
@@ -55,6 +56,14 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     bool m_useLargeRJets;
     bool m_useLeptons;
     bool m_useNeutrinos;
+
+    std::string t_sampleName;
+    std::string t_metadataFile;
+
+    std::map<std::string, float> m_XSections;        // map sample name to XSection
+    std::map<std::string, float> m_KFactors;         // map sample name to KFactor
+    std::map<std::string, float> m_sumOfMCWeights;   // map sample name to sum of weights
+    std::map<std::string, unsigned int> m_NEvents;   // map sample name to number of events in sample
 
 
     // Handles and Tokens
@@ -100,7 +109,6 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<std::vector<int>> h_lhewtids;
     edm::Handle<std::vector<float>> h_lhewts;
 
-
     edm::Handle<std::vector<Electron>> m_electrons;
     edm::Handle<std::vector<Muon>> m_muons;
     edm::Handle<std::vector<Neutrino>> m_neutrinos;
@@ -116,8 +124,12 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<int> h_evtno;
     edm::Handle<int> h_lumisec;
 
-
     // Branches
+    std::string m_sampleName;
+    float m_xsection;
+    float m_kfactor;
+    float m_sumOfWeights;
+
     std::vector<float> m_jet_pt;
     std::vector<float> m_jet_eta;
     std::vector<float> m_jet_phi;
@@ -200,10 +212,6 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     float m_weight_pileup;
     float m_weight_jet_jer;
     float m_weight_ljet_jer;
-
-    float m_xsection;
-    float m_kfactor;
-    float m_sumOfWeights;
 
     float m_met_met_sf;
     float m_met_phi_sf;

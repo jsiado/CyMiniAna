@@ -52,11 +52,9 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     virtual void init_hist( const std::string& name, const unsigned int nBinsX, const double *xbins,
                               const unsigned int nBinsY, const double *ybins,  
                               const unsigned int nBinsZ, const double *zbins );
-    virtual void bookHists( const std::string name );
 
 
     /* fill histograms */
-    virtual void fill( const std::string& name, const edm::Event& event, double event_weight );
     virtual void fill( const std::string& name, const double& value, const double& weight );
     virtual void fill( const std::string& name, const double& xvalue, const double& yvalue, const double& weight );
     virtual void fill( const std::string& name, const double& xvalue, const double& yvalue, const double& zvalue, const double& weight );
@@ -103,6 +101,7 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     edm::EDGetTokenT<MET> t_met;
     edm::EDGetTokenT<double> t_HT;
     edm::EDGetTokenT<double> t_ST;
+    edm::EDGetTokenT<double> t_event_weight;
 
     edm::Handle<std::vector<Electron>> m_electrons;
     edm::Handle<std::vector<Muon>> m_muons;
@@ -112,6 +111,7 @@ class histogrammer : public edm::one::EDAnalyzer<edm::one::SharedResources> {
     edm::Handle<MET> m_met;
     edm::Handle<double> m_HT;
     edm::Handle<double> m_ST;
+    edm::Handle<double> m_event_weight;
 };
 
 #endif

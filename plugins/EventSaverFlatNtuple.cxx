@@ -15,6 +15,8 @@ Write data to flat ntuple
 using namespace edm;
 
 EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
+  t_sampleName(cfg.getParameter<std::string>("sampleName")),
+  t_metadataFile(cfg.getParameter<std::string>("metadataFile")),
   t_electrons(consumes<std::vector<Electron>>(edm::InputTag("CMAProducer","electrons","CyMiniAna"))),
   t_muons(consumes<std::vector<Muon>>(edm::InputTag("CMAProducer","muons","CyMiniAna"))),
   t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("CMAProducer","neutrinos","CyMiniAna"))),
@@ -25,13 +27,10 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
   t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
   t_rho(consumes<std::vector<float>>(cfg.getParameter<edm::InputTag>("rhoLabel"))),
   t_npv(consumes<int>(cfg.getParameter<edm::InputTag>("npvLabel"))){
-//  t_npuTrue(consumes<int>(cfg.getParameter<edm::InputTag>("puNtrueIntLabel"))){
-//  t_runno(consumes<int>(cfg.getParameter<edm::InputTag>("runnoLabel"))),
-//  t_evtno(consumes<int>(cfg.getParameter<edm::InputTag>("evtnoLabel"))),
-//  t_lumisec(consumes<int>(cfg.getParameter<edm::InputTag>("lumisecLabel"))){
-
+    // Make output TTrees
     edm::Service<TFileService> fs;
     m_ttree = fs->make<TTree>("events","events");
+    m_metadata_ttree = fs->make<TTree>("metadata","metadata");
 
     initialize_branches();
 
@@ -41,6 +40,15 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
     m_useLargeRJets  = cfg.getParameter<bool>("useLargeRJets");  // filling large-R jet branches
     m_useLeptons     = cfg.getParameter<bool>("useLeptons");     // filling lepton branches
     m_useNeutrinos   = cfg.getParameter<bool>("useNeutrinos");   // filling neutrino branches 
+
+    m_sampleName = t_sampleName;
+    m_XSections.clear();
+    m_KFactors.clear();
+    m_sumOfMCWeights.clear();
+    m_NEvents.clear();
+    if (m_isMC){
+        cma::getSampleWeights( t_metadataFile,m_XSections,m_KFactors,m_sumOfMCWeights,m_NEvents );
+    }
 }
 
 
@@ -288,8 +296,35 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
 }
 
 
+void EventSaverFlatNtuple::endJob(){
+    /* End of job 
+       - Fill the metadata tree (only 1 "event")
+    */
+    if (m_isMC){
+        m_xsection = m_XSections.at( m_sampleName );
+        m_kfactor  = m_KFactors.at( m_sampleName );
+        m_sumOfWeights = m_sumOfMCWeights.at( m_sampleName );
+    }
+    else{
+        m_xsection = 1;
+        m_kfactor  = 1;
+        m_sumOfWeights = 1;
+    }
+
+    m_metadata_ttree->Fill();
+
+    return;
+}
+
+
 void EventSaverFlatNtuple::initialize_branches(){
-    /* Setup the output tree */
+    /* Setup the output trees */
+    // Metadata
+    m_metadata_ttree->Branch("sampleName",   &m_sampleName);                      // string
+    m_metadata_ttree->Branch("xsection",     &m_xsection,     "xsection/F");      // float
+    m_metadata_ttree->Branch("kfactor",      &m_kfactor,      "kfactor/F");       // float
+    m_metadata_ttree->Branch("sumOfWeights", &m_sumOfWeights, "sumOfWeights/F");  // float
+
     // Physics Objects
     // -- AK4 Jets
     m_ttree->Branch("jet_pt",  &m_jet_pt);     // vector of floats
@@ -381,9 +416,9 @@ void EventSaverFlatNtuple::initialize_branches(){
     m_ttree->Branch("weight_pileup",   &m_weight_pileup,  "weight_pileup/F");      // float
     m_ttree->Branch("weight_jet_jer",  &m_weight_jet_jer, "weight_jet_jer/F");     // float
     m_ttree->Branch("weight_ljet_jer", &m_weight_ljet_jer,"weight_ljet_jer/F");    // float
-    m_ttree->Branch("xsection",        &m_xsection,       "xsection/F");           // float
-    m_ttree->Branch("kfactor",         &m_kfactor,        "kfactor/F");            // float
-    m_ttree->Branch("sumOfWeights",    &m_sumOfWeights,   "sumOfWeights/F");       // float
+//    m_ttree->Branch("xsection",        &m_xsection,       "xsection/F");           // float
+//    m_ttree->Branch("kfactor",         &m_kfactor,        "kfactor/F");            // float
+//    m_ttree->Branch("sumOfWeights",    &m_sumOfWeights,   "sumOfWeights/F");       // float
 
     // Uncertainties (SFs)
     m_ttree->Branch("met_met_sf",      &m_met_met_sf,    "met_met_sf/F");          // float

@@ -1,0 +1,10 @@
+file:config/B2GEDMNtuple_1.root B2GEDMNtuple_1
+/SingleMuon/oiorio-Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1-d397a966867907ea02661d70db4cdb9f/USER SingleMuon-Run2016B-ver2-v2
+/SingleMuon/oiorio-Run2016C-03Feb2017-v1_B2GAnaFW_80X_V3p1-d397a966867907ea02661d70db4cdb9f/USER SingleMuon-Run2016B-ver2-v2
+/SingleMuon/oiorio-Run2016D-03Feb2017-v1_B2GAnaFW_80X_V3p1-d397a966867907ea02661d70db4cdb9f/USER SingleMuon-Run2016B-ver2-v2
+/SingleMuon/oiorio-Run2016E-03Feb2017-v1_B2GAnaFW_80X_V3p1-772b8342a7e97379f340082700062d1c/USER SingleMuon-Run2016B-ver2-v2
+/SingleMuon/oiorio-Run2016F-03Feb2017-v1_B2GAnaFW_80X_V3p1-772b8342a7e97379f340082700062d1c/USER SingleMuon-Run2016B-ver2-v2
+/SingleMuon/oiorio-Run2016G-03Feb2017-v1_B2GAnaFW_80X_V3p1-70f39d6d09d0b73bfa14078f288a0ee4/USER SingleMuon-Run2016B-ver2-v2
+/SingleMuon/oiorio-Run2016H-03Feb2017_ver2-v1_B2GAnaFW_80X_V3p1-426fcf68e8d774085dec299deacebe2a/USER SingleMuon-Run2016B-ver2-v2
+/SingleMuon/oiorio-Run2016H-03Feb2017_ver3-v1_B2GAnaFW_80X_V3p1-426fcf68e8d774085dec299deacebe2a/USER SingleMuon-Run2016B-ver2-v2
+/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/oiorio-RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June-abe82725a22c385c5abbaab3e6182693/USER TT_TuneCUETP8M2T4_13TeV-powheg-pythia8
