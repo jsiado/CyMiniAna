@@ -26,7 +26,7 @@
 
 #include "Analysis/CyMiniAna/interface/tools.h"
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
-
+#include "Analysis/CyMiniAna/interface/Truth.h"
 
 class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 //class EventSaverFlatNtuple : public edm::EDProducer {
@@ -65,13 +65,16 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     std::map<std::string, float> m_sumOfMCWeights;   // map sample name to sum of weights
     std::map<std::string, unsigned int> m_NEvents;   // map sample name to number of events in sample
 
+    Truth m_truthTool;
 
     // Handles and Tokens
     edm::EDGetTokenT<std::vector<Electron>> t_electrons;
     edm::EDGetTokenT<std::vector<Muon>> t_muons;
     edm::EDGetTokenT<std::vector<Neutrino>> t_neutrinos;
     edm::EDGetTokenT<std::vector<Jet>> t_jets;
+    edm::EDGetTokenT<std::vector<Jet>> t_truth_jets;
     edm::EDGetTokenT<std::vector<Ljet>> t_ljets;
+    edm::EDGetTokenT<std::vector<Ljet>> t_truth_ljets;
     edm::EDGetTokenT<MET> t_met;
     edm::EDGetTokenT<double> t_HT;
     edm::EDGetTokenT<double> t_ST;
@@ -113,7 +116,9 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<std::vector<Muon>> m_muons;
     edm::Handle<std::vector<Neutrino>> m_neutrinos;
     edm::Handle<std::vector<Jet>> m_jets;
+    edm::Handle<std::vector<Jet>> m_truth_jets;
     edm::Handle<std::vector<Ljet>> m_ljets;
+    edm::Handle<std::vector<Ljet>> m_truth_ljets;
     edm::Handle<MET> m_met;
     edm::Handle<double> m_HT;
     edm::Handle<double> m_ST;
@@ -228,7 +233,11 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     std::vector<float> m_mc_e;
     std::vector<float> m_mc_pdgId;
     std::vector<float> m_mc_charge;
-    std::vector<float> m_mc_mom_idx;
+    std::vector<int> m_mc_parent0_idx;
+    std::vector<int> m_mc_parent1_idx;
+    std::vector<int> m_mc_child0_idx;
+    std::vector<int> m_mc_child1_idx;
+
     std::vector<float> m_truth_jet_pt;
     std::vector<float> m_truth_jet_eta;
     std::vector<float> m_truth_jet_phi;

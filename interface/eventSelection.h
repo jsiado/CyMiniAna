@@ -9,7 +9,6 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include <boost/dynamic_bitset.hpp>
 #include "TROOT.h"
@@ -103,7 +102,6 @@ class eventSelection : public edm::EDFilter {
     edm::EDGetTokenT<double> t_ST;
     edm::EDGetTokenT<std::vector<float>> t_trigBit;
     edm::InputTag t_trigName;
-    edm::EDGetTokenT<GenEventInfoProduct> t_genEvtInfoProd;
 
     edm::Handle<std::vector<Electron>> m_electrons;
     edm::Handle<std::vector<Muon>> m_muons;
@@ -115,7 +113,6 @@ class eventSelection : public edm::EDFilter {
     edm::Handle<double> m_ST;
     edm::Handle<std::vector<float>> h_trigBit;
     edm::Handle<std::vector<std::string>> h_trigName;
-    edm::Handle<GenEventInfoProduct> h_genEvtInfoProd;
 };
 
 #endif

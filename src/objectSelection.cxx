@@ -54,10 +54,10 @@ void objectSelection::initialize() {
 
 bool objectSelection::pass( const Electron& el, bool isGen ) const{
     /* Cuts on electrons */
-    bool pass(false);
+    bool passSel(false);
 
     if (isGen){
-        pass = true;
+        passSel = true;
     }
     else{
         // kinematics
@@ -66,18 +66,18 @@ bool objectSelection::pass( const Electron& el, bool isGen ) const{
         // id
         bool passID = electronID(el);
 
-        pass = passKin && passID;
+        passSel = passKin && passID;
     }
 
-    return pass;
+    return passSel;
 }
 
 bool objectSelection::pass( const Muon& mu, bool isGen ) const{
     /* Cuts on muons */
-    bool pass(false);
+    bool passSel(false);
 
     if (isGen){
-        pass = true;
+        passSel = true;
     }
     else{
         // kinematics
@@ -89,33 +89,33 @@ bool objectSelection::pass( const Muon& mu, bool isGen ) const{
         // iso
         bool passISO = muonISO(mu);
 
-        pass = passKin && passID && passISO;
+        passSel = passKin && passID && passISO;
     }
 
-    return pass;
+    return passSel;
 }
 
 bool objectSelection::pass( const Neutrino& nu, bool isGen ) const{
     /* Cuts on neutrinos */
-    bool pass(false);
+    bool passSel(false);
 
     if (isGen){
-        pass = true;
+        passSel = true;
     }
     else{
-        pass = true;
+        passSel = true;
         // quality cuts on neutrino reco? Possibly best for imaginary solutions!
     }
 
-    return pass;
+    return passSel;
 }
 
 bool objectSelection::pass( const Jet& jet, bool isGen ) const{
     /* Cuts on jets */
-    bool pass(false);
+    bool passSel(false);
 
     if (isGen){
-        pass = true;
+        passSel = (jet.p4.Pt()>10 && std::abs(jet.p4.Eta()<5));
     }
     else{
         // kinematics
@@ -124,18 +124,18 @@ bool objectSelection::pass( const Jet& jet, bool isGen ) const{
         // id
         bool passID = jetID(jet);
 
-        pass = passKin && passID;
+        passSel = passKin && passID;
     }
 
-    return pass;
+    return passSel;
 }
 
 bool objectSelection::pass( const Ljet& ljet, bool isGen ) const{
     /* Cuts on large-R jets */
-    bool pass(false);
+    bool passSel(false);
 
     if (isGen){
-        pass = true;
+        passSel = (ljet.p4.Pt()>10 && std::abs(ljet.p4.Eta()<5));
     }
     else{
         // kinematics
@@ -144,10 +144,10 @@ bool objectSelection::pass( const Ljet& ljet, bool isGen ) const{
         // id
         bool passID = ljetID(ljet);
 
-        pass = passKin && passID;
+        passSel = passKin && passID;
     }
 
-    return pass;
+    return passSel;
 }
 
 
@@ -163,93 +163,93 @@ bool objectSelection::applyElectronIsolation() const{
 
 bool objectSelection::electronID(const Electron& el) const{
     /* Electron ID */
-    bool pass(false);
+    bool passSel(false);
 
     if (m_el_ID.compare("veto")==0)
-        pass = (el.vidVeto) ? true : false;
+        passSel = (el.vidVeto) ? true : false;
     else if (m_el_ID.compare("loose")==0)
-        pass = (el.vidLoose) ? true : false;
+        passSel = (el.vidLoose) ? true : false;
     else if (m_el_ID.compare("medium")==0)
-        pass = (el.vidMedium) ? true : false;
+        passSel = (el.vidMedium) ? true : false;
     else if (m_el_ID.compare("tight")==0)
-        pass = (el.vidTight) ? true : false;
+        passSel = (el.vidTight) ? true : false;
     else{
         edm::LogWarning("Unsupported electron ID type ") << m_el_ID;
         edm::LogWarning("Please check your electron ID configuration ");
-        pass = false;
+        passSel = false;
     }
 
-    return pass;
+    return passSel;
 }
 
 
 bool objectSelection::muonID( const Muon& mu ) const{
     /* Muon ID */
-    bool pass(false);
+    bool passSel(false);
 
     if (m_mu_ID.compare("loose")==0 && mu.loose)
-        pass = true;
+        passSel = true;
     else if (m_mu_ID.compare("tight")==0 && mu.tight)
-        pass = true;
+        passSel = true;
     else if(m_mu_ID.compare("loose")!=0 && m_mu_ID.compare("tight")!=0){
         edm::LogWarning("Unsupported muon ID type ") << m_mu_ID;
         edm::LogWarning("Please check your muon ID configuration ");
-        pass = false;
+        passSel = false;
     }
 
-    return pass;
+    return passSel;
 }
 
 bool objectSelection::muonISO( const Muon& mu ) const{
     /* Muon Isolation */
-    bool pass(false);
+    bool passSel(false);
 
     double muIso = mu.iso04;
     if (muIso >= m_mu_IsoMin && muIso < m_mu_IsoMax)
-        pass = true;
+        passSel = true;
 
-    return pass;
+    return passSel;
 }
 
 
 bool objectSelection::jetID(const Jet& jet) const{
     /* Jet ID */
-    bool pass(false);
+    bool passSel(false);
 
     if (m_jet_ID.compare("loose")==0)
-        pass = (jet.loose) ? true : false;
+        passSel = (jet.loose) ? true : false;
     else if (m_jet_ID.compare("tight")==0)
-        pass = (jet.tight) ? true : false;
+        passSel = (jet.tight) ? true : false;
     else if (m_jet_ID.compare("tightlepveto")==0)
-        pass = (jet.tightlepveto) ? true : false;
+        passSel = (jet.tightlepveto) ? true : false;
     else{
         edm::LogWarning("Unsupported jet ID type ");
         edm::LogWarning("ID = ") << m_jet_ID << m_jet_ID.compare("loose");
         edm::LogWarning("Please check your jet ID configuration ");
-        pass = false;
+        passSel = false;
     }
 
-    return pass;
+    return passSel;
 }
 
 
 bool objectSelection::ljetID(const Ljet& ljet) const{
     /* Large-R jet ID */
-    bool pass(false);
+    bool passSel(false);
 
     if (m_ljet_ID.compare("loose")==0)
-        pass = (ljet.loose) ? true : false;
+        passSel = (ljet.loose) ? true : false;
     else if (m_ljet_ID.compare("tight")==0)
-        pass = (ljet.tight) ? true : false;
+        passSel = (ljet.tight) ? true : false;
     else if (m_ljet_ID.compare("tightlepveto")==0)
-        pass = (ljet.tightlepveto) ? true : false;
+        passSel = (ljet.tightlepveto) ? true : false;
     else{
         edm::LogWarning("Unsupported large-R jet ID type ") << m_ljet_ID;
         edm::LogWarning("Please check your ljet ID configuration ");
-        pass = false;
+        passSel = false;
     }
 
-    return pass;
+    return passSel;
 }
 
 // THE END

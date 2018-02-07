@@ -64,7 +64,7 @@ std::map<std::string,double> BTagTools::execute(const Jet& jet) const{
 }
 
 
-void BTagTools::getBtagDecisions(Jet& jet) const{
+void BTagTools::getBTagDecisions(Jet& jet) const{
     /* Check b-tagging for a jet */
     if (jet.CSVv2 >= m_CSVv2L){
         jet.isbtagged.at("L") = true;
@@ -78,6 +78,24 @@ void BTagTools::getBtagDecisions(Jet& jet) const{
     }
 
     return;
+}
+
+
+float BTagTools::getBTagSF(const std::vector<Jet>& jets) const{
+    /* Calculate the event weight due to b-tagging 
+       Method 1a: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
+       - accessed on 7 Feb 2018
+       Efficiencies will be calculated following:
+         https://github.com/rappoccio/usercode/blob/Dev_53x/EDSHyFT/plugins/BTaggingEffAnalyzer.cc
+         https://github.com/rappoccio/usercode/blob/Dev_53x/EDSHyFT/test/bTaggingEfficiency/README.txt
+    */
+    float weight(1.0);
+    float pMC(1.0);
+    float pDATA(1.0);
+
+    weight = pDATA/pMC;
+
+    return weight;
 }
 
 // THE END
