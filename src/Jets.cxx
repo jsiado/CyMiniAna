@@ -8,7 +8,7 @@ Texas A&M University
 
 -----
 
-Build Electrons from EDMntuples
+Build Jets from EDMntuples
 */
 #include "Analysis/CyMiniAna/interface/Jets.h"
 
@@ -18,6 +18,7 @@ using namespace edm;
 
 Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
   m_labels(iConfig.getParameter<edm::ParameterSet>("jetLabels")),
+  m_isMC(iConfig.getParameter<bool>("isMC")),
   m_useTruth(iConfig.getParameter<bool>("useTruth")),
   m_data_path(iConfig.getParameter<std::string>("data_path")){
     t_jetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPtLabel"));
@@ -40,7 +41,7 @@ Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
     t_jetY = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetYLabel"));
     t_jetArea = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetAreaLabel"));
     t_jetMuonEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag> ("jetMuonEnergyLabel"));
-    if (m_useTruth){
+    if (m_isMC && m_useTruth){
       t_jetGenPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenPtLabel"));
       t_jetGenEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenEtaLabel"));
       t_jetGenPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenPhiLabel"));
@@ -105,7 +106,7 @@ std::vector<Jet> Jets::execute(const edm::Event& evt, const objectSelection& obj
 
         // b-tagging SF
         jet.isbtagged = { {"L",false}, {"M",false}, {"T",false} };
-        m_btagTool->getBtagDecisions(jet);
+        m_btagTool->getBTagDecisions(jet);
         std::map<std::string,double> SFs = m_btagTool->execute(jet);
 
         jet.btagSF    = SFs.at("central");
@@ -123,14 +124,19 @@ std::vector<Jet> Jets::execute_truth(const edm::Event& evt, const objectSelectio
     /* Build Generator jets */
     m_truth_jets.clear();
 
+    if (!m_isMC || !m_useTruth) return m_truth_jets;  // return empty vector for non-truth setups
+
     evt.getByToken(t_jetGenPt,  h_jetGenPt);
     evt.getByToken(t_jetGenEta, h_jetGenEta);
     evt.getByToken(t_jetGenPhi, h_jetGenPhi);
     evt.getByToken(t_jetGenE,   h_jetGenE);
+    evt.getByToken(t_jetGenCharge, h_jetGenCharge);
 
     for (unsigned ijet=0, size=(h_jetGenPt.product())->size(); ijet<size; ++ijet) {
         Jet jet;
-        jet.p4.SetPtEtaPhiE( (h_jetGenPt.product())->at(ijet),  (h_jetGenPt.product())->at(ijet),
+        if ( std::abs((h_jetGenEta.product())->at(ijet)) > 10 ) continue;  // protect against ROOT errors
+
+        jet.p4.SetPtEtaPhiE( (h_jetGenPt.product())->at(ijet),  (h_jetGenEta.product())->at(ijet),
                              (h_jetGenPhi.product())->at(ijet), (h_jetGenE.product())->at(ijet));
         jet.charge = (h_jetGenCharge.product())->at(ijet);
 

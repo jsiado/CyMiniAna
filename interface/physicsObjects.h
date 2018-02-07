@@ -167,6 +167,32 @@ struct MET : CmaBase{
 };
 
 
+// Truth information
+struct Parton : CmaBase {
+    int pdgId;
+    int index;        // index in vector of truth partons
+    int parent0_idx;  // index in truth record of parent0
+    int parent1_idx;  // index in truth record of parent1
+    int child0_idx;   // index in truth record of child0
+    int child1_idx;   // index in truth record of child1
+    int charge;
+
+    // Heavy Object Booleans
+    bool isTop;
+    bool isW;
+    bool isZ;
+    bool isHiggs;
+    // Lepton Booleans
+    bool isLepton;
+    bool isTau;
+    bool isElectron;
+    bool isMuon;
+    bool isNeutrino;
+    // Quark Booleans
+    bool isQuark;
+    bool isBottom;
+    bool isLight;
+};
 
 // VLQ (assuming T->bW)
 struct VLQ : CmaBase{

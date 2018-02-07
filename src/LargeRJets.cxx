@@ -18,6 +18,7 @@ using namespace edm;
 
 LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
   m_labels(iConfig.getParameter<edm::ParameterSet>("largeRjetLabels")),
+  m_isMC(iConfig.getParameter<bool>("isMC")),
   m_useTruth(iConfig.getParameter<bool>("useTruth")),
   m_data_path(iConfig.getParameter<std::string>("data_path")){
     t_ljetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPtLabel"));
@@ -57,7 +58,7 @@ LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector 
     t_ljet_subjetJEC = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetJECLabel"));
     t_ljet_subjetCSV = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetCSVLabel"));
     t_ljet_subjetCMVA = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljet_subjetCMVALabel"));
-    if (m_useTruth){
+    if (m_isMC && m_useTruth){
         t_ljetGenPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenPtLabel"));
         t_ljetGenEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenEtaLabel"));
         t_ljetGenPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetGenPhiLabel"));
@@ -146,7 +147,7 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
             subjet.CSVv2  = (h_ljet_subjetCSV.product())->at(idx);
 
             subjet.isbtagged = { {"L",false}, {"M",false}, {"T",false} };
-            m_btagTool->getBtagDecisions(subjet);
+            m_btagTool->getBTagDecisions(subjet);
             std::map<std::string,double> SFs = m_btagTool->execute(subjet);
 
             subjet.btagSF    = SFs.at("central");
@@ -180,16 +181,22 @@ std::vector<Ljet> LargeRJets::execute_truth(const edm::Event& evt, const objectS
     /* Build Generator large-R jets */
     m_truth_ljets.clear();
 
+    if (!m_isMC || !m_useTruth) return m_truth_ljets;
+
     evt.getByToken(t_ljetGenPt,  h_ljetGenPt);
     evt.getByToken(t_ljetGenEta, h_ljetGenEta);
     evt.getByToken(t_ljetGenPhi, h_ljetGenPhi);
     evt.getByToken(t_ljetGenE,   h_ljetGenE);
+    evt.getByToken(t_ljetGenCharge, h_ljetGenCharge);
 
     for (unsigned ijet=0, size=(h_ljetGenPt.product())->size(); ijet<size; ++ijet) {
         Ljet ljet;
-        ljet.p4.SetPtEtaPhiE( (h_ljetGenPt.product())->at(ijet),  (h_ljetGenPt.product())->at(ijet),
-                              (h_ljetGenPhi.product())->at(ijet), (h_ljetGenE.product())->at(ijet));
 
+        if ( std::abs((h_ljetGenEta.product())->at(ijet)) > 10) continue;  // protect against ROOT errors
+
+        ljet.p4.SetPtEtaPhiE( (h_ljetGenPt.product())->at(ijet),  (h_ljetGenEta.product())->at(ijet),
+                              (h_ljetGenPhi.product())->at(ijet), (h_ljetGenE.product())->at(ijet));
+        ljet.charge = (h_ljetGenCharge.product())->at(ijet);
        	bool passObjSel	= obj.pass(ljet,true);
         if (!passObjSel) continue;
 

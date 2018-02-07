@@ -8,7 +8,7 @@ Texas A&M University
 
 -----
 
-Build Electrons from EDMntuples
+Build Muons from EDMntuples
 */
 #include "Analysis/CyMiniAna/interface/Muons.h"
 

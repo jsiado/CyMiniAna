@@ -17,11 +17,14 @@ using namespace edm;
 EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
   t_sampleName(cfg.getParameter<std::string>("sampleName")),
   t_metadataFile(cfg.getParameter<std::string>("metadataFile")),
+  m_truthTool(cfg,consumesCollector()),
   t_electrons(consumes<std::vector<Electron>>(edm::InputTag("CMAProducer","electrons","CyMiniAna"))),
   t_muons(consumes<std::vector<Muon>>(edm::InputTag("CMAProducer","muons","CyMiniAna"))),
   t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("CMAProducer","neutrinos","CyMiniAna"))),
   t_jets(consumes<std::vector<Jet>>(edm::InputTag("CMAProducer","jets","CyMiniAna"))),
+  t_truth_jets(consumes<std::vector<Jet>>(edm::InputTag("CMAProducer","truthjets","CyMiniAna"))),
   t_ljets(consumes<std::vector<Ljet>>(edm::InputTag("CMAProducer","ljets","CyMiniAna"))),
+  t_truth_ljets(consumes<std::vector<Ljet>>(edm::InputTag("CMAProducer","truthljets","CyMiniAna"))),
   t_met(consumes<MET>(edm::InputTag("CMAProducer","MET","CyMiniAna"))),
   t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
   t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
@@ -71,7 +74,9 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
     event.getByToken( t_muons, m_muons );
     event.getByToken( t_neutrinos, m_neutrinos );
     event.getByToken( t_jets, m_jets );
+    event.getByToken( t_truth_jets, m_truth_jets );
     event.getByToken( t_ljets, m_ljets );
+    event.getByToken( t_truth_ljets, m_truth_ljets );
     event.getByToken( t_met, m_met );
     event.getByToken( t_HT,  m_HT );
     event.getByToken( t_ST,  m_ST );
@@ -252,32 +257,55 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
     m_met_phi_sf = 1;
 
     if (m_isMC){
-/*
-        m_true_pileup;
-        m_weight_mc;
-        m_weight_btag;
-        m_weight_pileup;
-        m_weight_jet_jer;
-        m_weight_ljet_jer;
-        m_xsection;
-        m_kfactor;
-        m_sumOfWeights;
+        std::vector<Parton> truth = m_truthTool.execute(event); // Truth partons
 
-        m_mc_pt;
-        m_mc_eta;
-        m_mc_phi;
-        m_mc_e;
-        m_mc_pdgId;
-        m_mc_charge;
-        m_mc_mom_idx;
+//        m_true_pileup;
+//        m_weight_pileup;
+//        m_weight_jet_jer;
+//        m_weight_ljet_jer;
+        //m_weight_mc   = ;
+        //m_weight_btag = m_btagTool->getSF(m_jets);
 
+        m_mc_pt.clear();
+        m_mc_eta.clear();
+        m_mc_phi.clear();
+        m_mc_e.clear();
+        m_mc_pdgId.clear();
+        m_mc_charge.clear();
+        m_mc_parent0_idx.clear();
+        m_mc_parent1_idx.clear();
+        m_mc_child0_idx.clear();
+        m_mc_child1_idx.clear();
+
+        for (const auto& tru: truth){
+            m_mc_pdgId.push_back(tru.pdgId);
+            m_mc_charge.push_back(tru.charge);
+
+            float eta = (std::abs(tru.p4.Eta())>10) ? 10. : tru.p4.Eta();
+            m_mc_pt.push_back(tru.p4.Pt());
+            m_mc_eta.push_back(eta);
+            m_mc_phi.push_back(tru.p4.Phi());
+            m_mc_e.push_back(tru.p4.E());
+
+            m_mc_parent0_idx.push_back(tru.parent0_idx);
+            m_mc_parent1_idx.push_back(tru.parent1_idx);
+            m_mc_child0_idx.push_back(tru.child0_idx);
+            m_mc_child1_idx.push_back(tru.child1_idx);
+        }
         if (m_useJets){
             m_truth_jet_pt.clear();
             m_truth_jet_eta.clear();
             m_truth_jet_phi.clear();
             m_truth_jet_e.clear();
             m_truth_jet_charge.clear();
-        }
+            for (const auto& jet : *m_truth_jets.product()){
+                m_truth_jet_pt.push_back(  jet.p4.Pt() );
+                m_truth_jet_eta.push_back( jet.p4.Eta() );
+                m_truth_jet_phi.push_back( jet.p4.Phi() );
+                m_truth_jet_e.push_back(   jet.p4.E() );
+                m_truth_jet_charge.push_back(   jet.charge );
+            }
+        } // end truth small-R jets
 
         if (m_useLargeRJets){
             m_truth_ljet_pt.clear();
@@ -285,9 +313,15 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
             m_truth_ljet_phi.clear();
             m_truth_ljet_e.clear();
             m_truth_ljet_charge.clear();
-        }
-*/
-    }
+            for (const auto& jet : *m_truth_ljets.product()){
+                m_truth_ljet_pt.push_back(  jet.p4.Pt() );
+                m_truth_ljet_eta.push_back( jet.p4.Eta() );
+                m_truth_ljet_phi.push_back( jet.p4.Phi() );
+                m_truth_ljet_e.push_back(   jet.p4.E() );
+                m_truth_ljet_charge.push_back(   jet.charge );
+            }
+        } // end truth large-R jets
+    } // end if isMC
 
     // Fill output tree
     m_ttree->Fill();
@@ -446,7 +480,10 @@ void EventSaverFlatNtuple::initialize_branches(){
     m_ttree->Branch("mc_e",         &m_mc_e);        // vector of floats
     m_ttree->Branch("mc_pdgId",     &m_mc_pdgId);    // vector of floats
     m_ttree->Branch("mc_charge",    &m_mc_charge);   // vector of floats
-    m_ttree->Branch("mc_mom_idx",   &m_mc_mom_idx);  // vector of floats
+    m_ttree->Branch("mc_parent0_idx",  &m_mc_parent0_idx);  // vector of ints
+    m_ttree->Branch("mc_parent1_idx",  &m_mc_parent1_idx);  // vector of ints
+    m_ttree->Branch("mc_child0_idx",   &m_mc_child0_idx);   // vector of ints
+    m_ttree->Branch("mc_child1_idx",   &m_mc_child1_idx);   // vector of ints
 
     // -- Truth-level Objects (AK4/AK8 Jets)
     m_ttree->Branch("truth_jet_pt",      &m_truth_jet_pt);      // vector of floats

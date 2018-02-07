@@ -26,6 +26,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "Analysis/CyMiniAna/interface/tools.h"
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
@@ -132,6 +133,7 @@ class CMAProducer : public edm::EDProducer {
     edm::EDGetTokenT<float> t_htHat;
     edm::EDGetTokenT<std::vector<int>> t_lhewtids;
     edm::EDGetTokenT<std::vector<float>> t_lhewts;
+    edm::EDGetTokenT<GenEventInfoProduct> t_genEvtInfoProd;
 
     // Handles
     edm::Handle<int> h_evtno;
@@ -149,6 +151,7 @@ class CMAProducer : public edm::EDProducer {
     edm::Handle<float> h_htHat;
     edm::Handle<std::vector<int>> h_lhewtids;
     edm::Handle<std::vector<float>> h_lhewts;
+    edm::Handle<GenEventInfoProduct> h_genEvtInfoProd;
 };
 
 #endif

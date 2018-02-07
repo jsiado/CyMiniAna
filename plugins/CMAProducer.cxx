@@ -19,7 +19,6 @@ using namespace edm;
 // constructor
 CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   // PhysicsObjects
-//  m_electronsTool(iConfig.getParameter<edm::ParameterSet>("electronLabels"),consumesCollector()),
   m_electronsTool(iConfig,consumesCollector()),
   m_muonsTool(iConfig,consumesCollector()),
   m_neutrinosTool(iConfig,consumesCollector()),
@@ -47,13 +46,16 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
     m_NEvents.clear();
     if (m_isMC){
         cma::getSampleWeights( m_metadataFile,m_XSection,m_KFactor,m_sumOfWeights,m_NEvents );
+        t_genEvtInfoProd = consumes<GenEventInfoProduct>(iConfig.getParameter<std::string>("genEvtInfoProdName"));  // generator info
     }
 
     // Register products (physics objects & information)
     produces<std::vector<Electron>>("electrons").setBranchAlias( "electrons" );
     produces<std::vector<Muon>>("muons").setBranchAlias( "muons" );
     produces<std::vector<Jet>>("jets").setBranchAlias( "jets" );
+    produces<std::vector<Jet>>("truthjets").setBranchAlias( "truthjets" );
     produces<std::vector<Ljet>>("ljets").setBranchAlias( "ljets" );
+    produces<std::vector<Ljet>>("truthljets").setBranchAlias( "truthljets" );
     produces<std::vector<Neutrino>>("neutrinos").setBranchAlias( "neutrinos" );
     produces<MET>("MET").setBranchAlias( "MET" );
     produces<double>("HT").setBranchAlias( "HT" );
@@ -117,7 +119,9 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     std::auto_ptr< std::vector<Muon> > e_muons( new std::vector<Muon> );
     std::auto_ptr< std::vector<Neutrino> > e_neutrinos( new std::vector<Neutrino> );
     std::auto_ptr< std::vector<Jet> > e_jets( new std::vector<Jet> );
+    std::auto_ptr< std::vector<Jet> > e_truth_jets( new std::vector<Jet> );
     std::auto_ptr< std::vector<Ljet> > e_ljets( new std::vector<Ljet> );
+    std::auto_ptr< std::vector<Ljet> > e_truth_ljets( new std::vector<Ljet> );
     std::auto_ptr< MET > e_MET( new MET );
     std::auto_ptr< double > e_HT( new double );
     std::auto_ptr< double > e_ST( new double );
@@ -142,18 +146,30 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
         }
     }
 
+    m_jets.clear();
+    m_truth_jets.clear();
     if (m_useJets){
         m_jets = m_jetsTool.execute(evt,m_objectSelectionTool);             // AK4 jets
+        if (m_isMC) m_truth_jets = m_jetsTool.execute_truth(evt,m_objectSelectionTool);  // AK4 jets
+
         edm::LogInfo("Jets built "+std::to_string(m_jets.size()));
         for (auto& jet : m_jets)
             e_jets->push_back(jet);
+        for (auto& jet : m_truth_jets)
+            e_truth_jets->push_back(jet);
     }
 
+    m_ljets.clear();
+    m_truth_ljets.clear();
     if (m_useLargeRJets){
         m_ljets = m_ljetsTool.execute(evt,m_objectSelectionTool);           // AK8 jets
+        if (m_isMC) m_truth_ljets = m_ljetsTool.execute_truth(evt,m_objectSelectionTool); // AK8 jets
         edm::LogInfo("LJets built "+std::to_string(m_jets.size()));
+
         for (auto& jet : m_ljets)
             e_ljets->push_back(jet);
+        for (auto& jet : m_truth_ljets)
+            e_truth_ljets->push_back(jet);
     }
 
     initialize_kinematics(evt);                                             // MET, HT
@@ -171,14 +187,17 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
 
     /* 
      * do kinematic reconstruction, event weight calculations here 
+     *
+     *  - No btag SF yet
+     *  - No pileup weight yet
      */
-    m_event_weight  = 1.0;
-    m_event_weight *= m_XSection.at(m_sampleName) * m_KFactor.at(m_sampleName) / m_sumOfWeights.at(m_sampleName);
-// btag SF
-// pileup
-// generator weight
-    m_event_weight /= m_LUMI;
+    // MC weight
+    evt.getByToken(t_genEvtInfoProd,h_genEvtInfoProd);
+    float mc_weight = h_genEvtInfoProd->weight();
 
+    m_event_weight  = 1.0;
+    m_event_weight *= m_XSection.at(m_sampleName) * m_KFactor.at(m_sampleName) * mc_weight / m_sumOfWeights.at(m_sampleName);
+    m_event_weight /= m_LUMI;
 
     /* Set values to store in the event */
     (*e_MET).p4 = m_MET.p4;
@@ -192,14 +211,16 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     *e_event_weight = m_event_weight;
 
     /* Store values in the event to use in analyzers/filters */
-    evt.put(e_electrons, "electrons");
-    evt.put(e_muons,     "muons");
-    evt.put(e_neutrinos, "neutrinos");
-    evt.put(e_jets,      "jets");
-    evt.put(e_ljets,     "ljets");
-    evt.put(e_MET,       "MET");
-    evt.put(e_HT,        "HT");
-    evt.put(e_ST,        "ST");
+    evt.put(e_electrons,  "electrons");
+    evt.put(e_muons,      "muons");
+    evt.put(e_neutrinos,  "neutrinos");
+    evt.put(e_jets,       "jets");
+    evt.put(e_truth_jets, "truthjets");
+    evt.put(e_ljets,      "ljets");
+    evt.put(e_truth_ljets,"truthljets");
+    evt.put(e_MET,        "MET");
+    evt.put(e_HT,         "HT");
+    evt.put(e_ST,         "ST");
     evt.put(e_event_weight, "eventweight");
 
     return;

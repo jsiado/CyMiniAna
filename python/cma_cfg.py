@@ -34,7 +34,7 @@ options.register('isMC', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Monte Carlo sample" )
-options.register('useTruth', False,
+options.register('useTruth', True,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.bool,
     "Use truth information" )
@@ -126,8 +126,8 @@ process.CMAProducer = cms.EDProducer('CMAProducer',
     jetLabels       = jetLabels,
     largeRjetLabels = largeRJetLabels,
     METLabels = METLabels,
-    # - selection on objects (pT,eta,ID,b-tagging,etc.)
-    objSelectionParams = objectSelectionParams,
+    genEvtInfoProdName = cms.string('generator'), # truth information
+    objSelectionParams = objectSelectionParams,   # selection on objects
 )
 
 
@@ -171,7 +171,8 @@ process.tree = cms.EDAnalyzer("EventSaverFlatNtuple",
     evtnoLabel      = cms.InputTag("eventInfo", "evtInfoEventNumber"),
     puNtrueIntLabel = cms.InputTag("eventUserData", "puNtrueInt"),
     metadataFile = cms.string(data_path+"metadataFile.txt"),
-    sampleName = cms.string(sample_name),
+    sampleName   = cms.string(sample_name),
+    genParticles = cms.InputTag("filteredPrunedGenParticles"),
 )
 
 
