@@ -17,8 +17,9 @@ using namespace edm;
 
 
 Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) : 
-  m_labels(iConfig.getParameter<edm::ParameterSet>("jetLabels")){
-    m_useTruth = iConfig.getParameter<bool>("useTruth");
+  m_labels(iConfig.getParameter<edm::ParameterSet>("jetLabels")),
+  m_useTruth(iConfig.getParameter<bool>("useTruth")),
+  m_data_path(iConfig.getParameter<std::string>("data_path")){
     t_jetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPtLabel"));
     t_jetEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetEtaLabel"));
     t_jetPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPhiLabel"));
@@ -47,7 +48,7 @@ Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
       t_jetGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetGenChargeLabel"));
     }
 
-    m_btagTool = new BTagTools();
+    m_btagTool = new BTagTools(false,m_data_path);
 }
 
 Jets::~Jets() {}

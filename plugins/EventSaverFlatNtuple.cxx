@@ -15,6 +15,8 @@ Write data to flat ntuple
 using namespace edm;
 
 EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
+  t_sampleName(cfg.getParameter<std::string>("sampleName")),
+  t_metadataFile(cfg.getParameter<std::string>("metadataFile")),
   t_electrons(consumes<std::vector<Electron>>(edm::InputTag("CMAProducer","electrons","CyMiniAna"))),
   t_muons(consumes<std::vector<Muon>>(edm::InputTag("CMAProducer","muons","CyMiniAna"))),
   t_neutrinos(consumes<std::vector<Neutrino>>(edm::InputTag("CMAProducer","neutrinos","CyMiniAna"))),
@@ -24,12 +26,7 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
   t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
   t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
   t_rho(consumes<std::vector<float>>(cfg.getParameter<edm::InputTag>("rhoLabel"))),
-  t_npv(consumes<int>(cfg.getParameter<edm::InputTag>("npvLabel"))),
-  t_sampleName(consumes<double>(edm::InputTag("CMAProducer","sampleName","CyMiniAna"))),
-  t_xsection(consumes<double>(edm::InputTag("CMAProducer","xsection","CyMiniAna"))),
-  t_kfactor(consumes<double>(edm::InputTag("CMAProducer","kfactor","CyMiniAna"))),
-  t_sumOfWeights(consumes<double>(edm::InputTag("CMAProducer","sumOfWeights","CyMiniAna"))),
-  t_LUMI(consumes<double>(cfg.getParameter<edm::InputTag>("LUMI"))){
+  t_npv(consumes<int>(cfg.getParameter<edm::InputTag>("npvLabel"))){
     // Make output TTrees
     edm::Service<TFileService> fs;
     m_ttree = fs->make<TTree>("events","events");
@@ -43,6 +40,15 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
     m_useLargeRJets  = cfg.getParameter<bool>("useLargeRJets");  // filling large-R jet branches
     m_useLeptons     = cfg.getParameter<bool>("useLeptons");     // filling lepton branches
     m_useNeutrinos   = cfg.getParameter<bool>("useNeutrinos");   // filling neutrino branches 
+
+    m_sampleName = t_sampleName;
+    m_XSections.clear();
+    m_KFactors.clear();
+    m_sumOfMCWeights.clear();
+    m_NEvents.clear();
+    if (m_isMC){
+        cma::getSampleWeights( t_metadataFile,m_XSections,m_KFactors,m_sumOfMCWeights,m_NEvents );
+    }
 }
 
 
@@ -294,11 +300,16 @@ void EventSaverFlatNtuple::endJob(){
     /* End of job 
        - Fill the metadata tree (only 1 "event")
     */
-    // use getSampleWeights();
-    m_sampleName = *h_sampleName.product();
-    m_xsection   = *h_xsection.product();
-    m_kfactor    = *h_kfactor.product();
-    m_sumOfWeights = *h_sumOfWeights.product();
+    if (m_isMC){
+        m_xsection = m_XSections.at( m_sampleName );
+        m_kfactor  = m_KFactors.at( m_sampleName );
+        m_sumOfWeights = m_sumOfMCWeights.at( m_sampleName );
+    }
+    else{
+        m_xsection = 1;
+        m_kfactor  = 1;
+        m_sumOfWeights = 1;
+    }
 
     m_metadata_ttree->Fill();
 

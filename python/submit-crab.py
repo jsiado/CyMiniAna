@@ -35,11 +35,6 @@ def main():
 
         requestName = id[1:].replace('/','-').rstrip('-USER')[:75]
 
-        datasettag = id_split[1]+'-'+id_split[2]+'-'+git_tag
-        if len(datasettag)>120:
-            datasettag = datasettag[:120]
-        print datasettag
-
         config.General.workArea    = 'crab-cyminiana-'+git_tag
         config.General.transferOutputs = True
         config.General.transferLogs    = False
@@ -58,11 +53,9 @@ def main():
         config.Data.outLFNDirBase = '/store/user/dmarley/B2G/wprime-qQ/samples-v0.1/'
         config.Data.publication   = False #True
 
-        config.Site.storageSite = "T3_US_FNALLPC"
+        config.Site.storageSite    = "T3_US_FNALLPC"
         config.General.requestName = requestName
-
-        config.Data.inputDataset  = id
-#        config.Data.outputDatasetTag = 'CyMiniAna-'+datasettag
+        config.Data.inputDataset   = id
 
         print 'Configuration :'
         print config

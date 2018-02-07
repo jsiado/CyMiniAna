@@ -27,6 +27,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "Analysis/CyMiniAna/interface/tools.h"
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
 #include "Analysis/CyMiniAna/interface/objectSelection.h"
 #include "Analysis/CyMiniAna/interface/Jets.h"
@@ -98,11 +99,14 @@ class CMAProducer : public edm::EDProducer {
     MET m_MET;
     double m_HT;
     double m_ST;
+    double m_event_weight;
 
     std::string m_metadataFile;
+    std::string m_sampleName;                      // unique name for the sample
     std::map<std::string, float> m_XSection;	   // map sample name to XSection
     std::map<std::string, float> m_KFactor;        // map sample name to KFactor
     std::map<std::string, float> m_sumOfWeights;   // map sample name to sum of weights
+    std::map<std::string, unsigned int> m_NEvents; // map sample name to number of events
 
     // ************
     // Setup to read EDMntuple format

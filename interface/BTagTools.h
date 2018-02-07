@@ -20,7 +20,7 @@
 class BTagTools {
   public:
     // Constructor
-    explicit BTagTools(bool isBoosted=false);
+    explicit BTagTools(const bool& isBoosted=false, const std::string& data_path="data/");
 
     // Destructor
     virtual ~BTagTools();
@@ -37,7 +37,8 @@ class BTagTools {
                                           //"central",            // central sys type
                                           //{"up", "down"});      // other sys types
 
-    bool m_isBoosted;  // Boosted or AK4 jet scenarios
+    bool m_isBoosted;        // Boosted or AK4 jet scenarios
+    std::string m_data_path; // where CSV files are stored
 
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
     float m_CSVv2L=0.5426;

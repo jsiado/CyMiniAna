@@ -19,10 +19,6 @@ hist = cms.EDAnalyzer("histogrammer",
     useLargeRJets = cms.bool(False),
     useNeutrinos  = cms.bool(False),
     useLeptons    = cms.bool(False),
-
-    useSystWeights = cms.bool(False),
-    weightSystematicsFile = cms.string("SetMe"),
-    weightVectorSystematicsFile = cms.string("SetMe"),
 )
 
 ## THE END

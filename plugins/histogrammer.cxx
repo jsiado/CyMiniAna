@@ -26,7 +26,7 @@ histogrammer::histogrammer( const ParameterSet & cfg ) :
   t_met(consumes<MET>(edm::InputTag("CMAProducer","MET","CyMiniAna"))),
   t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
   t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
-  t_event_weight(consumes<double>(edm::InputTag("CMAProducer","event_weight","CyMiniAna"))){
+  t_event_weight(consumes<double>(edm::InputTag("CMAProducer","eventweight","CyMiniAna"))){
     m_map_histograms1D.clear();
     m_map_histograms2D.clear();
     m_map_histograms3D.clear();
@@ -37,6 +37,8 @@ histogrammer::histogrammer( const ParameterSet & cfg ) :
     m_useLargeRJets  = cfg.getParameter<bool>("useLargeRJets");
     m_useLeptons     = cfg.getParameter<bool>("useLeptons");
     m_useNeutrinos   = cfg.getParameter<bool>("useNeutrinos");
+
+    m_name = cfg.getParameter<std::string>("name");
 }
 
 
@@ -109,7 +111,7 @@ void histogrammer::beginJob(){
         init_hist("jet_pt_"+m_name,  500, 0.0, 2000);
         init_hist("jet_eta_"+m_name,  50, -2.5, 2.5);
         init_hist("jet_phi_"+m_name,  64, -3.2, 3.2);
-        init_hist("jet_CSVv2_"+m_name, 200, -1,1);
+        init_hist("jet_CSVv2_"+m_name, 100,0,1);
     }
 
     if (m_useLargeRJets){
@@ -210,73 +212,74 @@ void histogrammer::analyze( const edm::Event& event, const edm::EventSetup& ) {
     event.getByToken( t_ST,  m_ST );
     event.getByToken( t_event_weight, m_event_weight );
 
+    float event_weight( *m_event_weight.product() );
+
     // fill histograms
     if (m_useJets){
-        fill("n_jets_"+name,  (*m_jets.product()).size(), m_event_weight);
-        fill("n_btags_"+name, 0, m_event_weight);
+        fill("n_jets_"+m_name,  (*m_jets.product()).size(), event_weight);
+        fill("n_btags_"+m_name, 0, event_weight);
 
         for (const auto& jet : *m_jets.product()){
-            fill("jet_pt_"+name,   jet.p4.Pt(),  m_event_weight);
-            fill("jet_eta_"+name,  jet.p4.Eta(), m_event_weight);
-            fill("jet_phi_"+name,  jet.p4.Phi(), m_event_weight);
-            fill("jet_CSVv2_"+name, jet.CSVv2,   m_event_weight);
-            HT+=jet.p4.Pt();
+            fill("jet_pt_"+m_name,   jet.p4.Pt(),  event_weight);
+            fill("jet_eta_"+m_name,  jet.p4.Eta(), event_weight);
+            fill("jet_phi_"+m_name,  jet.p4.Phi(), event_weight);
+            fill("jet_CSVv2_"+m_name, jet.CSVv2,   event_weight);
         }
     }
 
     if (m_useLargeRJets){
-        fill("n_ljets_"+name,  (*m_ljets.product()).size(), m_event_weight);
+        fill("n_ljets_"+m_name,  (*m_ljets.product()).size(), event_weight);
 
         for (const auto& jet : *m_ljets.product()){
-            fill("ljet_pt_"+name,   jet.p4.Pt(),  m_event_weight);
-            fill("ljet_eta_"+name,  jet.p4.Eta(), m_event_weight);
-            fill("ljet_phi_"+name,  jet.p4.Phi(), m_event_weight);
-            fill("ljet_SDmass_"+name, jet.softDropMass,   m_event_weight);
+            fill("ljet_pt_"+m_name,   jet.p4.Pt(),  event_weight);
+            fill("ljet_eta_"+m_name,  jet.p4.Eta(), event_weight);
+            fill("ljet_phi_"+m_name,  jet.p4.Phi(), event_weight);
+            fill("ljet_SDmass_"+m_name, jet.softDropMass, event_weight);
         }
     }
 
     if (m_useLeptons){
         for (const auto& el : *m_electrons.product()){
-            fill("el_pt_"+name,  el.p4.Pt(),  m_event_weight);
-            fill("el_eta_"+name, el.p4.Eta(), m_event_weight);
-            fill("el_phi_"+name, el.p4.Phi(), m_event_weight);
+            fill("el_pt_"+m_name,  el.p4.Pt(),  event_weight);
+            fill("el_eta_"+m_name, el.p4.Eta(), event_weight);
+            fill("el_phi_"+m_name, el.p4.Phi(), event_weight);
         }
         for (const auto& mu : *m_muons.product()){
-            fill("mu_pt_"+name,  mu.p4.Pt(),  m_event_weight);
-            fill("mu_eta_"+name, mu.p4.Eta(), m_event_weight);
-            fill("mu_phi_"+name, mu.p4.Phi(), m_event_weight);
+            fill("mu_pt_"+m_name,  mu.p4.Pt(),  event_weight);
+            fill("mu_eta_"+m_name, mu.p4.Eta(), event_weight);
+            fill("mu_phi_"+m_name, mu.p4.Phi(), event_weight);
         }
     }
 
     if (m_useNeutrinos){
         for (const auto& nu : *m_neutrinos.product()){
-            fill("nu_pt_"+name,  nu.p4.Pt(),  m_event_weight);
-            fill("nu_eta_"+name, nu.p4.Eta(), m_event_weight);
-            fill("nu_phi_"+name, nu.p4.Phi(), m_event_weight);
+            fill("nu_pt_"+m_name,  nu.p4.Pt(),  event_weight);
+            fill("nu_eta_"+m_name, nu.p4.Eta(), event_weight);
+            fill("nu_phi_"+m_name, nu.p4.Phi(), event_weight);
         }
     }
 
     // kinematics
-    fill("ht_"+name,      HT /*(m_HT.product())*/, m_event_weight);
-    fill("met_met_"+name, (*m_met.product()).p4.Pt(), m_event_weight);
-    fill("met_phi_"+name, (*m_met.product()).p4.Phi(),  m_event_weight);
+    fill("ht_"+m_name,      *m_HT.product(),             event_weight);
+    fill("met_met_"+m_name, (*m_met.product()).p4.Pt(),  event_weight);
+    fill("met_phi_"+m_name, (*m_met.product()).p4.Phi(), event_weight);
 
 /*  Future histograms:
     // DNN
-    fill("dnn_"+name, 1.0, m_event_weight); // N/A
+    fill("dnn_"+m_name, 1.0, event_weight); // N/A
 
     LogDebug("Fill VLQ/Wprime");
-    fill("top_pt_"+name,  top.p4.Pt(),  m_event_weight);
-    fill("top_eta_"+name, top.p4.Eta(), m_event_weight);
-    fill("top_phi_"+name, top.p4.Phi(), m_event_weight);
-    fill("top_m_"+name,   top.p4.M(),   m_event_weight);
-    fill("antitop_pt_"+name,  antitop.p4.Pt(),  m_event_weight); 
-    fill("antitop_eta_"+name, antitop.p4.Eta(), m_event_weight);
-    fill("antitop_phi_"+name, antitop.p4.Phi(), m_event_weight);
-    fill("antitop_m_"+name,   antitop.p4.M(),   m_event_weight);
+    fill("top_pt_"+m_name,  top.p4.Pt(),  event_weight);
+    fill("top_eta_"+m_name, top.p4.Eta(), event_weight);
+    fill("top_phi_"+m_name, top.p4.Phi(), event_weight);
+    fill("top_m_"+m_name,   top.p4.M(),   event_weight);
+    fill("antitop_pt_"+m_name,  antitop.p4.Pt(),  event_weight); 
+    fill("antitop_eta_"+m_name, antitop.p4.Eta(), event_weight);
+    fill("antitop_phi_"+m_name, antitop.p4.Phi(), event_weight);
+    fill("antitop_m_"+m_name,   antitop.p4.M(),   event_weight);
 
-    fill("mttbar_"+name,  (top.p4+antitop.p4).M(), m_event_weight);
-    fill("pTttbar_"+name, (top.p4+antitop.p4).Pt(), m_event_weight);
+    fill("mttbar_"+m_name,  (top.p4+antitop.p4).M(), event_weight);
+    fill("pTttbar_"+m_name, (top.p4+antitop.p4).Pt(), event_weight);
 */
     LogDebug("End histograms");
 

@@ -26,7 +26,7 @@ cma = cms.EDProducer("CMAProducer",
     kinematicReco  = cms.bool(False),
 
     LUMI = cms.double(1.0),
-    cleanEvents  = cms.bool(False),
+    data_path    = cms.string("data/"),
     metadataFile = cms.string(""),
 
     # Physics Objects

@@ -57,6 +57,15 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     bool m_useLeptons;
     bool m_useNeutrinos;
 
+    std::string t_sampleName;
+    std::string t_metadataFile;
+
+    std::map<std::string, float> m_XSections;        // map sample name to XSection
+    std::map<std::string, float> m_KFactors;         // map sample name to KFactor
+    std::map<std::string, float> m_sumOfMCWeights;   // map sample name to sum of weights
+    std::map<std::string, unsigned int> m_NEvents;   // map sample name to number of events in sample
+
+
     // Handles and Tokens
     edm::EDGetTokenT<std::vector<Electron>> t_electrons;
     edm::EDGetTokenT<std::vector<Muon>> t_muons;
@@ -86,12 +95,6 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::EDGetTokenT<std::vector<int>> t_lhewtids;
     edm::EDGetTokenT<std::vector<float>> t_lhewts;
 
-    edm::EDGetTokenT<std::string> t_sampleName;
-    edm::EDGetTokenT<float> t_xsection;
-    edm::EDGetTokenT<float> t_kfactor;
-    edm::EDGetTokenT<float> t_sumOfWeights;
-    edm::EDGetTokenT<float> t_LUMI;
-
     // Handles
     edm::Handle<bool> h_isData;
     edm::Handle<bool> h_hltdecision;
@@ -120,13 +123,6 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<int> h_npuTrue;
     edm::Handle<int> h_evtno;
     edm::Handle<int> h_lumisec;
-
-    edm::Handle<std::string> h_sampleName;
-    edm::Handle<float> h_xsection;
-    edm::Handle<float> h_kfactor;
-    edm::Handle<float> h_sumOfWeights;
-    edm::Handle<float> h_LUMI;
-
 
     // Branches
     std::string m_sampleName;
