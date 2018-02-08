@@ -30,6 +30,9 @@ LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector 
     t_ljetCvsB = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCvsBLabel"));
     t_ljetCvsL = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCvsLLabel"));
     t_ljetJEC = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJECLabel"));
+    t_ljetJERSF = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJERSFLabel"));
+    t_ljetJERSFUp = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJERSFUpLabel"));
+    t_ljetJERSFDown = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJERSFDownLabel"));
     t_ljetY = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetYLabel"));
     t_ljetArea = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetAreaLabel"));
     t_ljetMuonEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetMuonEnergyLabel"));
@@ -90,6 +93,9 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
     evt.getByToken(t_ljetCvsB,   h_ljetCvsB);
     evt.getByToken(t_ljetCvsL,   h_ljetCvsL);
     evt.getByToken(t_ljetJEC,    h_ljetJEC);
+    evt.getByToken(t_ljetJERSF,  h_ljetJERSF);
+    evt.getByToken(t_ljetJERSFUp,h_ljetJERSFUp);
+    evt.getByToken(t_ljetJERSFDown, h_ljetJERSFDown);
     evt.getByToken(t_ljetY,      h_ljetY);
     evt.getByToken(t_ljetArea,   h_ljetArea);
     evt.getByToken(t_ljetnHadEnergy, h_ljetnHadEnergy);
@@ -166,6 +172,11 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
         ljet.cHadEnergy = (h_ljetcHadEnergy.product())->at(ijet);
         ljet.muonEnergy = (h_ljetMuonEnergy.product())->at(ijet);
 
+        // JER SF
+        ljet.JERSF    = (h_ljetJERSF.product())->at(ijet);
+        ljet.JERSF_UP = (h_ljetJERSFUp.product())->at(ijet);
+        ljet.JERSF_DN = (h_ljetJERSFDown.product())->at(ijet);
+
         setLjetID(ljet);
        	bool passObjSel	= obj.pass(ljet);
         if (!passObjSel) continue;
@@ -197,6 +208,7 @@ std::vector<Ljet> LargeRJets::execute_truth(const edm::Event& evt, const objectS
         ljet.p4.SetPtEtaPhiE( (h_ljetGenPt.product())->at(ijet),  (h_ljetGenEta.product())->at(ijet),
                               (h_ljetGenPhi.product())->at(ijet), (h_ljetGenE.product())->at(ijet));
         ljet.charge = (h_ljetGenCharge.product())->at(ijet);
+
        	bool passObjSel	= obj.pass(ljet,true);
         if (!passObjSel) continue;
 
