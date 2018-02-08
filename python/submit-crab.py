@@ -41,7 +41,7 @@ def main():
 
         config.JobType.pluginName = 'Analysis'
         config.JobType.psetName   = 'python/cma_cfg.py'
-        config.JobType.inputFiles = 'config' 
+        config.JobType.inputFiles = 'data'
                                     #['data/CSVv2_Moriond17_B_H.csv',
                                     # 'data/subjet_CSVv2_Moriond17_B_H.csv',
                                     # 'data/cuts_pre.txt',

@@ -61,7 +61,7 @@ options.register('isCRABJob', False,
 options.parseArguments()
 
 
-## Set some basic options for running
+## Set some basic options for running (interactive and CRAB)
 filenames = [
           'file:config/B2GEDMNtuple_1.root'
 #          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
@@ -69,10 +69,9 @@ filenames = [
 ]
 
 data_path = 'config/'   # path to files needed in CyMiniAna
-
-hltPaths    = ["HLT_Ele32_eta2p1_WPTight_Gsf_v8",
-               "HLT_IsoMu24_v4",
-               "HLT_IsoTkMu24_v4"]
+hltPaths  = ["HLT_Ele32_eta2p1_WPTight_Gsf_v8",
+             "HLT_IsoMu24_v4",
+             "HLT_IsoTkMu24_v4"]
 if not options.isMC:
     hltPaths = [i.replace(i[-1],"*") for i in hltPaths]
 
