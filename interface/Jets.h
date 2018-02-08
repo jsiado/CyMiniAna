@@ -62,6 +62,7 @@ class Jets {
     edm::Handle<std::vector<float>> h_jetCvsB;
     edm::Handle<std::vector<float>> h_jetCvsL;
     edm::Handle<std::vector<float>> h_jetJEC;
+    edm::Handle<std::vector<float>> h_jetJECsyst;
     edm::Handle<std::vector<float>> h_jetJERSF;
     edm::Handle<std::vector<float>> h_jetJERSFUp;
     edm::Handle<std::vector<float>> h_jetJERSFDown;
@@ -95,6 +96,7 @@ class Jets {
     edm::EDGetTokenT<std::vector<float>> t_jetCvsB;
     edm::EDGetTokenT<std::vector<float>> t_jetCvsL;
     edm::EDGetTokenT<std::vector<float>> t_jetJEC;
+    edm::EDGetTokenT<std::vector<float>> t_jetJECsyst;
     edm::EDGetTokenT<std::vector<float>> t_jetJERSF;
     edm::EDGetTokenT<std::vector<float>> t_jetJERSFUp;
     edm::EDGetTokenT<std::vector<float>> t_jetJERSFDown;

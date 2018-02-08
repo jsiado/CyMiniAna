@@ -21,16 +21,17 @@ LargeRJets::LargeRJets(edm::ParameterSet const& iConfig, edm::ConsumesCollector 
   m_isMC(iConfig.getParameter<bool>("isMC")),
   m_useTruth(iConfig.getParameter<bool>("useTruth")),
   m_data_path(iConfig.getParameter<std::string>("data_path")){
-    t_ljetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPtLabel"));
+    t_ljetPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPtLabel"));
     t_ljetEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetEtaLabel"));
     t_ljetPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetPhiLabel"));
-    t_ljetE = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetEnergyLabel"));
-    t_ljetCSV = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCSVLabel"));
+    t_ljetE   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetEnergyLabel"));
+    t_ljetCSV  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCSVLabel"));
     t_ljetCMVA = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCMVALabel"));
     t_ljetCvsB = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCvsBLabel"));
     t_ljetCvsL = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetCvsLLabel"));
-    t_ljetJEC = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJECLabel"));
-    t_ljetJERSF = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJERSFLabel"));
+    t_ljetJEC  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJECLabel"));
+    t_ljetJECsyst = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJECsystLabel"));
+    t_ljetJERSF   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJERSFLabel"));
     t_ljetJERSFUp = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJERSFUpLabel"));
     t_ljetJERSFDown = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetJERSFDownLabel"));
     t_ljetY = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("ljetYLabel"));
@@ -93,6 +94,7 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
     evt.getByToken(t_ljetCvsB,   h_ljetCvsB);
     evt.getByToken(t_ljetCvsL,   h_ljetCvsL);
     evt.getByToken(t_ljetJEC,    h_ljetJEC);
+    evt.getByToken(t_ljetJECsyst,h_ljetJECsyst);
     evt.getByToken(t_ljetJERSF,  h_ljetJERSF);
     evt.getByToken(t_ljetJERSFUp,h_ljetJERSFUp);
     evt.getByToken(t_ljetJERSFDown, h_ljetJERSFDown);
@@ -172,7 +174,8 @@ std::vector<Ljet> LargeRJets::execute(const edm::Event& evt, const objectSelecti
         ljet.cHadEnergy = (h_ljetcHadEnergy.product())->at(ijet);
         ljet.muonEnergy = (h_ljetMuonEnergy.product())->at(ijet);
 
-        // JER SF
+        // JEC & JER
+        ljet.JECsyst  = (h_ljetJECsyst.product())->at(ijet);
         ljet.JERSF    = (h_ljetJERSF.product())->at(ijet);
         ljet.JERSF_UP = (h_ljetJERSFUp.product())->at(ijet);
         ljet.JERSF_DN = (h_ljetJERSFDown.product())->at(ijet);

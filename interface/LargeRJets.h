@@ -63,6 +63,7 @@ class LargeRJets {
     edm::Handle<std::vector<float>> h_ljetCvsB;
     edm::Handle<std::vector<float>> h_ljetCvsL;
     edm::Handle<std::vector<float>> h_ljetJEC;
+    edm::Handle<std::vector<float>> h_ljetJECsyst;
     edm::Handle<std::vector<float>> h_ljetJERSF;
     edm::Handle<std::vector<float>> h_ljetJERSFUp;
     edm::Handle<std::vector<float>> h_ljetJERSFDown;
@@ -119,6 +120,7 @@ class LargeRJets {
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsB;
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsL;
     edm::EDGetTokenT<std::vector<float>> t_ljetJEC;
+    edm::EDGetTokenT<std::vector<float>> t_ljetJECsyst;
     edm::EDGetTokenT<std::vector<float>> t_ljetJERSF;
     edm::EDGetTokenT<std::vector<float>> t_ljetJERSFUp;
     edm::EDGetTokenT<std::vector<float>> t_ljetJERSFDown;

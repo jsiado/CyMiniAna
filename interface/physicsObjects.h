@@ -49,6 +49,7 @@ struct Jet : CmaBase{
     float ptResolution;
     float smearedPt;
 
+    float JECsyst;
     float JERSF;
     float JERSF_UP;
     float JERSF_DN;
