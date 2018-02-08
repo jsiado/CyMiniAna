@@ -48,6 +48,11 @@ struct Jet : CmaBase{
     float jetArea;
     float ptResolution;
     float smearedPt;
+
+    float JERSF;
+    float JERSF_UP;
+    float JERSF_DN;
+
     std::vector<int> keys;
 
     float charge;
@@ -99,34 +104,42 @@ struct Electron : Lepton{
         isMuon     = false;
     }
 
-    bool vidVeto;
-    bool vidLoose;
-    bool vidMedium;
-    bool vidTight;
     float charge;
     float iso03;
     float iso03db;
     float SCEta;
     float SCPhi;
-    float vidHEEP;
-    float vidVetonoiso;
-    float vidLoosenoiso;
-    float vidMediumnoiso;
-    float vidTightnoiso;
-    float vidHEEPnoiso;
+    bool vidHEEP;
+    bool vidHEEPnoiso;
+    bool vidVeto;
+    bool vidVetonoiso;
+    bool vidLoose;
+    bool vidLoosenoiso;
+    bool vidMedium;
+    bool vidMediumnoiso;
+    bool vidTight;
+    bool vidTightnoiso;
     float vidMvaGPvalue;
     float vidMvaGPcateg;
     float vidMvaHZZvalue;
     float vidMvaHZZcateg;
-    int veto_NoIsoID;
-    int loose_NoIsoID;
-    int medium_NoIsoID;
-    int tight_NoIsoID;
-    int isoVeto;
-    int isoLoose;
-    int isoMedium;
-    int isoTight;
-    int vetoID;
+
+    float vetoSF;
+    float looseSF;
+    float mediumSF;
+    float tightSF;
+    float recoSF;
+    float vetoSF_UP;
+    float looseSF_UP;
+    float mediumSF_UP;
+    float tightSF_UP;
+    float recoSF_UP;
+    float vetoSF_DN;
+    float looseSF_DN;
+    float mediumSF_DN;
+    float tightSF_DN;
+    float recoSF_DN;
+
     // electron ID variables (to re-calculate)
     float Dz;
     float Dxy;

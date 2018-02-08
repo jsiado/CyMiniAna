@@ -120,6 +120,9 @@ jetLabels = cms.PSet(
     jetCvsBLabel            = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"CvsB"),
     jetCvsLLabel            = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"CvsL"),
     jetJECLabel             = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"jecFactor0"),
+    jetJERSFLabel           = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"JERSF"),
+    jetJERSFUpLabel         = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"JERSFUp"),
+    jetJERSFDownLabel       = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"JERSFDown"),
     jetnHadEnergyLabel      = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"neutralHadronEnergyFrac"),
     jetnEMEnergyLabel       = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"neutralEmEnergyFrac"),
     jetHFHadronEnergyLabel  = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"HFHadronEnergy"),
@@ -135,11 +138,6 @@ jetLabels = cms.PSet(
     jetGenPhiLabel          = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"GenJetPhi"),
     jetGenELabel            = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"GenJetE"),
     jetGenChargeLabel       = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"GenJetCharge"),
-
-"jetAK4CHSJERSF"
-"jetAK4CHSJERSFDown"
-"jetAK4CHSJERSFUp"
-
 )
 
 largeRJetLabels = cms.PSet(
@@ -158,6 +156,9 @@ largeRJetLabels = cms.PSet(
     ljetDoubleBAK8Label      = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"DoubleBAK8"),
     ljetDoubleBCA15Label     = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"DoubleBCA15"),
     ljetJECLabel             = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"jecFactor0"),
+    ljetJERSFLabel           = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"JERSF"),
+    ljetJERSFUpLabel         = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"JERSFUp"),
+    ljetJERSFDownLabel       = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"JERSFDown"),
     ljetnHadEnergyLabel      = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"neutralHadronEnergyFrac"),
     ljetnEMEnergyLabel       = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"neutralEmEnergyFrac"),
     ljetcHadEnergyLabel      = cms.InputTag("jetsAK8"+jetType, "jetAK8"+jetType+"chargedHadronEnergyFrac"),

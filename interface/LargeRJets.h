@@ -63,6 +63,9 @@ class LargeRJets {
     edm::Handle<std::vector<float>> h_ljetCvsB;
     edm::Handle<std::vector<float>> h_ljetCvsL;
     edm::Handle<std::vector<float>> h_ljetJEC;
+    edm::Handle<std::vector<float>> h_ljetJERSF;
+    edm::Handle<std::vector<float>> h_ljetJERSFUp;
+    edm::Handle<std::vector<float>> h_ljetJERSFDown;
     edm::Handle<std::vector<float>> h_ljetnHadEnergy;
     edm::Handle<std::vector<float>> h_ljetnEMEnergy;
     edm::Handle<std::vector<float>> h_ljetHFHadronEnergy;
@@ -116,6 +119,9 @@ class LargeRJets {
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsB;
     edm::EDGetTokenT<std::vector<float>> t_ljetCvsL;
     edm::EDGetTokenT<std::vector<float>> t_ljetJEC;
+    edm::EDGetTokenT<std::vector<float>> t_ljetJERSF;
+    edm::EDGetTokenT<std::vector<float>> t_ljetJERSFUp;
+    edm::EDGetTokenT<std::vector<float>> t_ljetJERSFDown;
     edm::EDGetTokenT<std::vector<float>> t_ljetY;
     edm::EDGetTokenT<std::vector<float>> t_ljetArea;
     edm::EDGetTokenT<std::vector<float>> t_ljetMuonEnergy;

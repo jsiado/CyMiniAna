@@ -18,6 +18,7 @@
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -97,6 +98,7 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::EDGetTokenT<float> t_htHat;
     edm::EDGetTokenT<std::vector<int>> t_lhewtids;
     edm::EDGetTokenT<std::vector<float>> t_lhewts;
+    edm::EDGetTokenT<GenEventInfoProduct> t_genEvtInfoProd;
 
     // Handles
     edm::Handle<bool> h_isData;
@@ -128,6 +130,7 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<int> h_npuTrue;
     edm::Handle<int> h_evtno;
     edm::Handle<int> h_lumisec;
+    edm::Handle<GenEventInfoProduct> h_genEvtInfoProd;
 
     // Branches
     std::string m_sampleName;

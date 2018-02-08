@@ -16,7 +16,8 @@
  <class name="std::vector<Lepton>"/>
  <class name="edm::Wrapper<std::vector<Lepton> >"/>
 
- <class name="Electron" ClassVersion="13">
+ <class name="Electron" ClassVersion="14">
+  <version ClassVersion="14" checksum="1878110420"/>
   <version ClassVersion="13" checksum="2873762588"/>
         <version ClassVersion="12" checksum="4182755459"/>
  </class>
@@ -32,7 +33,8 @@
  <class name="std::vector<Muon>"/>
  <class name="edm::Wrapper<std::vector<Muon> >"/> 
 
- <class name="Jet" ClassVersion="14">
+ <class name="Jet" ClassVersion="15">
+  <version ClassVersion="15" checksum="2975528112"/>
   <version ClassVersion="14" checksum="1516667001"/>
   <version ClassVersion="13" checksum="275272349"/>
         <version ClassVersion="12" checksum="2767043855"/>
@@ -42,7 +44,8 @@
  <class name="std::vector<Jet>"/>
  <class name="edm::Wrapper<std::vector<Jet> >"/> 
 
- <class name="Ljet" ClassVersion="14">
+ <class name="Ljet" ClassVersion="15">
+  <version ClassVersion="15" checksum="2516569938"/>
   <version ClassVersion="14" checksum="2927757059"/>
   <version ClassVersion="13" checksum="1972469959"/>
         <version ClassVersion="12" checksum="1380754953"/>
