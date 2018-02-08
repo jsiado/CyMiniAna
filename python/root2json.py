@@ -7,11 +7,7 @@ daniel.edison.marley@cernSPAMNOT.ch
 Texas A&M University
 -----
 
-Script to convert information in root file to JSON format for Keras.
-
-save large-R jet information with selection:
-
-features:
+Class to convert information in root file to JSON format for Keras.
 """
 import sys
 import json
