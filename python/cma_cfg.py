@@ -68,7 +68,7 @@ filenames = [
 #          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
 ]
 
-data_path = 'data/'   # path to files needed in CyMiniAna
+data_path = 'config/'   # path to files needed in CyMiniAna
 
 hltPaths    = ["HLT_Ele32_eta2p1_WPTight_Gsf_v8",
                "HLT_IsoMu24_v4",

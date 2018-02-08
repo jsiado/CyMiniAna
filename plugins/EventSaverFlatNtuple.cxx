@@ -82,7 +82,7 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
     event.getByToken( t_ST,  m_ST );
     event.getByToken( t_rho, h_rho);
     event.getByToken( t_npv, h_npv);
-//    event.getByToken( t_runno,   h_runno);
+    event.getByToken(t_genEvtInfoProd,h_genEvtInfoProd);
 //    event.getByToken( t_evtno,   h_evtno);
 //    event.getByToken( t_lumisec, h_lumisec);
 
@@ -260,11 +260,11 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
         std::vector<Parton> truth = m_truthTool.execute(event); // Truth partons
 
 //        m_true_pileup;
-//        m_weight_pileup;
-//        m_weight_jet_jer;
-//        m_weight_ljet_jer;
-        //m_weight_mc   = ;
-        //m_weight_btag = m_btagTool->getSF(m_jets);
+        m_weight_pileup   = 1.0;
+        m_weight_jet_jer  = 1.0;
+        m_weight_ljet_jer = 1.0;
+        m_weight_mc   = h_genEvtInfoProd->weight();;
+        m_weight_btag = 1.0;   // m_btagTool->getSF(m_jets); Need efficiencies!
 
         m_mc_pt.clear();
         m_mc_eta.clear();

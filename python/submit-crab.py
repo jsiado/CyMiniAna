@@ -41,11 +41,12 @@ def main():
 
         config.JobType.pluginName = 'Analysis'
         config.JobType.psetName   = 'python/cma_cfg.py'
-        config.JobType.inputFiles = ['data/CSVv2_Moriond17_B_H.csv',
-                                     'data/subjet_CSVv2_Moriond17_B_H.csv',
-                                     'data/cuts_pre.txt',
-                                     'data/weightSystematics.txt',
-                                     'data/weightVectorSystematics.txt']
+        config.JobType.inputFiles = 'config' 
+                                    #['data/CSVv2_Moriond17_B_H.csv',
+                                    # 'data/subjet_CSVv2_Moriond17_B_H.csv',
+                                    # 'data/cuts_pre.txt',
+                                    # 'data/weightSystematics.txt',
+                                    # 'data/weightVectorSystematics.txt']
 
         config.Data.inputDBS      = 'phys03'
         config.Data.splitting     = 'FileBased'

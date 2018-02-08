@@ -135,6 +135,11 @@ jetLabels = cms.PSet(
     jetGenPhiLabel          = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"GenJetPhi"),
     jetGenELabel            = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"GenJetE"),
     jetGenChargeLabel       = cms.InputTag("jetsAK4"+jetType, "jetAK4"+jetType+"GenJetCharge"),
+
+"jetAK4CHSJERSF"
+"jetAK4CHSJERSFDown"
+"jetAK4CHSJERSFUp"
+
 )
 
 largeRJetLabels = cms.PSet(
