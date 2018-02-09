@@ -98,6 +98,10 @@ std::vector<Muon> Muons::execute(const edm::Event& evt, const objectSelection& o
         mu.loose = ((h_muIsLooseMuon.product())->at(imu) > 0);
         mu.tight = ((h_muIsTightMuon.product())->at(imu) > 0);
 
+        // ID and RECO SFs
+        // https://twiki.cern.ch/twiki/bin/view/CMS/MuonWorkInProgressAndPagResults
+
+
        	bool passObjSel	= obj.pass(mu);
         if (!passObjSel) continue;
 
