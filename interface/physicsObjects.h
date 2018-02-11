@@ -167,6 +167,19 @@ struct Muon : Lepton{
     float soft;
     float medium2016;
     float hightPt;
+
+    float mediumID_SF;
+    float mediumID_SF_UP;
+    float mediumID_SF_DN;
+    float looseISO_SF;
+    float looseISO_SF_UP;
+    float looseISO_SF_DN;
+    float trigger_SF;
+    float trigger_SF_UP;
+    float trigger_SF_DN;
+    float track_SF;
+    float track_SF_UP;
+    float track_SF_DN;
 };
 
 struct Neutrino : CmaBase{

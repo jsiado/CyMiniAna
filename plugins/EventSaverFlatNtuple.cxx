@@ -29,7 +29,8 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
   t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
   t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
   t_rho(consumes<std::vector<float>>(cfg.getParameter<edm::InputTag>("rhoLabel"))),
-  t_npv(consumes<int>(cfg.getParameter<edm::InputTag>("npvLabel"))){
+  t_npv(consumes<int>(cfg.getParameter<edm::InputTag>("npvLabel"))),
+  t_genEvtInfoProd(consumes<GenEventInfoProduct>(cfg.getParameter<std::string>("genEvtInfoProdName"))){
     // Make output TTrees
     edm::Service<TFileService> fs;
     m_ttree = fs->make<TTree>("events","events");
@@ -263,7 +264,7 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
         m_weight_pileup   = 1.0;
         m_weight_jet_jer  = 1.0;
         m_weight_ljet_jer = 1.0;
-        m_weight_mc   = h_genEvtInfoProd->weight();;
+        m_weight_mc   = h_genEvtInfoProd->weight();
         m_weight_btag = 1.0;   // m_btagTool->getSF(m_jets); Need efficiencies!
 
         m_mc_pt.clear();

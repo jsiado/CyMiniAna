@@ -44,6 +44,14 @@ Electrons::Electrons(edm::ParameterSet const& iConfig, edm::ConsumesCollector &&
     t_elmissHits = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("elmissHitsLabel"));
     t_elooEmooP = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("elooEmooPLabel"));
     t_elscEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("elscEtaLabel"));
+
+    
+    for (const auto& sf : m_listOfSFs){
+        TFile* f = TFile::Open(("data/egammaEffi_"+sf+"_EGM2D.root").c_str());  // hard-coded :/
+        TH2D* h = (TH2D*)f->Get("EGamma_SF2D");
+        TH2D* hist = (TH2D*)h->Clone();
+        m_listOfHists[sf] = hist;
+    }
 }
 
 Electrons::~Electrons() {}
@@ -85,14 +93,12 @@ std::vector<Electron> Electrons::execute(const edm::Event& evt, const objectSele
         el.p4.SetPtEtaPhiE((h_elPt.product())->at(iel), (h_elEta.product())->at(iel),
                            (h_elPhi.product())->at(iel),(h_elE.product())->at(iel));
 
+        el.index     = iel;
         el.charge    = (h_elCharge.product())->at(iel);
         el.vidLoose  = (h_elvidLoose.product())->at(iel);
         el.vidMedium = (h_elvidMedium.product())->at(iel);
         el.vidTight  = (h_elvidTight.product())->at(iel);
         el.vidVeto   = (h_elvidVeto.product())->at(iel);
-
-        // Get SFs
-        getSF(el);
  
         bool updateElectronID(false);
         if (updateElectronID){
@@ -114,6 +120,9 @@ std::vector<Electron> Electrons::execute(const edm::Event& evt, const objectSele
        	bool passObjSel	= obj.pass(el);
         if (!passObjSel) continue;
 
+        // Get SFs
+        getSF(el);
+
         m_electrons.push_back(el);
     }
 
@@ -130,10 +139,8 @@ void Electrons::getSF( Electron& el ) const{
 
     // loop over SFs (defined in header) to access root files
     for (const auto& sf : m_listOfSFs){
-        TFile* f = TFile::Open(("data/egammaEffi_"+sf+"_EGM2D.root").c_str());  // hard-coded :/
 
-        // load histogram & extract SF + uncertainty
-        TH2D* h = (TH2D*)f->Get("EGamma_SF2D");
+        TH2D* h = m_listOfHists.at(sf);
 
         int xBin = h->GetXaxis()->FindBin( eta );
         int yBin = h->GetYaxis()->FindBin( pt );

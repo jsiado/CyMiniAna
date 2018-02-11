@@ -53,6 +53,40 @@ Muons::Muons(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
         t_muGenPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("muGenPtLabel"));
         t_muGenCharge = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("muGenChargeLabel"));
     }
+
+    // Get histograms & store them for later
+    m_listOfHists.clear();
+
+    // ID
+    TFile* f = TFile::Open("data/muonEffi_ID_BCDEF.root");
+    TH2D* h  = (TH2D*)f->Get("MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/pt_abseta_ratio");
+    m_listOfHists["ID_BCDEF"] = h;
+
+    f = TFile::Open("data/muonEffi_ID_GH.root");
+    h = (TH2D*)f->Get("MC_NUM_MediumID_DEN_genTracks_PAR_pt_eta/pt_abseta_ratio");
+    m_listOfHists["ID_GH"] = h;
+
+    // ISO
+    f = TFile::Open("data/muonEffi_ISO_BCDEF.root");
+    h = (TH2D*)f->Get("LooseISO_MediumID_pt_eta/pt_abseta_ratio");
+    m_listOfHists["ISO_BCDEF"] = h;
+
+    f = TFile::Open("data/muonEffi_ISO_GH.root");
+    h = (TH2D*)f->Get("LooseISO_MediumID_pt_eta/pt_abseta_ratio");
+    m_listOfHists["ISO_GH"] = h;
+
+    // TRIG
+    f = TFile::Open("data/muonEffi_TRIG_RunBtoF.root");
+    h = (TH2D*)f->Get("IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio");
+    m_listOfHists["TRIG_BCDEF"] = h;
+
+    f = TFile::Open("data/muonEffi_TRIG_Period4.root");
+    h = (TH2D*)f->Get("IsoMu24_OR_IsoTkMu24_PtEtaBins/pt_abseta_ratio");
+    m_listOfHists["TRIG_GH"] = h;
+
+    // TRACK
+    f = TFile::Open("data/muonEffi_TRACK_BCDEFGH.root");
+    m_trackHisto = (TGraphAsymmErrors*)f->Get("eff_eta3_dr030e030_corr");
 }
 
 Muons::~Muons() {}
@@ -98,12 +132,11 @@ std::vector<Muon> Muons::execute(const edm::Event& evt, const objectSelection& o
         mu.loose = ((h_muIsLooseMuon.product())->at(imu) > 0);
         mu.tight = ((h_muIsTightMuon.product())->at(imu) > 0);
 
-        // ID and RECO SFs
-        // https://twiki.cern.ch/twiki/bin/view/CMS/MuonWorkInProgressAndPagResults
-
-
        	bool passObjSel	= obj.pass(mu);
         if (!passObjSel) continue;
+
+        // ID, ISO, TRIG, & TRACK SFs
+        getSF(mu);
 
         m_muons.push_back(mu);
     }
@@ -136,6 +169,77 @@ std::vector<Muon> Muons::execute_truth(const edm::Event& evt, const objectSelect
     }
 
     return m_truth_muons;
+}
+
+
+void Muons::getSF( Muon& mu ){
+    /* Retrieve SFs from ROOT files 
+       -- Accessed from https://twiki.cern.ch/twiki/bin/view/CMS/MuonWorkInProgressAndPagResults#Results_on_the_full_2016_data
+       -- 9 February 2018
+
+       Trigger SFs are centrally-provided (using standard triggers)
+       Use luminosity to weight SFs across run periods
+    */
+    float lumiBF = m_lumi_2016["b"] + m_lumi_2016["c"] + m_lumi_2016["d"] + m_lumi_2016["e"] + m_lumi_2016["f"];
+    float lumiGH = m_lumi_2016["g"] + m_lumi_2016["h_1"] + m_lumi_2016["h_2"];
+
+    float lumitotal = lumiBF + lumiGH;
+    lumiBF /= lumitotal;
+    lumiGH /= lumitotal;
+
+    std::map<std::string,float> valuesBF;
+    std::map<std::string,float> valuesGH;
+
+    // ID :: LooseISO & MediumID2016 (BCDEF) + MediumID (GH)
+    // https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Short_Term_Instructions_for_Mori
+    valuesBF = getSF_values( "ID_BCDEF", mu.p4 );
+    valuesGH = getSF_values( "ID_GH", mu.p4 );
+
+    mu.mediumID_SF    = valuesBF["sf"]*lumiBF + valuesGH["sf"]*lumiGH;
+    mu.mediumID_SF_UP = valuesBF["sf_up"]*lumiBF + valuesGH["sf_dn"]*lumiGH;
+    mu.mediumID_SF_DN = valuesBF["sf_up"]*lumiBF + valuesGH["sf_dn"]*lumiGH;
+
+    // ISO
+    valuesBF = getSF_values( "ISO_BCDEF", mu.p4 );
+    valuesGH = getSF_values( "ISO_GH", mu.p4 );
+
+    mu.looseISO_SF    = valuesBF["sf"]*lumiBF + valuesGH["sf"]*lumiGH;
+    mu.looseISO_SF_UP = valuesBF["sf_up"]*lumiBF + valuesGH["sf_dn"]*lumiGH;
+    mu.looseISO_SF_DN = valuesBF["sf_up"]*lumiBF + valuesGH["sf_dn"]*lumiGH;
+
+    // TRIG
+    valuesBF = getSF_values( "TRIG_BCDEF", mu.p4 );
+    valuesGH = getSF_values( "TRIG_GH", mu.p4 );
+
+    mu.trigger_SF    = valuesBF["sf"]*lumiBF + valuesGH["sf"]*lumiGH;
+    mu.trigger_SF_UP = valuesBF["sf_up"]*lumiBF + valuesGH["sf_dn"]*lumiGH;
+    mu.trigger_SF_DN = valuesBF["sf_up"]*lumiBF + valuesGH["sf_dn"]*lumiGH;
+
+    // TRACK -- only 1 SF for the entire 2016 dataset
+    int x = m_trackHisto->GetXaxis()->FindBin( mu.p4.Eta() );
+
+    mu.track_SF    = m_trackHisto->GetErrorY(x);
+    mu.track_SF_UP = m_trackHisto->GetErrorYhigh(x);
+    mu.track_SF_DN = m_trackHisto->GetErrorYlow(x);
+
+    return;
+}
+
+
+std::map<std::string,float> Muons::getSF_values( const std::string& histname, const TLorentzVector& p ){
+    /* Quickly retrieve the SF nominal and uncertainty values (cleans up the getSF() function above) */
+    std::map<std::string,float> values;
+
+    TH2D* h = m_listOfHists.at(histname);
+
+    int x = h->GetXaxis()->FindBin( p.Eta() );
+    int y = (h->GetYaxis()->GetNbins()>0) ? h->GetYaxis()->FindBin( p.Pt() ) : 1;
+
+    values["sf"] = h->GetBinContent(x,y);
+    values["sf_up"] = h->GetBinErrorUp(x,y);
+    values["sf_dn"] = h->GetBinErrorLow(x,y);
+
+    return values;
 }
 
 // THE END

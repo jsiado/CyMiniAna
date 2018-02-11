@@ -39,6 +39,7 @@ class Electrons {
 
     // SFs for ID and RECO
     std::vector<std::string> m_listOfSFs = {"veto","loose","medium","tight","reco"};
+    std::map<std::string,TH2D*> m_listOfHists;
 
     // Setup physics information from EDMntuples
     edm::ParameterSet m_labels;
