@@ -184,6 +184,13 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     std::vector<int> m_el_ID_loose;
     std::vector<int> m_el_ID_medium;
     std::vector<int> m_el_ID_tight;
+    std::vector<int> m_el_reco;
+    std::vector<float> m_el_SF_ID;
+    std::vector<float> m_el_SF_reco;
+    std::vector<float> m_el_SF_ID_UP;
+    std::vector<float> m_el_SF_reco_UP;
+    std::vector<float> m_el_SF_ID_DN;
+    std::vector<float> m_el_SF_reco_DN;
 
     std::vector<float> m_mu_pt;
     std::vector<float> m_mu_eta;
@@ -194,6 +201,18 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     std::vector<int> m_mu_ID_loose;
     std::vector<int> m_mu_ID_medium;
     std::vector<int> m_mu_ID_tight;
+    std::vector<float> m_mu_SF_ID;
+    std::vector<float> m_mu_SF_ISO;
+    std::vector<float> m_mu_SF_trigger;
+    std::vector<float> m_mu_SF_track;
+    std::vector<float> m_mu_SF_ID_UP;
+    std::vector<float> m_mu_SF_ISO_UP;
+    std::vector<float> m_mu_SF_trigger_UP;
+    std::vector<float> m_mu_SF_track_UP;
+    std::vector<float> m_mu_SF_ID_DN;
+    std::vector<float> m_mu_SF_ISO_DN;
+    std::vector<float> m_mu_SF_trigger_DN;
+    std::vector<float> m_mu_SF_track_DN;
 
     std::vector<float> m_nu_pt;
     std::vector<float> m_nu_eta;

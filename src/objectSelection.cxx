@@ -166,13 +166,13 @@ bool objectSelection::electronID(const Electron& el) const{
     bool passSel(false);
 
     if (m_el_ID.compare("veto")==0)
-        passSel = (el.vidVeto) ? true : false;
+        passSel = (el.vidVeto);
     else if (m_el_ID.compare("loose")==0)
-        passSel = (el.vidLoose) ? true : false;
+        passSel = (el.vidLoose);
     else if (m_el_ID.compare("medium")==0)
-        passSel = (el.vidMedium) ? true : false;
+        passSel = (el.vidMedium);
     else if (m_el_ID.compare("tight")==0)
-        passSel = (el.vidTight) ? true : false;
+        passSel = (el.vidTight);
     else{
         edm::LogWarning("Unsupported electron ID type ") << m_el_ID;
         edm::LogWarning("Please check your electron ID configuration ");
@@ -187,11 +187,13 @@ bool objectSelection::muonID( const Muon& mu ) const{
     /* Muon ID */
     bool passSel(false);
 
-    if (m_mu_ID.compare("loose")==0 && mu.loose)
-        passSel = true;
-    else if (m_mu_ID.compare("tight")==0 && mu.tight)
-        passSel = true;
-    else if(m_mu_ID.compare("loose")!=0 && m_mu_ID.compare("tight")!=0){
+    if (m_mu_ID.compare("loose")==0)
+        passSel = mu.loose;
+    else if (m_mu_ID.compare("medium")==0)
+        passSel = mu.medium;
+    else if (m_mu_ID.compare("tight")==0)
+        passSel = mu.tight;
+    else if(m_mu_ID.compare("loose")!=0 && m_mu_ID.compare("medium")!=0 && m_mu_ID.compare("tight")!=0){
         edm::LogWarning("Unsupported muon ID type ") << m_mu_ID;
         edm::LogWarning("Please check your muon ID configuration ");
         passSel = false;

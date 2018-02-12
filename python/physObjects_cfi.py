@@ -28,7 +28,8 @@ import FWCore.ParameterSet.Config as cms
 objectSelectionParams = cms.PSet(
 
  # muonParameters
-    mu_id     = cms.string("loose"),
+ # ID: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Short_Term_Instructions_for_Mori
+    mu_id     = cms.string("medium"),  # medium: GH; medium2016: BCDEF
     mu_pt     = cms.double(30),
     mu_eta    = cms.double(2.4),
     mu_IsoMin = cms.double(-100),

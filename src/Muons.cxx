@@ -58,6 +58,7 @@ Muons::Muons(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
     m_listOfHists.clear();
 
     // ID
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Short_Term_Instructions_for_Mori
     TFile* f = TFile::Open("data/muonEffi_ID_BCDEF.root");
     TH2D* h  = (TH2D*)f->Get("MC_NUM_MediumID2016_DEN_genTracks_PAR_pt_eta/pt_abseta_ratio");
     m_listOfHists["ID_BCDEF"] = h;
@@ -232,8 +233,14 @@ std::map<std::string,float> Muons::getSF_values( const std::string& histname, co
 
     TH2D* h = m_listOfHists.at(histname);
 
-    int x = h->GetXaxis()->FindBin( p.Eta() );
-    int y = (h->GetYaxis()->GetNbins()>0) ? h->GetYaxis()->FindBin( p.Pt() ) : 1;
+    // Check pT bounds
+    int x(0);
+    if (p.Pt() > h->GetXaxis()->GetBinUpEdge(h->GetNbinsX()) )
+        x = h->GetNbinsX();
+    else
+        x = h->GetXaxis()->FindBin( p.Pt() );
+
+    int y = h->GetYaxis()->FindBin( std::abs(p.Eta()) );
 
     values["sf"] = h->GetBinContent(x,y);
     values["sf_up"] = h->GetBinErrorUp(x,y);
