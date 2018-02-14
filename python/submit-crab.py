@@ -41,11 +41,15 @@ def main():
 
         config.JobType.pluginName = 'Analysis'
         config.JobType.psetName   = 'python/cma_cfg.py'
-        config.JobType.inputFiles = ['data/CSVv2_Moriond17_B_H.csv',
-                                     'data/subjet_CSVv2_Moriond17_B_H.csv',
-                                     'data/cuts_pre.txt',
-                                     'data/weightSystematics.txt',
-                                     'data/weightVectorSystematics.txt']
+
+        # just put the directory as 'inputFiles' value
+        # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_are_the_inputFiles_handled_i
+        config.JobType.inputFiles = 'data'
+                                    #['data/CSVv2_Moriond17_B_H.csv',
+                                    # 'data/subjet_CSVv2_Moriond17_B_H.csv',
+                                    # 'data/cuts_pre.txt',
+                                    # 'data/weightSystematics.txt',
+                                    # 'data/weightVectorSystematics.txt']
 
         config.Data.inputDBS      = 'phys03'
         config.Data.splitting     = 'FileBased'

@@ -18,6 +18,7 @@
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -97,6 +98,7 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::EDGetTokenT<float> t_htHat;
     edm::EDGetTokenT<std::vector<int>> t_lhewtids;
     edm::EDGetTokenT<std::vector<float>> t_lhewts;
+    edm::EDGetTokenT<GenEventInfoProduct> t_genEvtInfoProd;
 
     // Handles
     edm::Handle<bool> h_isData;
@@ -128,6 +130,7 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     edm::Handle<int> h_npuTrue;
     edm::Handle<int> h_evtno;
     edm::Handle<int> h_lumisec;
+    edm::Handle<GenEventInfoProduct> h_genEvtInfoProd;
 
     // Branches
     std::string m_sampleName;
@@ -181,6 +184,13 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     std::vector<int> m_el_ID_loose;
     std::vector<int> m_el_ID_medium;
     std::vector<int> m_el_ID_tight;
+    std::vector<int> m_el_reco;
+    std::vector<float> m_el_SF_ID;
+    std::vector<float> m_el_SF_reco;
+    std::vector<float> m_el_SF_ID_UP;
+    std::vector<float> m_el_SF_reco_UP;
+    std::vector<float> m_el_SF_ID_DN;
+    std::vector<float> m_el_SF_reco_DN;
 
     std::vector<float> m_mu_pt;
     std::vector<float> m_mu_eta;
@@ -191,6 +201,18 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     std::vector<int> m_mu_ID_loose;
     std::vector<int> m_mu_ID_medium;
     std::vector<int> m_mu_ID_tight;
+    std::vector<float> m_mu_SF_ID;
+    std::vector<float> m_mu_SF_ISO;
+    std::vector<float> m_mu_SF_trigger;
+    std::vector<float> m_mu_SF_track;
+    std::vector<float> m_mu_SF_ID_UP;
+    std::vector<float> m_mu_SF_ISO_UP;
+    std::vector<float> m_mu_SF_trigger_UP;
+    std::vector<float> m_mu_SF_track_UP;
+    std::vector<float> m_mu_SF_ID_DN;
+    std::vector<float> m_mu_SF_ISO_DN;
+    std::vector<float> m_mu_SF_trigger_DN;
+    std::vector<float> m_mu_SF_track_DN;
 
     std::vector<float> m_nu_pt;
     std::vector<float> m_nu_eta;

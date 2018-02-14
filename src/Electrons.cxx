@@ -9,6 +9,9 @@ Texas A&M University
 -----
 
 Build Electrons from EDMntuples
+
+Uncertainties:
+  https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaIDRecipesRun2#Electron_efficiencies_and_scale
 */
 #include "Analysis/CyMiniAna/interface/Electrons.h"
 
@@ -41,6 +44,14 @@ Electrons::Electrons(edm::ParameterSet const& iConfig, edm::ConsumesCollector &&
     t_elmissHits = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("elmissHitsLabel"));
     t_elooEmooP = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("elooEmooPLabel"));
     t_elscEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("elscEtaLabel"));
+
+    
+    for (const auto& sf : m_listOfSFs){
+        TFile* f = TFile::Open(("data/egammaEffi_"+sf+"_EGM2D.root").c_str());  // hard-coded :/
+        TH2D* h = (TH2D*)f->Get("EGamma_SF2D");
+        TH2D* hist = (TH2D*)h->Clone();
+        m_listOfHists[sf] = hist;
+    }
 }
 
 Electrons::~Electrons() {}
@@ -82,29 +93,35 @@ std::vector<Electron> Electrons::execute(const edm::Event& evt, const objectSele
         el.p4.SetPtEtaPhiE((h_elPt.product())->at(iel), (h_elEta.product())->at(iel),
                            (h_elPhi.product())->at(iel),(h_elE.product())->at(iel));
 
+        el.index     = iel;
         el.charge    = (h_elCharge.product())->at(iel);
         el.vidLoose  = (h_elvidLoose.product())->at(iel);
         el.vidMedium = (h_elvidMedium.product())->at(iel);
         el.vidTight  = (h_elvidTight.product())->at(iel);
         el.vidVeto   = (h_elvidVeto.product())->at(iel);
  
-        el.Dz  = (h_elDz.product())->at(iel);
-        el.Dxy = (h_elDxy.product())->at(iel);
-        el.HoE = (h_elHoE.product())->at(iel);
-        el.scEta  = (h_elscEta.product())->at(iel);
-        el.dPhiIn = (h_eldPhiIn.product())->at(iel);
-        el.ooEmooP  = (h_elooEmooP.product())->at(iel);
-        el.missHits = (h_elmissHits.product())->at(iel);
-        el.RelIsoEA = (h_elRelIsoEA.product())->at(iel);
-        el.dEtaInSeed  = (h_eldEtaInSeed.product())->at(iel);
-        el.full5x5siee = (h_elfull5x5siee.product())->at(iel);
-        el.hasMatchedConVeto = (h_elhasMatchedConVeto.product())->at(iel);
-
         bool updateElectronID(false);
-        if (updateElectronID) setElectronID(el);
+        if (updateElectronID){
+            el.Dz  = (h_elDz.product())->at(iel);
+            el.Dxy = (h_elDxy.product())->at(iel);
+            el.HoE = (h_elHoE.product())->at(iel);
+            el.scEta  = (h_elscEta.product())->at(iel);
+            el.dPhiIn = (h_eldPhiIn.product())->at(iel);
+            el.ooEmooP  = (h_elooEmooP.product())->at(iel);
+            el.missHits = (h_elmissHits.product())->at(iel);
+            el.RelIsoEA = (h_elRelIsoEA.product())->at(iel);
+            el.dEtaInSeed  = (h_eldEtaInSeed.product())->at(iel);
+            el.full5x5siee = (h_elfull5x5siee.product())->at(iel);
+            el.hasMatchedConVeto = (h_elhasMatchedConVeto.product())->at(iel);
+
+            setElectronID(el);
+        }
 
        	bool passObjSel	= obj.pass(el);
         if (!passObjSel) continue;
+
+        // Get SFs
+        getSF(el);
 
         m_electrons.push_back(el);
     }
@@ -112,6 +129,50 @@ std::vector<Electron> Electrons::execute(const edm::Event& evt, const objectSele
     return m_electrons;
 }
 
+
+void Electrons::getSF( Electron& el ) const{
+    /* Use the Egamma-provided SFs for ID and Reconstruction */
+    std::map<std::string,float> sfs;
+
+    float pt  = el.p4.Pt();
+    float eta = el.p4.Eta();
+
+    // loop over SFs (defined in header) to access root files
+    for (const auto& sf : m_listOfSFs){
+
+        TH2D* h = m_listOfHists.at(sf);
+
+        int xBin = h->GetXaxis()->FindBin( eta );
+        int yBin = h->GetYaxis()->FindBin( pt );
+
+        sfs[sf]       = h->GetBinContent(  xBin, yBin );
+        sfs[sf+"_UP"] = h->GetBinErrorUp(  xBin, yBin );   // I think Up and Low will be the same?
+        sfs[sf+"_DN"] = h->GetBinErrorLow( xBin, yBin );
+    }
+
+    // Set attributes of the electron
+    el.vetoSF = sfs["veto"];
+    el.vetoSF_UP = sfs["veto_UP"];
+    el.vetoSF_DN = sfs["veto_DN"];
+
+    el.looseSF = sfs["loose"];
+    el.looseSF_UP = sfs["loose_UP"];
+    el.looseSF_DN = sfs["loose_DN"];
+
+    el.mediumSF = sfs["medium"];
+    el.mediumSF_UP = sfs["medium_UP"];
+    el.mediumSF_DN = sfs["medium_DN"];
+
+    el.tightSF = sfs["tight"];
+    el.tightSF_UP = sfs["tight_UP"];
+    el.tightSF_DN = sfs["tight_DN"];
+
+    el.recoSF = sfs["reco"];
+    el.recoSF_UP = sfs["reco_UP"];
+    el.recoSF_DN = sfs["reco_DN"];
+
+    return;
+}
 
 void Electrons::setElectronID( Electron& el ) const{
     /* Determine electron ID */

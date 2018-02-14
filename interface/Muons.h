@@ -5,6 +5,10 @@
 #include <iostream>
 
 #include "TROOT.h"
+#include "TFile.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TGraphAsymmErrors.h"
 #include "TLorentzVector.h"
 
 #include "FWCore/Framework/interface/ConsumesCollector.h"
@@ -27,6 +31,9 @@ class Muons {
     std::vector<Muon> execute(const edm::Event& evt, const objectSelection& obj);
     std::vector<Muon> execute_truth(const edm::Event& evt, const objectSelection& obj);
 
+    void getSF( Muon& mu );
+    std::map<std::string,float> getSF_values( const std::string& histname, const TLorentzVector& p );
+
   private:
 
     // Physics information
@@ -36,6 +43,16 @@ class Muons {
     // Setup physics information from EDMntuples
     edm::ParameterSet m_labels;
     bool m_useTruth;
+
+    // SingleMuon dataset sizes:
+    // https://twiki.cern.ch/twiki/bin/view/CMS/B2GAnaEDMNTuples80X#NTuples_with_tag_v8_0_x_v3_2
+    std::map<std::string,float> m_lumi_2016 = { {"b",5784},{"c",2573},  // /pb
+                                                {"d",4284},{"e",4009},
+                                                {"f",3102},{"g",7540},
+                                                {"h_1",8390},{"h_2",215} };
+
+    std::map<std::string,TH2D*> m_listOfHists;
+    TGraphAsymmErrors* m_trackHisto;
 
     // ************
     // Setup to read EDMntuple format

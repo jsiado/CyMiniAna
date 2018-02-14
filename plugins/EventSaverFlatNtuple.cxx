@@ -29,7 +29,8 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
   t_HT(consumes<double>(edm::InputTag("CMAProducer","HT","CyMiniAna"))),
   t_ST(consumes<double>(edm::InputTag("CMAProducer","ST","CyMiniAna"))),
   t_rho(consumes<std::vector<float>>(cfg.getParameter<edm::InputTag>("rhoLabel"))),
-  t_npv(consumes<int>(cfg.getParameter<edm::InputTag>("npvLabel"))){
+  t_npv(consumes<int>(cfg.getParameter<edm::InputTag>("npvLabel"))),
+  t_genEvtInfoProd(consumes<GenEventInfoProduct>(cfg.getParameter<std::string>("genEvtInfoProdName"))){
     // Make output TTrees
     edm::Service<TFileService> fs;
     m_ttree = fs->make<TTree>("events","events");
@@ -82,9 +83,10 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
     event.getByToken( t_ST,  m_ST );
     event.getByToken( t_rho, h_rho);
     event.getByToken( t_npv, h_npv);
-//    event.getByToken( t_runno,   h_runno);
+    event.getByToken(t_genEvtInfoProd,h_genEvtInfoProd);
 //    event.getByToken( t_evtno,   h_evtno);
 //    event.getByToken( t_lumisec, h_lumisec);
+
 
     // Set branch values
     if (m_useJets){
@@ -116,8 +118,10 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
             m_jet_jec.push_back(1);
             m_jet_jer_up.push_back(1);
             m_jet_jer_down.push_back(1);
-        }
-    }
+        } // end loop over AK4
+    } // end use Jets
+
+    // AK8 jets
     if (m_useLargeRJets){
         m_ljet_pt.clear();
         m_ljet_eta.clear();
@@ -178,8 +182,11 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
                 m_ljet_subjet_CSV.push_back(jet.CSVv2);
                 m_ljet_subjet_charge.push_back(jet.charge);
             }
-        }
-    }
+        } // end loop over AK8
+    } // end useLargeRJets
+
+
+    // Leptons
     if (m_useLeptons){
         m_el_pt.clear();
         m_el_eta.clear();
@@ -191,6 +198,17 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
         m_el_ID_medium.clear();
         m_el_ID_tight.clear();
 
+//        m_el_SF_IDveto.clear();
+//        m_el_SF_IDloose.clear();
+//        m_el_SF_IDmedium.clear();
+//        m_el_SF_IDtight.clear();
+        m_el_SF_ID.clear();
+        m_el_SF_reco.clear();
+        m_el_SF_ID_UP.clear();
+        m_el_SF_reco_UP.clear();
+        m_el_SF_ID_DN.clear();
+        m_el_SF_reco_DN.clear();
+
         for (const auto& el : *m_electrons.product()){
             m_el_pt.push_back(  el.p4.Pt() );
             m_el_eta.push_back( el.p4.Eta() );
@@ -201,7 +219,14 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
             m_el_ID_loose.push_back(  el.vidLoose );
             m_el_ID_medium.push_back( el.vidMedium );
             m_el_ID_tight.push_back(  el.vidTight );
-        }
+            // SF
+            m_el_SF_ID.push_back(el.tightSF);
+            m_el_SF_reco.push_back(el.recoSF);
+            m_el_SF_ID_UP.push_back(el.tightSF_UP);
+            m_el_SF_ID_DN.push_back(el.tightSF_DN);
+            m_el_SF_reco_UP.push_back(el.recoSF_UP);
+            m_el_SF_reco_DN.push_back(el.recoSF_DN);
+        } // end loop over electrons
 
         m_mu_pt.clear();
         m_mu_eta.clear();
@@ -212,6 +237,19 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
         m_mu_ID_loose.clear();
         m_mu_ID_medium.clear();
         m_mu_ID_tight.clear();
+        // SFs
+        m_mu_SF_ID.clear();
+        m_mu_SF_ISO.clear();
+        m_mu_SF_trigger.clear();
+        m_mu_SF_track.clear();
+        m_mu_SF_ID_UP.clear();
+        m_mu_SF_ISO_UP.clear();
+        m_mu_SF_trigger_UP.clear();
+        m_mu_SF_track_UP.clear();
+        m_mu_SF_ID_DN.clear();
+        m_mu_SF_ISO_DN.clear();
+        m_mu_SF_trigger_DN.clear();
+        m_mu_SF_track_DN.clear();
 
         for (const auto& mu : *m_muons.product()){
             m_mu_pt.push_back(  mu.p4.Pt() );
@@ -223,8 +261,23 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
             m_mu_ID_loose.push_back(  mu.loose );
             m_mu_ID_medium.push_back( (mu.loose && !mu.tight) ); // unofficial (30Jan2018)
             m_mu_ID_tight.push_back(  mu.tight );
-        }
-    }
+
+            m_mu_SF_ID.push_back(mu.mediumID_SF);
+            m_mu_SF_ISO.push_back(mu.looseISO_SF);
+            m_mu_SF_trigger.push_back(mu.trigger_SF);
+            m_mu_SF_track.push_back(mu.track_SF);
+            m_mu_SF_ID_UP.push_back(mu.mediumID_SF_UP);
+            m_mu_SF_ISO_UP.push_back(mu.looseISO_SF_UP);
+            m_mu_SF_trigger_UP.push_back(mu.trigger_SF_UP);
+            m_mu_SF_track_UP.push_back(mu.track_SF_UP);
+            m_mu_SF_ID_DN.push_back(mu.mediumID_SF_DN);
+            m_mu_SF_ISO_DN.push_back(mu.looseISO_SF_DN);
+            m_mu_SF_trigger_DN.push_back(mu.trigger_SF_DN);
+            m_mu_SF_track_DN.push_back(mu.track_SF_DN);
+        } // end loop over muons
+    } // end use leptons
+
+    // Neutrinos
     if (m_useNeutrinos){
         m_nu_pt.clear();
         m_nu_eta.clear();
@@ -236,6 +289,7 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
             m_nu_phi.push_back(nu.p4.Phi());
         }
     }
+
 
     m_met_met = (*m_met.product()).p4.Pt();
     m_met_phi = (*m_met.product()).p4.Phi();
@@ -260,11 +314,11 @@ void EventSaverFlatNtuple::analyze( const edm::Event& event, const edm::EventSet
         std::vector<Parton> truth = m_truthTool.execute(event); // Truth partons
 
 //        m_true_pileup;
-//        m_weight_pileup;
-//        m_weight_jet_jer;
-//        m_weight_ljet_jer;
-        //m_weight_mc   = ;
-        //m_weight_btag = m_btagTool->getSF(m_jets);
+        m_weight_pileup   = 1.0;
+        m_weight_jet_jer  = 1.0;
+        m_weight_ljet_jer = 1.0;
+        m_weight_mc   = h_genEvtInfoProd->weight();
+        m_weight_btag = 1.0;   // m_btagTool->getSF(m_jets); Need efficiencies!
 
         m_mc_pt.clear();
         m_mc_eta.clear();
@@ -411,15 +465,34 @@ void EventSaverFlatNtuple::initialize_branches(){
     m_ttree->Branch("el_ID_medium", &m_el_ID_medium);     // vector of ints
     m_ttree->Branch("el_ID_tight",  &m_el_ID_tight);      // vector of ints
 
+    m_ttree->Branch("el_SF_ID",      &m_el_SF_ID);
+    m_ttree->Branch("el_SF_reco",    &m_el_SF_reco);
+    m_ttree->Branch("el_SF_ID_UP",   &m_el_SF_ID_UP);
+    m_ttree->Branch("el_SF_reco_UP", &m_el_SF_reco_UP);
+    m_ttree->Branch("el_SF_ID_DN",   &m_el_SF_ID_DN);
+    m_ttree->Branch("el_SF_reco_DN", &m_el_SF_reco_DN);
+
     m_ttree->Branch("mu_pt",  &m_mu_pt);     // vector of floats
     m_ttree->Branch("mu_eta", &m_mu_eta);    // vector of floats
     m_ttree->Branch("mu_phi", &m_mu_phi);    // vector of floats
     m_ttree->Branch("mu_e",   &m_mu_e);      // vector of floats
     m_ttree->Branch("mu_iso", &m_mu_iso);    // vector of ints
-    m_ttree->Branch("mu_charge",    &m_mu_charge);        // vector of floats
-    m_ttree->Branch("mu_ID_loose",  &m_mu_ID_loose);      // vector of ints
-    m_ttree->Branch("mu_ID_medium", &m_mu_ID_medium);     // vector of ints
-    m_ttree->Branch("mu_ID_tight",  &m_mu_ID_tight);      // vector of ints
+    m_ttree->Branch("mu_charge",     &m_mu_charge);        // vector of floats
+    m_ttree->Branch("mu_ID_loose",   &m_mu_ID_loose);      // vector of ints
+    m_ttree->Branch("mu_ID_medium",  &m_mu_ID_medium);     // vector of ints
+    m_ttree->Branch("mu_ID_tight",   &m_mu_ID_tight);      // vector of ints
+    m_ttree->Branch("mu_SF_ID",      &m_mu_SF_ID);      // vector of floats
+    m_ttree->Branch("mu_SF_ISO",     &m_mu_SF_ISO);     // vector of floats
+    m_ttree->Branch("mu_SF_trigger", &m_mu_SF_trigger); // vector of floats
+    m_ttree->Branch("mu_SF_track",   &m_mu_SF_track);   // vector of floats
+    m_ttree->Branch("mu_SF_ID_UP",      &m_mu_SF_ID_UP);      // vector of floats
+    m_ttree->Branch("mu_SF_ISO_UP",     &m_mu_SF_ISO_UP);     // vector of floats
+    m_ttree->Branch("mu_SF_trigger_UP", &m_mu_SF_trigger_UP); // vector of floats
+    m_ttree->Branch("mu_SF_track_UP",   &m_mu_SF_track_UP);   // vector of floats
+    m_ttree->Branch("mu_SF_ID_DN",      &m_mu_SF_ID_DN);      // vector of floats
+    m_ttree->Branch("mu_SF_ISO_DN",     &m_mu_SF_ISO_DN);     // vector of floats
+    m_ttree->Branch("mu_SF_trigger_DN", &m_mu_SF_trigger_DN); // vector of floats
+    m_ttree->Branch("mu_SF_track_DN",   &m_mu_SF_track_DN);   // vector of floats
 
     m_ttree->Branch("nu_pt",  &m_nu_pt);     // vector of floats
     m_ttree->Branch("nu_eta", &m_nu_eta);    // vector of floats

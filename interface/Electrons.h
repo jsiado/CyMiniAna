@@ -5,6 +5,8 @@
 #include <iostream>
 
 #include "TROOT.h"
+#include "TFile.h"
+#include "TH2D.h"
 #include "TLorentzVector.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -26,6 +28,7 @@ class Electrons {
     // Container of electrons (defined in interface/physicsObjects.h)
     std::vector<Electron> execute(const edm::Event& evt, const objectSelection& obj);
 
+    void getSF( Electron& el ) const;
     void setElectronID( Electron& el ) const;
     bool electronISO( const Electron& el, const std::string& ID ) const;
 
@@ -33,6 +36,10 @@ class Electrons {
 
     // Physics information
     std::vector<Electron> m_electrons;
+
+    // SFs for ID and RECO
+    std::vector<std::string> m_listOfSFs = {"veto","loose","medium","tight","reco"};
+    std::map<std::string,TH2D*> m_listOfHists;
 
     // Setup physics information from EDMntuples
     edm::ParameterSet m_labels;

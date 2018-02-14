@@ -21,19 +21,23 @@ Jets::Jets(edm::ParameterSet const& iConfig, edm::ConsumesCollector && iC) :
   m_isMC(iConfig.getParameter<bool>("isMC")),
   m_useTruth(iConfig.getParameter<bool>("useTruth")),
   m_data_path(iConfig.getParameter<std::string>("data_path")){
-    t_jetPt = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPtLabel"));
+    t_jetPt  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPtLabel"));
     t_jetEta = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetEtaLabel"));
     t_jetPhi = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPhiLabel"));
-    t_jetE = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetEnergyLabel"));
+    t_jetE   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetEnergyLabel"));
     t_jetHadronFlavour = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetPartonFlavourLabel"));
     t_jetPartonFlavour = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetHadronFlavourLabel"));
-    t_jetCSV = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCSVLabel"));
+    t_jetCSV  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCSVLabel"));
     t_jetCMVA = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCMVALabel"));
     t_jetCvsB = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCvsBLabel"));
     t_jetCvsL = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetCvsLLabel"));
-    t_jetJEC = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetJECLabel"));
+    t_jetJEC  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetJECLabel"));
+    t_jetJECsyst = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetJECsystLabel"));
+    t_jetJERSF   = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetJERSFLabel"));
+    t_jetJERSFUp = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetJERSFUpLabel"));
+    t_jetJERSFDown  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetJERSFDownLabel"));
     t_jetnHadEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetnHadEnergyLabel"));
-    t_jetnEMEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetnEMEnergyLabel"));
+    t_jetnEMEnergy  = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetnEMEnergyLabel"));
     t_jetcHadEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetcHadEnergyLabel"));
     t_jetcEMEnergy = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetcEMEnergyLabel"));
     t_jetcMultip = iC.consumes<std::vector<float>>(m_labels.getParameter<edm::InputTag>("jetcMultipLabel"));
@@ -64,6 +68,10 @@ std::vector<Jet> Jets::execute(const edm::Event& evt, const objectSelection& obj
     evt.getByToken(t_jetEta, h_jetEta);
     evt.getByToken(t_jetPhi, h_jetPhi);
     evt.getByToken(t_jetJEC, h_jetJEC);
+    evt.getByToken(t_jetJECsyst, h_jetJECsyst);
+    evt.getByToken(t_jetJERSF, h_jetJERSF);
+    evt.getByToken(t_jetJERSFUp, h_jetJERSFUp);
+    evt.getByToken(t_jetJERSFDown, h_jetJERSFDown);
     evt.getByToken(t_jetCSV, h_jetCSV);
     evt.getByToken(t_jetCMVA,   h_jetCMVA);
     evt.getByToken(t_jetCvsB,   h_jetCvsB);
@@ -98,6 +106,12 @@ std::vector<Jet> Jets::execute(const edm::Event& evt, const objectSelection& obj
         jet.muonEnergy  = (h_jetcMultip.product())->at(ijet);
         jet.true_flavor = int((h_jetHadronFlavour.product())->at(ijet));
         jet.index       = ijet;
+
+        // JEC & JER
+        jet.JECsyst = (h_jetJECsyst.product())->at(ijet);
+        jet.JERSF    = (h_jetJERSF.product())->at(ijet);
+        jet.JERSF_UP = (h_jetJERSFUp.product())->at(ijet);
+        jet.JERSF_DN = (h_jetJERSFDown.product())->at(ijet);
 
         setJetID(jet);
         bool passObjSel = obj.pass(jet);
