@@ -18,9 +18,10 @@ import sys
 import ROOT
 from argparse import ArgumentParser
 
-from hepPlotter import HepPlotter
-import hepPlotterTools as hpt
-import hepPlotterLabels as hpl
+from Analysis.CyMiniAna.hepPlotter.hepPlotter import HepPlotter
+import Analysis.CyMiniAna.hepPlotter.hepPlotterTools as hpt
+import Analysis.CyMiniAna.hepPlotter.hepPlotterLabels as hpl
+
 
 parser = ArgumentParser(description="Histogram Plotter")
 

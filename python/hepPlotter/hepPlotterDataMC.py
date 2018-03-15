@@ -24,6 +24,7 @@ os.environ['PATH'] = os.environ['PATH']+':/usr/texbin'+':/Library/TeX/texbin'  #
 
 ## Setup Matplotlib Configuration ##
 import matplotlib
+import numpy as np
 mpl_version = matplotlib.__version__
 matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend.
 from matplotlib import rc
@@ -31,11 +32,10 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import AutoMinorLocator
-import numpy as np
 
 rc('text', usetex=True)
 rc('font', family='sans-serif')
-if mpl_version.startswith('1.5') or mpl_version.startswith('2'):
+if mpl_version.startswith('1.5'):
     fontProperties = {}
 else:
     fontProperties = {'family':'sans-serif','sans-serif':['Helvetica']}
@@ -56,6 +56,7 @@ class HepPlotterDataMC(HepPlotter):
         HepPlotter.__init__(self,"histogram",1)
 
         self.stackSignal = False
+        self.stacked     = True
         self.plotLUMI    = True
         self.blind       = False
         self.ymaxScale   = 1.3
@@ -80,8 +81,9 @@ class HepPlotterDataMC(HepPlotter):
                             'signal':[],
                             'data':[],
                             'systematic':[]}  # systematic is for plotting single systematic uncertainties
-        self.labels      = hpl.text_dicts()
-        self.systematics = OrderedDict()
+        self.sample_labels   = hpl.sample_lables()
+        self.variable_labels = hpl.variable_lables()
+        self.systematics     = OrderedDict()
 
         self.uncertainty_handles = []
         self.uncertainty_labels  = []
@@ -147,8 +149,8 @@ class HepPlotterDataMC(HepPlotter):
                     totDataError += np.square(error)
 
                 p,c,b = self.ax1.errorbar(bin_center,data,yerr=error,capsize=0,
-                                     fmt="o",mec="k",mfc="k",color="k",
-                                     label=self.labels['samples'][name]['label'],zorder=100)
+                                          fmt="o",mec="k",mfc="k",color="k",
+                                          label=self.sample_labels[name].label,zorder=100)
 
                 self.histograms[name]    = data
                 self.uncertainties[name] = np.sqrt(totDataError)
@@ -177,8 +179,8 @@ class HepPlotterDataMC(HepPlotter):
             self.uncertainties[name] = self.hists2plot[name]['error']
             self.histograms[name]    = weights
 
-            labels.append(self.labels['samples'][name]['label'])
-            fillcolors.append(self.labels['samples'][name]['color'])
+            labels.append(self.sample_labels[name].label)
+            fillcolors.append(self.sample_labels[name].color)
 
         totalBckg,b,p = self.ax1.hist(datas,bins=binning,
                                  weights=weights,histtype="stepfilled",
@@ -194,7 +196,7 @@ class HepPlotterDataMC(HepPlotter):
 
 
         ## -- Signal -- ##
-        signal_colormap = plt.get_cmap(self.labels['samples']['signal']['color']) # map integer to color
+        signal_colormap = plt.get_cmap(self.sample_labels['signal'].color)   # map integer to color
         totalErrors = None
         for name in self.sampleTypes['signal']:
             weight  = self.hists2plot[name]['data']
@@ -207,7 +209,7 @@ class HepPlotterDataMC(HepPlotter):
 
             # set the signal color
             if len(self.sampleTypes['signal'])>1:
-                signal_color = signal_colormap(self.labels['samples'][name]['color'])
+                signal_color = signal_colormap(self.sample_labels[name].color)
             else:
                 signal_color = 'red'
 
@@ -215,14 +217,14 @@ class HepPlotterDataMC(HepPlotter):
             if self.stackSignal:
                 signalHistType = "stepfilled"
                 bottomEdge     = self.histograms["background"]
-                signal_label   = self.labels['samples'][name]['label']
+                signal_label   = self.sample_labels[name].label
             else:
                 signalHistType = "step"
                 bottomEdge     = 0.0
                 signal_label   = None
                 # draw the 'step' histogram as a line in the legend
                 h_pseudo       = self.ax1.plot([],[],color=signal_color,lw=2,ls='solid',
-                                            label=self.labels['samples'][name]['label'])
+                                            label=self.sample_labels[name].label)
 
             signalPred,b,p = self.ax1.hist(data,bins=binning,
                         weights=weight,histtype=signalHistType,
@@ -258,16 +260,16 @@ class HepPlotterDataMC(HepPlotter):
 
             # Add to the legend in the top plot
             histStep_pseudo = self.ax1.plot([],[],color=color,lw=2,ls='solid',
-                                            label=self.labels['samples'][name]['label'])
+                                            label=self.sample_labels[name].label)
             # Draw in the bottom plot
             systHist,b,p = self.ax2.hist(data,bins=binning,weights=weight,histtype='step',
                                          lw=2,edgecolor=color,color=color,log=self.logplot,
-                                         label=self.labels['samples'][name]['label'],
+                                         label=self.sample_labels[name].label,
                                          stacked=False,zorder=10)
 
             # Add to the legend in the top plot
             self.uncertainty_handles.append(systHist)
-            self.uncertainty_labels.append( self.labels['samples'][name]['label'] )
+            self.uncertainty_labels.append( self.sample_labels[name].label )
 
             self.histograms[name]    = systHist
             self.uncertainties[name] = 0
@@ -446,3 +448,4 @@ class HepPlotterDataMC(HepPlotter):
         return
 
 ### THE END ###
+

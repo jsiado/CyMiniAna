@@ -5,7 +5,7 @@ Script to submit CRAB jobs
 import os
 
 
-def main():
+def main(input_datasets="config/crab-datasets.txt"):
 
     from CRABClient.UserUtilities import config
     config = config()
@@ -14,7 +14,7 @@ def main():
     from httplib import HTTPException
 
     git_tag        = os.environ['GIT_CMA_TAG']
-    input_datasets = open( "config/crab-datasets.txt","r" ).readlines()
+    input_datasets = open( input_datasets,"r" ).readlines()
 
 
     def submit(config):
