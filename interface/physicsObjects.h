@@ -197,12 +197,12 @@ struct MET : CmaBase{
 // Truth information
 struct Parton : CmaBase {
     int pdgId;
-    int index;        // index in vector of truth partons
-    int parent0_idx;  // index in truth record of parent0
-    int parent1_idx;  // index in truth record of parent1
-    int child0_idx;   // index in truth record of child0
-    int child1_idx;   // index in truth record of child1
-    int charge;
+    int index;       // index in vector of truth partons
+    int decayIdx;    // index in truth record
+    int parent_ref;  // index in truth vector of parent
+    int parent_idx;  // index in truth record of parent
+    int top_index;   // index in truth_tops if this is a top
+    int containment; // record value used to calculate containment
 
     // Heavy Object Booleans
     bool isTop;
@@ -220,6 +220,21 @@ struct Parton : CmaBase {
     bool isBottom;
     bool isLight;
 };
+
+struct TruthTop {
+    // collect indices in truth_partons vector of top parton info
+    bool isTop;
+    bool isAntiTop;
+    int Top;
+    int W;
+    int bottom;
+    std::vector<int> Wdecays;   // for storing W daughters
+    std::vector<int> daughters; // for storing non-W/bottom daughters
+
+    bool isHadronic;  // W decays to quarks
+    bool isLeptonic;  // W decays to leptons
+};
+
 
 // VLQ (assuming T->bW)
 struct VLQ : CmaBase{
