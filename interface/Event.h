@@ -86,7 +86,7 @@ class Event {
     std::vector<Ljet> truth_ljets() {return m_truth_ljets;}
     std::vector<Jet>  truth_jets() {return m_truth_jets;}
 
-    virtual float met( const std::string& met_name );
+    virtual MET met() {return m_met;}
     virtual float HT() {return m_HT;}
     virtual float ST() {return m_ST;}
     virtual void getBtaggedJets( Jet& jet );
@@ -166,6 +166,7 @@ class Event {
     std::vector<Neutrino> m_neutrinos;
     std::vector<Ljet> m_ljets;
     std::vector<Jet>  m_jets;
+    MET m_met;
 
     // truth physics object information
     std::vector<Parton> m_truth_partons;
@@ -187,8 +188,6 @@ class Event {
     // kinematics
     float m_HT;
     float m_ST;
-    float m_metmet;
-    float m_metphi;
 
     // nominal b-tagging weight maps
     std::map<std::string, float> m_weight_btag;

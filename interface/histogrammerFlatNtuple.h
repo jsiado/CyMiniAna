@@ -70,6 +70,11 @@ class histogrammerFlatNtuple {
     bool m_isMC;
     bool m_doSystWeights;
 
+    bool m_useJets;
+    bool m_useLargeRJets;
+    bool m_useLeptons;
+    bool m_useNeutrinos;
+
     std::map<std::string, TH1D*> m_map_histograms1D;
     std::map<std::string, TH2D*> m_map_histograms2D;
     std::map<std::string, TH3D*> m_map_histograms3D;

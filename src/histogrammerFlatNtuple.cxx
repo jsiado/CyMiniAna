@@ -26,6 +26,11 @@ histogrammerFlatNtuple::histogrammerFlatNtuple( configuration& cmaConfig, std::s
 
     m_isMC  = m_config->isMC();
 
+    m_useJets = m_config->useJets();
+    m_useLargeRJets = m_config->useLargeRJets();
+    m_useLeptons    = m_config->useLeptons();
+    m_useNeutrinos  = m_config->useNeutrinos();
+
     if (m_name.length()>0  && m_name.substr(m_name.length()-1,1).compare("_")!=0)
         m_name = m_name+"_"; // add '_' to end of string, if needed
   }
@@ -99,8 +104,17 @@ void histogrammerFlatNtuple::initialize( TFile& outputFile, bool doSystWeights )
 
 
     // loop over treenames (typically systematic uncertainties)
-    for (const auto& treename : m_config->treeNames() )
+    for (auto& treename : m_config->treeNames() ){
+        std::size_t found = treename.find("/");   // protection against directory structure
+        if (found!=std::string::npos){
+            treename = treename.substr(found+1);
+        }
+
         bookHists( m_name+treename );
+    }
+
+
+
 
     // weight systematics
     if (m_isMC && m_doSystWeights){
@@ -128,27 +142,47 @@ void histogrammerFlatNtuple::bookHists( std::string name ){
     */
     m_names.resize(0); // append names to this to keep track of later
 
-    if (m_config->useJets()){
+    if (m_useJets){
         init_hist("n_jets_"+name,   31, -0.5,  30.5);
         init_hist("n_btags_"+name,  11, -0.5,  10.5);
 
-        init_hist("jet1_pt_"+name,  500, 0.0, 2000);
-        init_hist("jet1_eta_"+name,  50, -2.5, 2.5);
-        init_hist("jet1_phi_"+name,  64, -3.2, 3.2);
-        init_hist("jet1_cMVAv2_"+name, 200, -1,1);
-        init_hist("jet2_pt_"+name,  500, 0.0, 2000);
-        init_hist("jet2_eta_"+name,  50, -2.5, 2.5);
-        init_hist("jet2_phi_"+name,  64, -3.2, 3.2);
-        init_hist("jet2_cMVAv2_"+name, 200, -1,1);
+        init_hist("jet_pt_"+name,     2000,  0.0, 2000.0);
+        init_hist("jet_eta_"+name,      50, -2.5,    2.5);
+        init_hist("jet_phi_"+name,      64, -3.2,    3.2);
+        init_hist("jet_bdisc_"+name,   100,  0.0,    1.0);
     }
 
-    if (m_config->useLeptons()){
-        init_hist("lep_pt_"+name,  500, 0.0, 2000);
-        init_hist("lep_eta_"+name,  50, -2.5, 2.5);
-        init_hist("lep_phi_"+name,  64, -3.2, 3.2);
+    if (m_useLargeRJets){
+        init_hist("n_ljets_"+name,       31, -0.5,   30.5);
+        init_hist("ljet_pt_"+name,     2000,  0.0, 2000.0);
+        init_hist("ljet_eta_"+name,      50, -2.5,    2.5);
+        init_hist("ljet_phi_"+name,      64, -3.2,    3.2);
+        init_hist("ljet_SDmass_"+name,  500,  0.0,  500.0);
+        init_hist("ljet_charge_"+name, 1000, -5.0,    5.0);
+        init_hist("ljet_tau1_"+name,    200,  0.0,    2.0);
+        init_hist("ljet_tau2_"+name,    200,  0.0,    2.0);
+        init_hist("ljet_tau3_"+name,    200,  0.0,    2.0);
+        init_hist("ljet_tau21_"+name,   100,  0.0,    1.0);
+        init_hist("ljet_tau32_"+name,   100,  0.0,    1.0);
+        init_hist("ljet_subjet0_bdisc_"+name, 100, 0.0, 1.0);
+        init_hist("ljet_subjet1_bdisc_"+name, 100, 0.0, 1.0);
+        init_hist("ljet_subjet0_charge_"+name,1000, -5.0, 5.0);
+        init_hist("ljet_subjet1_charge_"+name,1000, -5.0, 5.0);
     }
 
-    if (m_config->useNeutrinos()){
+    if (m_useLeptons){
+        init_hist("el_pt_"+name,  500, 0.0, 2000);
+        init_hist("el_eta_"+name,  50, -2.5, 2.5);
+        init_hist("el_phi_"+name,  64, -3.2, 3.2);
+        init_hist("el_charge_"+name, 240, -1.2, 1.2);
+
+        init_hist("mu_pt_"+name,  500, 0.0, 2000);
+        init_hist("mu_eta_"+name,  50, -2.5, 2.5);
+        init_hist("mu_phi_"+name,  64, -3.2, 3.2);
+        init_hist("mu_charge_"+name, 240, -1.2, 1.2);
+    }
+
+    if (m_useNeutrinos){
         init_hist("nu_pt_"+name,  500, 0.0, 2000);
         init_hist("nu_eta_"+name,  50, -2.5, 2.5);
         init_hist("nu_phi_"+name,  64, -3.2, 3.2);
@@ -248,66 +282,91 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
     cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill histograms.");
     cma::DEBUG("HISTOGRAMMERFLATNTUPLE : event weight = "+std::to_string(event_weight) );
 
-    if (m_config->useJets()){
+    // physics information
+    std::vector<Jet> jets = event.jets();
+    std::vector<Ljet> ljets = event.ljets();
+    std::vector<Muon> muons = event.muons();
+    std::vector<Electron> electrons = event.electrons();
+    std::vector<Neutrino> neutrinos = event.neutrinos();
+    MET met = event.met();
+
+    if (m_useJets){
         cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill small-R jets");
         fill("n_btags_"+name, event.btag_jets().size(), event_weight );
+        fill("n_jets_"+name, jets.size(), event_weight );
 
-        std::vector<Jet> jets = event.jets();
-        fill("n_jets_"+name, jets.size(), event_weight );  // reflects the "nJetsL" variables, not 2
-
-        fill("jet1_pt_"+name,  jets.at(0).p4.Pt(),   event_weight);
-        fill("jet1_eta_"+name, jets.at(0).p4.Eta(),  event_weight);
-        fill("jet1_phi_"+name, jets.at(0).p4.Phi(),  event_weight);
-        fill("jet1_cMVAv2_"+name, jets.at(0).cMVAv2, event_weight);
-        fill("jet2_pt_"+name,  jets.at(1).p4.Pt(),   event_weight);
-        fill("jet2_eta_"+name, jets.at(1).p4.Eta(),  event_weight);
-        fill("jet2_phi_"+name, jets.at(1).p4.Phi(),  event_weight);
-        fill("jet2_cMVAv2_"+name, jets.at(1).cMVAv2, event_weight);
+        for (const auto& jet : jets){
+            fill("jet_pt_"+name,  jet.p4.Pt(),   event_weight);
+            fill("jet_eta_"+name, jet.p4.Eta(),  event_weight);
+            fill("jet_phi_"+name, jet.p4.Phi(),  event_weight);
+            fill("jet_bdisc_"+name, jet.CSVv2,  event_weight);
+        }
     }
 
+    if (m_useLargeRJets){
+        fill("n_ljets_"+name, ljets.size(), event_weight );
 
-    if (m_config->useLeptons()){
+        for (const auto& ljet : ljets){
+            fill("ljet_pt_"+name,    ljet.p4.Pt(),  event_weight);
+            fill("ljet_eta_"+name,   ljet.p4.Eta(), event_weight);
+            fill("ljet_phi_"+name,   ljet.p4.Phi(), event_weight);
+            fill("ljet_SDmass_"+name,ljet.softDropMass, event_weight);
+            fill("ljet_charge_"+name,ljet.charge,event_weight);
+
+            fill("ljet_tau1_"+name,  ljet.tau1,  event_weight);
+            fill("ljet_tau2_"+name,  ljet.tau2,  event_weight);
+            fill("ljet_tau3_"+name,  ljet.tau3,  event_weight);
+            fill("ljet_tau21_"+name, ljet.tau21, event_weight);
+            fill("ljet_tau32_"+name, ljet.tau32, event_weight);
+
+            if (ljet.subjets.size()>0){
+                fill("ljet_subjet0_bdisc_"+name, ljet.subjets.at(0).CSVv2, event_weight);
+                fill("ljet_subjet0_charge_"+name,ljet.subjets.at(0).charge,event_weight);
+                if (ljet.subjets.size()>1){
+                    fill("ljet_subjet1_bdisc_"+name, ljet.subjets.at(1).CSVv2, event_weight);
+                    fill("ljet_subjet1_charge_"+name,ljet.subjets.at(1).charge,event_weight);
+                }
+            }
+        } // end loop over ljets
+    } // end if use ljets
+
+    if (m_useLeptons){
         cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill leptons");
-        std::vector<Lepton> leptons = event.leptons();
-        fill("lep_pt_"+name,  leptons.at(0).p4.Pt(), event_weight);
-        fill("lep_eta_"+name, leptons.at(0).p4.Eta(), event_weight);
-        fill("lep_phi_"+name, leptons.at(0).p4.Phi(), event_weight);
+        for (const auto& el : electrons){
+            fill("el_pt_"+name,  el.p4.Pt(),  event_weight);
+            fill("el_eta_"+name, el.p4.Eta(), event_weight);
+            fill("el_phi_"+name, el.p4.Phi(), event_weight);
+            fill("el_charge_"+name, el.charge, event_weight);
+        }
+
+        for (const auto& mu : muons){
+            fill("mu_pt_"+name,  mu.p4.Pt(),  event_weight);
+            fill("mu_eta_"+name, mu.p4.Eta(), event_weight);
+            fill("mu_phi_"+name, mu.p4.Phi(), event_weight);
+            fill("mu_charge_"+name, mu.charge, event_weight);
+        }
     }
 
 
     if (m_config->useNeutrinos()){
         cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill neutrinos");
-        std::vector<Neutrino> nus = event.neutrinos();
-
-        fill("nu_pt_"+name,  nus.at(0).p4.Pt(),  event_weight);
-        fill("nu_eta_"+name, nus.at(0).p4.Eta(), event_weight);
-        fill("nu_phi_"+name, nus.at(0).p4.Phi(), event_weight);
+        fill("nu_pt_"+name,  neutrinos.at(0).p4.Pt(),  event_weight);
+        fill("nu_eta_"+name, neutrinos.at(0).p4.Eta(), event_weight);
+        fill("nu_phi_"+name, neutrinos.at(0).p4.Phi(), event_weight);
     }
 
 
     // kinematics
     cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill kinematics");
-    fill("met_met_"+name, event.met("met"), event_weight);
-    fill("met_phi_"+name, event.met("phi"), event_weight);
-    fill("ht_"+name,      event.HT(),       event_weight);
+    fill("met_met_"+name, met.p4.Pt(),  event_weight);
+    fill("met_phi_"+name, met.p4.Phi(), event_weight);
+    fill("ht_"+name,      event.HT(),   event_weight);
 
-    // HME && DNN && AMWT
-    cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill AMWT");
-    //fill("dnn_"+name, event.dnn(), event_weight); // N/A
 
+/*
     cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill VLQ/Wprime");
-/*    fill("top_pt_"+name,  top.p4.Pt(),  event_weight);
-    fill("top_eta_"+name, top.p4.Eta(), event_weight);
-    fill("top_phi_"+name, top.p4.Phi(), event_weight);
-    fill("top_m_"+name,   top.p4.M(),   event_weight);
-    fill("antitop_pt_"+name,  antitop.p4.Pt(),  event_weight); 
-    fill("antitop_eta_"+name, antitop.p4.Eta(), event_weight);
-    fill("antitop_phi_"+name, antitop.p4.Phi(), event_weight);
-    fill("antitop_m_"+name,   antitop.p4.M(),   event_weight);
-
-    fill("mttbar_"+name,  (top.p4+antitop.p4).M(), event_weight);
-    fill("pTttbar_"+name, (top.p4+antitop.p4).Pt(), event_weight);
 */
+
     cma::DEBUG("HISTOGRAMMERFLATNTUPLE : End histograms");
 
     return;
