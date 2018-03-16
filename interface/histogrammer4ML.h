@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 
-#include "Analysis/CyMiniAna/interface/histogrammer.h"
+#include "Analysis/CyMiniAna/interface/histogrammerFlatNtuple.h"
 #include "Analysis/CyMiniAna/interface/configuration.h"
 #include "Analysis/CyMiniAna/interface/tools.h"
 #include "Analysis/CyMiniAna/interface/Event.h"

@@ -1,6 +1,7 @@
 <lcgdict>
 
- <class name="CmaBase" ClassVersion="13">
+ <class name="CmaBase" ClassVersion="14">
+  <version ClassVersion="14" checksum="2166625523"/>
   <version ClassVersion="13" checksum="1328335697"/>
         <version ClassVersion="12" checksum="1359310673"/>
  </class>
@@ -8,7 +9,8 @@
  <class name="std::vector<CmaBase>"/>
  <class name="edm::Wrapper<std::vector<CmaBase> >"/>
 
- <class name="Lepton" ClassVersion="13">
+ <class name="Lepton" ClassVersion="14">
+  <version ClassVersion="14" checksum="4093473463"/>
   <version ClassVersion="13" checksum="332990388"/>
         <version ClassVersion="12" checksum="1359310673"/>
  </class>
@@ -16,7 +18,8 @@
  <class name="std::vector<Lepton>"/>
  <class name="edm::Wrapper<std::vector<Lepton> >"/>
 
- <class name="Electron" ClassVersion="14">
+ <class name="Electron" ClassVersion="15">
+  <version ClassVersion="15" checksum="2487021917"/>
   <version ClassVersion="14" checksum="1878110420"/>
   <version ClassVersion="13" checksum="2873762588"/>
         <version ClassVersion="12" checksum="4182755459"/>
@@ -25,7 +28,8 @@
  <class name="std::vector<Electron>"/>
  <class name="edm::Wrapper<std::vector<Electron> >"/>
 
- <class name="Muon" ClassVersion="14">
+ <class name="Muon" ClassVersion="15">
+  <version ClassVersion="15" checksum="98497129"/>
   <version ClassVersion="14" checksum="1272494894"/>
   <version ClassVersion="13" checksum="2785921976"/>
         <version ClassVersion="12" checksum="2653987949"/>
@@ -34,7 +38,8 @@
  <class name="std::vector<Muon>"/>
  <class name="edm::Wrapper<std::vector<Muon> >"/> 
 
- <class name="Jet" ClassVersion="16">
+ <class name="Jet" ClassVersion="17">
+  <version ClassVersion="17" checksum="2014064912"/>
   <version ClassVersion="16" checksum="3192516513"/>
   <version ClassVersion="15" checksum="2975528112"/>
   <version ClassVersion="14" checksum="1516667001"/>
@@ -46,7 +51,8 @@
  <class name="std::vector<Jet>"/>
  <class name="edm::Wrapper<std::vector<Jet> >"/> 
 
- <class name="Ljet" ClassVersion="16">
+ <class name="Ljet" ClassVersion="17">
+  <version ClassVersion="17" checksum="2689332866"/>
   <version ClassVersion="16" checksum="3166693483"/>
   <version ClassVersion="15" checksum="2516569938"/>
   <version ClassVersion="14" checksum="2927757059"/>
@@ -58,7 +64,8 @@
  <class name="std::vector<Ljet>"/>
  <class name="edm::Wrapper<std::vector<Ljet> >"/> 
 
- <class name="Neutrino" ClassVersion="12">
+ <class name="Neutrino" ClassVersion="13">
+  <version ClassVersion="13" checksum="4046650253"/>
   <version ClassVersion="12" checksum="3208360427"/>
         <version ClassVersion="11" checksum="1880111018"/>
  </class>
@@ -66,7 +73,8 @@
  <class name="std::vector<Neutrino>"/>
  <class name="edm::Wrapper<std::vector<Neutrino> >"/> 
 
- <class name="MET" ClassVersion="12">
+ <class name="MET" ClassVersion="13">
+  <version ClassVersion="13" checksum="622139143"/>
   <version ClassVersion="12" checksum="654958641"/>
         <version ClassVersion="11" checksum="4190889974"/>
  </class>

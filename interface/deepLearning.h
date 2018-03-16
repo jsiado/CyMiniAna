@@ -13,15 +13,15 @@
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
 
 
-class deepLearning {
+class DeepLearning {
   public:
-    deepLearning( configuration& cmaConfig );
+    DeepLearning( configuration& cmaConfig );
 
-    ~deepLearning();
+    ~DeepLearning();
 
-    void training(Top& top, const std::vector<Jet>& jets, const std::vector<Ljet>& ljets);
-    void inference(Top& top, const std::vector<Jet>& jets, const std::vector<Ljet>& ljets);
-    void loadFeatures(const Top& top);
+    void training();
+    void inference();
+    void loadFeatures();
 
     std::map<std::string,double> predictions();
     double prediction();

@@ -44,8 +44,9 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
     m_KFactor.clear();
     m_sumOfWeights.clear();
     m_NEvents.clear();
+    m_mapOfSamples.clear();
     if (m_isMC){
-        cma::getSampleWeights( m_metadataFile,m_XSection,m_KFactor,m_sumOfWeights,m_NEvents );
+        cma::getSampleWeights( m_metadataFile,m_mapOfSamples );
         t_genEvtInfoProd = consumes<GenEventInfoProduct>(iConfig.getParameter<std::string>("genEvtInfoProdName"));  // generator info
     }
 
@@ -195,8 +196,9 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     evt.getByToken(t_genEvtInfoProd,h_genEvtInfoProd);
     float mc_weight = h_genEvtInfoProd->weight();
 
+    Sample s = m_mapOfSamples.at(m_sampleName);
     m_event_weight  = 1.0;
-    m_event_weight *= m_XSection.at(m_sampleName) * m_KFactor.at(m_sampleName) * mc_weight / m_sumOfWeights.at(m_sampleName);
+    m_event_weight *= s.XSection * s.KFactor * mc_weight / s.sumOfWeights;
     m_event_weight /= m_LUMI;
 
     /* Set values to store in the event */

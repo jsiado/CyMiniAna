@@ -148,7 +148,7 @@ void histogrammerFlatNtuple::bookHists( std::string name ){
         init_hist("lep_phi_"+name,  64, -3.2, 3.2);
     }
 
-    if (m_config->useNeutrino()){
+    if (m_config->useNeutrinos()){
         init_hist("nu_pt_"+name,  500, 0.0, 2000);
         init_hist("nu_eta_"+name,  50, -2.5, 2.5);
         init_hist("nu_phi_"+name,  64, -3.2, 3.2);
@@ -159,22 +159,10 @@ void histogrammerFlatNtuple::bookHists( std::string name ){
     init_hist("met_phi_"+name, 6.4, -3.2,  3.2);
     init_hist("ht_"+name,     5000,  0.0, 5000);
 
-    // HME && DNN && AMWT
-    //init_hist("hme_"+name, 2000, 0.0, 2000);
-    //init_hist("dnn_"+name,  100, 0.0,   1.);
 
 /*  VLQ/Wprime
-    init_hist("top_pt_"+name,  2000, 0.0, 2000);
-    init_hist("top_eta_"+name,   50,-2.5,  2.5);
-    init_hist("top_phi_"+name,   64,-3.2,  3.2);
-    init_hist("top_m_"+name,    200, 100,  300);
-    init_hist("antitop_pt_"+name,  2000, 0.0, 2000);
-    init_hist("antitop_eta_"+name,   50,-2.5,  2.5);
-    init_hist("antitop_phi_"+name,   64,-3.2,  3.2);
-    init_hist("antitop_m_"+name,    200, 100,  300);
-
-    init_hist("mttbar_"+name,  5000, 0.0, 5000);
-    init_hist("pTttbar_"+name,  300, 0.0,  300);
+    init_hist("wprime_mass_"+name,  6000, 0.0, 6000);
+    init_hist("vlq_mass_"+name,     5000, 0.0, 5000);
 */
     return;
 }
@@ -287,7 +275,7 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
     }
 
 
-    if (m_config->useNeutrino()){
+    if (m_config->useNeutrinos()){
         cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill neutrinos");
         std::vector<Neutrino> nus = event.neutrinos();
 

@@ -104,6 +104,7 @@ class CMAProducer : public edm::EDProducer {
 
     std::string m_metadataFile;
     std::string m_sampleName;                      // unique name for the sample
+    std::map<std::string, Sample> m_mapOfSamples;  // map of samples (struct)
     std::map<std::string, float> m_XSection;	   // map sample name to XSection
     std::map<std::string, float> m_KFactor;        // map sample name to KFactor
     std::map<std::string, float> m_sumOfWeights;   // map sample name to sum of weights

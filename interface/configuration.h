@@ -31,27 +31,22 @@ class configuration {
     virtual void print();
 
     // Type of File(s) being processed
-    virtual bool isMC();              // must call "checkFileType(file)" or "isMC(file)" first!
+    virtual bool isMC() {return m_isMC;}              // must call "inspectFile(file)" or "isMC(file)" first!
     virtual bool isMC( TFile& file );
-    bool isGridFile();
-
-    // Type of analysis (all-hadronic, semi-leptonic, or di-leptonic)
-    virtual bool isZeroLeptonAnalysis();
-    virtual bool isOneLeptonAnalysis();
-    virtual bool isTwoleptonAnalysis();
+    bool isGridFile() {return m_isGridFile;}
 
     // object declarations
-    virtual bool useJets();
-    virtual bool useNeutrino();
-    virtual bool useLeptons();
-    virtual bool useLargeRJets();
-    virtual bool useRCJets();
-    virtual bool useTruth();
-    virtual bool useFlags();
-    virtual bool useTtbar();
+    virtual bool useJets() {return m_useJets;}
+    virtual bool useLargeRJets() {return m_useLargeRJets;}
+    virtual bool useNeutrinos() {return m_useNeutrinos;}
+    virtual bool useLeptons() {return m_useLeptons;}
+    virtual bool useTruth() {return m_useTruth;}
+    virtual bool useTtbar() {return m_useTtbar;}
+    virtual bool useDNN() {return m_useDNN;}
+    virtual bool useWprime() {return m_useWprime;}
 
-    std::string jet_btagWkpt();
-    std::vector<std::string> btagWkpts();
+    std::string jet_btagWkpt() {return m_jet_btag_wkpt;}
+    std::vector<std::string> btagWkpts() {return m_btag_WPs;}
     float cMVAv2L() {return m_cMVAv2L;}
     float cMVAv2M() {return m_cMVAv2M;}
     float cMVAv2T() {return m_cMVAv2T;}
@@ -59,80 +54,74 @@ class configuration {
     float CSVv2M()  {return m_CSVv2M;}
     float CSVv2T()  {return m_CSVv2T;}
 
+
     // functions about the TTree
     virtual bool isNominalTree();
     virtual bool isNominalTree( const std::string &tree_name );
-    std::vector<std::string> treeNames();
+    std::vector<std::string> treeNames() {return m_treeNames;}
     void setTreename(std::string treeName);
-    std::string treename();
+    std::string treename() {return m_treename;}
 
     // functions about the file
-    std::vector<std::string> filesToProcess();
+    std::vector<std::string> filesToProcess() {return m_filesToProcess;}
     void setFilename(std::string fileName);
-    std::string filename();
+    std::string filename() {return m_filename;}
+    std::string primaryDataset() {return m_primaryDataset;}
+    unsigned int NTotalEvents() {return m_NTotalEvents;}
 
     // return some values from config file
-    std::string verboseLevel();
-    std::string selection();
-    std::vector<std::string> qcdSelections();
-    std::string cutsfile();
-    std::string outputFilePath();
-    std::string customFileEnding();
-    std::string configFileName();
-    std::string getAbsolutePath();
-    int nEventsToProcess();
-    unsigned long long firstEvent();
-    bool makeNewFile();
-    bool makeHistograms();
-    bool makeEfficiencies();
+    std::string verboseLevel() {return m_verboseLevel;}
+    std::string selection() {return m_selection;}
+    std::string cutsfile() {return m_cutsfile;}
+    std::string outputFilePath() {return m_outputFilePath;}
+    std::string customFileEnding() {return m_customFileEnding;}
+    std::string configFileName() {return m_configFile;}
+    std::string getAbsolutePath() {return m_cma_absPath;}
+    int nEventsToProcess() {return m_nEventsToProcess;}
+    unsigned long long firstEvent() {return m_firstEvent;}
+    bool makeTTree() {return m_makeTTree;}
+    bool makeHistograms() {return m_makeHistograms;}
+    bool makeEfficiencies() {return m_makeEfficiencies;}
 
     // information for event weights
-    void checkFileType( TFile& file );
-    std::string metadataFile();
+    void inspectFile( TFile& file );
+    std::string metadataFile() {return m_metadataFile;}
+
+    std::map<std::string,Sample> mapOfSamples(){return m_mapOfSamples;}
+    Sample sample(){return m_mapOfSamples.at(m_primaryDataset);}
+
     double XSectionMap ( std::string mcChannelNumber);
     double KFactorMap ( std::string mcChannelNumber );
     double sumWeightsMap ( std::string mcChannelNumber );
-    virtual double LUMI();
+    virtual double LUMI() {return m_LUMI;}
 
     // weight systematics
-    bool calcWeightSystematics();
-    std::map<std::string,unsigned int> mapOfWeightVectorSystematics();
-    std::vector<std::string> listOfWeightSystematics();
-    std::string listOfWeightSystematicsFile();
-    std::string listOfWeightVectorSystematicsFile();
+    bool calcWeightSystematics() {return m_calcWeightSystematics;}
+    std::map<std::string,unsigned int> mapOfWeightVectorSystematics() {return m_mapOfWeightVectorSystematics;}
+    std::vector<std::string> listOfWeightSystematics() {return m_listOfWeightSystematics;}
+    std::string listOfWeightSystematicsFile() {return m_listOfWeightSystematicsFile;}
+    std::string listOfWeightVectorSystematicsFile() {return m_listOfWeightVectorSystematicsFile;}
 
-    // DNN & HME
-    std::string dnnFile();
-    bool getDNN();
-    double minDNN();
-    double maxDNN();
-    std::string dnnKey();   // key for lwtnn
-    bool getHME();
+    // DNN
+    std::string dnnFile() {return m_dnnFile;}
+    std::string dnnKey() {return m_dnnKey;}       // key for lwtnn to use in map
+    bool DNNinference(){ return m_DNNinference;}
+    bool DNNtraining(){ return m_DNNtraining;}
 
     // Reco/Truth event loops
-    bool doRecoEventLoop();
-    bool doTruthEventLoop();
-    bool matchTruthToReco();
+    bool doRecoEventLoop() {return m_doRecoEventLoop;}
+    bool doTruthEventLoop() {return m_doTruthEventLoop;}
+    bool matchTruthToReco() {return m_matchTruthToReco;} // true  -- match truth events to reco events (loop over reco events)
     void setMatchTruthToReco(bool truthToReco);
 
     // misc. for dilepton ttbar
-    bool kinematicReco();
-    unsigned int NJetSmear();
-    unsigned int NMassPoints();
-    unsigned int massMin();
-    unsigned int massMax();
-
+    bool kinematicReco() {return m_kinematicReco;}
+    bool neutrinoReco(){ return m_neutrinoReco;}
+    bool wprimeReco(){ return m_wprimeReco;}
     float beamEnergy() {return m_beamEnergy;}           // 13000.;
     double topQuarkMass() {return m_topQuarkMass;}      // 172.5
     double bQuarkMass() {return m_bQuarkMass;}          // 4.18
     double WMass() {return m_WMass;}                    // 80.2
-
-    /// All analysis eras as needed
-    enum Era{run2_13tev_25ns,     run2_13tev_2015_25ns, run2_13tev_2016_25ns, 
-             run2_13tev_25ns_74X, undefined};
-    Era convert(const std::string& era);       /// Convert an era from string to enum
-    std::string convert(const Era& era);   /// Convert an era from enum to string
-    double energyInTev(const Era era) {return 13.;}     /// Return energy for given era in TeV
 
   protected:
 
@@ -145,25 +134,18 @@ class configuration {
     bool m_isMC;
     bool m_isGridFile;
 
-    // type of analysis
-    bool m_isZeroLeptonAnalysis;
-    bool m_isOneLeptonAnalysis;
-    bool m_isTwoleptonAnalysis;
-
     // object declarations
     bool m_useTruth;
     bool m_useJets;
     bool m_useLeptons;
     bool m_useLargeRJets;
-    bool m_useRCJets;
-    bool m_useNeutrino;
-    bool m_useFlags;
+    bool m_useNeutrinos;
     bool m_useTtbar;
+    bool m_useDNN;
+    bool m_useWprime;
 
     // luminosity
-    double m_LUMI      = 36074.56; // 2015+2016 luminosity
-    double m_LUMI_2015 = 3212.96;
-    double m_LUMI_2016 = 32861.6; // OflLumi-13TeV-008
+    double m_LUMI = 35.89;   // 2015+2016 luminosity
 
     // return some values from config file
     std::string m_input_selection;
@@ -171,21 +153,24 @@ class configuration {
     std::string m_cutsfile;
     std::string m_treename;
     std::string m_filename;
+    std::string m_primaryDataset;
+    unsigned int m_NTotalEvents;
     std::string m_verboseLevel;
     int m_nEventsToProcess;
     unsigned long long m_firstEvent;
     std::string m_outputFilePath;
     std::string m_customFileEnding;
-    bool m_makeNewFile;
+    bool m_makeTTree;
     bool m_makeHistograms;
     bool m_makeEfficiencies;
     std::string m_sumWeightsFiles;
     std::string m_cma_absPath;
     std::string m_metadataFile;
-    bool m_getDNN;
+    bool m_DNNinference;
+    bool m_DNNtraining;
     std::string m_dnnFile;
     std::string m_dnnKey;
-    bool m_getHME;
+
     bool m_doRecoEventLoop;
     bool m_doTruthEventLoop;
     bool m_matchTruthToReco;
@@ -213,6 +198,7 @@ class configuration {
     std::string m_listOfWeightSystematicsFile;
     std::string m_listOfWeightVectorSystematicsFile;
 
+    std::map<std::string,Sample> m_mapOfSamples;  // map of Sample structs
     std::map<std::string, float> m_XSection; // map file to XSection
     std::map<std::string, float> m_KFactor;  // map file to KFactor
     std::map<std::string, float> m_AMI;      // map file to sum of weights
@@ -236,24 +222,21 @@ class configuration {
     const double m_sqrt_s = 13000;      // center-of-mass energy
 
     bool m_kinematicReco;
-    unsigned int m_NJetSmear;    // 500
-    unsigned int m_NMassPoints;  // 500
-    unsigned int m_massMin;      // 100
-    unsigned int m_massMax;      // 300
+    bool m_neutrinoReco;
+    bool m_wprimeReco;
+
+    std::vector<std::string> m_mcFiles;
 
     std::map<std::string,std::string> m_defaultConfigs = {
-             {"isZeroLeptonAnalysis",  "false"},
-             {"isOneLeptonAnalysis",   "false"},
-             {"isTwoLeptonAnalysis",   "false"},
              {"useJets",               "false"},
              {"useLeptons",            "false"},
              {"useLargeRJets",         "false"},
-             {"useRCJets",             "false"},
-             {"useNeutrino",           "false"},
+             {"useNeutrinos",          "false"},
              {"useTruth",              "false"},
-             {"useFlags",              "false"},
+             {"neutrinoReco",          "false"},
+             {"wprimeReco",            "false"},
              {"jet_btag_wkpt",         "M"},
-             {"makeNewFile",           "false"},
+             {"makeTTree",             "false"},
              {"makeHistograms",        "false"},
              {"makeEfficiencies",      "false"},
              {"NEvents",               "-1"},
@@ -273,14 +256,11 @@ class configuration {
              {"dnnFile",               "config/keras_ttbar_DNN.json"},
              {"dnnKey",                "dnn"},
              {"getDNN",                "false"},
-             {"getHME",                "false"},
+             {"DNNinference",          "false"},
+             {"DNNtraining" ,          "false"},
              {"doRecoEventLoop",       "true"},
              {"doTruthEventLoop",      "false"},
-             {"kinematicReco",        "true"},
-             {"NJetSmear",             "500"},
-             {"NMassPoints",           "1"},
-             {"massMin",               "172"},
-             {"massMax",               "301"} };
+             {"kinematicReco",        "true"} };
 };
 
 #endif

@@ -29,6 +29,10 @@
 
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
 #include "Analysis/CyMiniAna/interface/configuration.h"
+#include "Analysis/CyMiniAna/interface/truthMatching.h"
+#include "Analysis/CyMiniAna/interface/deepLearning.h"
+#include "Analysis/CyMiniAna/interface/neutrinoReco.h"
+#include "Analysis/CyMiniAna/interface/wprimeReco.h"
 
 
 // Event Class
@@ -46,7 +50,7 @@ class Event {
     // OR match reco to truth (truth loop, for acceptance studies)
     void matchTruthWithReco();
     // check during looping over truth events, if reco event match is found
-    bool isValidRecoEntry();
+    bool isValidRecoEntry() {return (m_entry > (long long)-1);}
 
     // Execute the event (load information and setup objects)
     virtual void execute(Long64_t entry);
@@ -69,59 +73,53 @@ class Event {
     virtual void clear();
 
     // Get physics information
-    std::vector<Lepton> leptons();
-    std::vector<Neutrino> neutrinos();
-    std::vector<Ljet> ljets();
-    std::vector<Jet>  jets();
+    std::vector<Lepton> leptons() {return m_leptons;}
+    std::vector<Muon> muons() {return m_muons;}
+    std::vector<Electron> electrons() {return m_electrons;}
+    std::vector<Neutrino> neutrinos() {return m_neutrinos;}
+    std::vector<Ljet> ljets() {return m_ljets;}
+    std::vector<Jet>  jets() {return m_jets;}
 
     // Get truth physics information 
-    std::vector<Lepton> truth_leptons();
-    std::vector<Neutrino> truth_neutrinos();
-    std::vector<Ljet> truth_ljets();
-    std::vector<Jet>  truth_jets();
+    std::vector<Lepton> truth_leptons() {return m_truth_leptons;}
+    std::vector<Neutrino> truth_neutrinos() {return m_truth_neutrinos;}
+    std::vector<Ljet> truth_ljets() {return m_truth_ljets;}
+    std::vector<Jet>  truth_jets() {return m_truth_jets;}
 
     virtual float met( const std::string& met_name );
-    virtual float HT();
-    virtual float ST();
+    virtual float HT() {return m_HT;}
+    virtual float ST() {return m_ST;}
     virtual void getBtaggedJets( Jet& jet );
     virtual std::vector<int> btag_jets(const std::string &wkpt);
-    virtual std::vector<int> btag_jets(); // using configured b-tag WP
+    virtual std::vector<int> btag_jets() {return m_btag_jets_default;}  // using configured b-tag WP
 
-//    virtual unsigned long long eventNumber();
-//    virtual unsigned int runNumber();
     long long entry() { return m_entry; }
-    virtual float eventNumber();
-    virtual float runNumber();
-    virtual float mu();
+    virtual int eventNumber();
+    virtual int runNumber();
     virtual int lumiblock();
-    virtual std::string treeName();
-    virtual float xsection();
-    virtual float kfactor();
-    virtual float sumOfWeights();
+    virtual std::string treeName() {return m_treeName;}
+    virtual float xsection() {return m_xsection;}
+    virtual float kfactor() {return m_kfactor;}
+    virtual float sumOfWeights() {return m_sumOfWeights;}
+
+    // Functions for external tools/information
     void truth();
-
-    // Neural network information
-    void getDNNInputs();      // return the DNN inputs to the user
-    void getDNN();            // get the DNN output
-    double DNN();
-
-    // kinematic reconstruction
-    void buildTtbar();
+    void wprimeReconstruction();    // reconstructing Wprime (interface with tool)
+    void deepLearning();            // DNN inference or training
+    float DNN() {return m_DNN;}     // return DNN value (if only one)
 
     // Get weights
-    virtual float nominal_weight();
+    virtual float nominal_weight() {return m_nominal_weight;}
     float weight_mc();
     float truth_weight_mc();
-    float weight_jvt();
     float weight_pileup();
     float weight_lept_eff();
-    float weight_btag();
+    float weight_btag() {return m_weight_btag_default;}
     float weight_btag(const std::string &wkpt);
 
     // Get weight systematics
     virtual std::map<std::string,float > weightSystematicsFloats();
     virtual std::map<std::string,std::vector<float> > weightSystematicsVectorFloats();
-    virtual std::vector<std::string> listOfWeightSystematics();
 
   protected:
 
@@ -136,16 +134,20 @@ class Event {
     long long m_entry;
     long long m_truth_entry;
 
-    // 0/1/2-lepton analyses
-    bool m_isZeroLeptonAnalysis;
-    bool m_isOneLeptonAnalysis;
-    bool m_isTwoLeptonAnalysis;
-
-    // neural network & kinematic reconstruction
-    bool m_kinematicReco;
-    bool m_buildNeutrinos;
+    bool m_useTruth;
+    bool m_useJets;
+    bool m_useLjets;
+    bool m_useLeptons;
+    bool m_useNeutrinos;
+    bool m_neutrinoReco;
+    bool m_useWprime;
+    bool m_wprimeReco;
+    bool m_DNNinference;
+    bool m_DNNtraining;
+    bool m_useDNN;
     bool m_getDNN;
-    double m_DNN;                                // DNN score
+    float m_DNN;                       // DNN score
+
 
     // event weight information
     double m_nominal_weight;
@@ -159,11 +161,14 @@ class Event {
 
     // physics object information
     std::vector<Lepton> m_leptons;
+    std::vector<Muon> m_muons;
+    std::vector<Electron> m_electrons;
     std::vector<Neutrino> m_neutrinos;
     std::vector<Ljet> m_ljets;
     std::vector<Jet>  m_jets;
 
     // truth physics object information
+    std::vector<Parton> m_truth_partons;
     std::vector<Lepton> m_truth_leptons;
     std::vector<Neutrino> m_truth_neutrinos;
     std::vector<Ljet> m_truth_ljets;
@@ -190,9 +195,14 @@ class Event {
     float m_weight_btag_default;
     // Maps to keep track of weight systematics
     std::map<std::string,TTreeReaderValue<float> * > m_weightSystematicsFloats;
-    std::map<std::string,TTreeReaderArray<float> * > m_weightSystematicsVectorFloats;
+    std::map<std::string,TTreeReaderValue<std::vector<float>> * > m_weightSystematicsVectorFloats;
     std::vector<std::string> m_listOfWeightSystematics;
 
+    // External tools
+    NeutrinoReco* m_neutrinoTool;
+    WprimeReco* m_wprimeTool;
+    DeepLearning* m_deepLearningTool;
+    truthMatching* m_truthMatchingTool;
 
 
 
@@ -200,7 +210,7 @@ class Event {
     // ************
     TTreeReaderValue<float> * m_weight_mc;
     TTreeReaderValue<float> * m_weight_pileup;
-    TTreeReaderValue<float> * m_weight_btag;
+    TTreeReaderValue<float> * m_weight_btagSF;
     TTreeReaderValue<float> * m_weight_pileup_UP;
     TTreeReaderValue<float> * m_weight_pileup_DOWN;
 
@@ -210,10 +220,10 @@ class Event {
     TTreeReaderValue<int> * m_lumiblock;
     TTreeReaderValue<float> * m_rho;
     TTreeReaderValue<int> * m_npv;
-    TTreeReaderArray<int> * m_NGoodVtx;
-    TTreeReaderArray<int> * m_LHAPDF_ID;
-    TTreeReaderArray<int> * m_NIsoTrk;
-    TTreeReaderArray<int> * m_true_pileup;
+    TTreeReaderValue<int> * m_NGoodVtx;
+    TTreeReaderValue<int> * m_LHAPDF_ID;
+    TTreeReaderValue<int> * m_NIsoTrk;
+    TTreeReaderValue<int> * m_true_pileup;
     TTreeReaderValue<float> * m_treeXSection;
     TTreeReaderValue<float> * m_treeKFactor;
     TTreeReaderValue<float> * m_treeSumOfWeights;
@@ -221,109 +231,109 @@ class Event {
     TTreeReaderValue<float> * m_dnn_score;
 
     // MET
-    TTreeReaderArray<float> * m_met_met;
-    TTreeReaderArray<float> * m_met_phi;
-    TTreeReaderArray<float> * m_met_met_sf;
-    TTreeReaderArray<float> * m_met_phi_sf;
+    TTreeReaderValue<float> * m_met_met;
+    TTreeReaderValue<float> * m_met_phi;
+    TTreeReaderValue<float> * m_met_met_sf;
+    TTreeReaderValue<float> * m_met_phi_sf;
 
     // HT/ST
-    TTreeReaderArray<float> * m_treeHT;
-    TTreeReaderArray<float> * m_treeST;
+    TTreeReaderValue<float> * m_treeHT;
+    TTreeReaderValue<float> * m_treeST;
 
     // Leptons
-    TTreeReaderArray<float> * m_el_pt;
-    TTreeReaderArray<float> * m_el_eta;
-    TTreeReaderArray<float> * m_el_phi;
-    TTreeReaderArray<float> * m_el_e;
-    TTreeReaderArray<float> * m_el_charge;
-    TTreeReaderArray<float> * m_el_iso;
-    TTreeReaderArray<float> * m_el_veto;
-    TTreeReaderArray<float> * m_el_loose;
-    TTreeReaderArray<float> * m_el_medium;
-    TTreeReaderArray<float> * m_el_tight;
+    TTreeReaderValue<std::vector<float>> * m_el_pt;
+    TTreeReaderValue<std::vector<float>> * m_el_eta;
+    TTreeReaderValue<std::vector<float>> * m_el_phi;
+    TTreeReaderValue<std::vector<float>> * m_el_e;
+    TTreeReaderValue<std::vector<float>> * m_el_charge;
+    TTreeReaderValue<std::vector<int>> * m_el_iso;
+    TTreeReaderValue<std::vector<int>> * m_el_veto;
+    TTreeReaderValue<std::vector<int>> * m_el_loose;
+    TTreeReaderValue<std::vector<int>> * m_el_medium;
+    TTreeReaderValue<std::vector<int>> * m_el_tight;
 
-    TTreeReaderArray<float> * m_mu_pt;
-    TTreeReaderArray<float> * m_mu_eta;
-    TTreeReaderArray<float> * m_mu_phi;
-    TTreeReaderArray<float> * m_mu_e;
-    TTreeReaderArray<float> * m_mu_charge;
-    TTreeReaderArray<float> * m_mu_iso;
-    TTreeReaderArray<int> * m_mu_loose;
-    TTreeReaderArray<int> * m_mu_medium;
-    TTreeReaderArray<int> * m_mu_medium2016;
-    TTreeReaderArray<int> * m_mu_tight;
-    TTreeReaderArray<int> * m_mu_hightPt;
+    TTreeReaderValue<std::vector<float>> * m_mu_pt;
+    TTreeReaderValue<std::vector<float>> * m_mu_eta;
+    TTreeReaderValue<std::vector<float>> * m_mu_phi;
+    TTreeReaderValue<std::vector<float>> * m_mu_e;
+    TTreeReaderValue<std::vector<float>> * m_mu_charge;
+    TTreeReaderValue<std::vector<int>> * m_mu_iso;
+    TTreeReaderValue<std::vector<int>> * m_mu_loose;
+    TTreeReaderValue<std::vector<int>> * m_mu_medium;
+    TTreeReaderValue<std::vector<int>> * m_mu_medium2016;
+    TTreeReaderValue<std::vector<int>> * m_mu_tight;
+    TTreeReaderValue<std::vector<int>> * m_mu_hightPt;
 
     // large-R jet info
     TTreeReaderValue<float> * m_weight_ljet_jer;
 
-    TTreeReaderArray<std::vector<float>> * m_ljet_pt;
-    TTreeReaderArray<std::vector<float>> * m_ljet_eta;
-    TTreeReaderArray<std::vector<float>> * m_ljet_phi;
-    TTreeReaderArray<std::vector<float>> * m_ljet_e;
-    TTreeReaderArray<std::vector<float>> * m_ljet_tau1;
-    TTreeReaderArray<std::vector<float>> * m_ljet_tau2;
-    TTreeReaderArray<std::vector<float>> * m_ljet_tau3;
-    TTreeReaderArray<std::vector<float>> * m_ljet_tau21;
-    TTreeReaderArray<std::vector<float>> * m_ljet_tau32;
-    TTreeReaderArray<std::vector<float>> * m_ljet_charge;
-    TTreeReaderArray<std::vector<float>> * m_ljet_SDmass;
-    TTreeReaderArray<std::vector<float>> * m_ljet_CSVv2;
-    TTreeReaderArray<std::vector<float>> * m_ljet_JERSF;
-    TTreeReaderArray<std::vector<float>> * m_ljet_JERSFUp;
-    TTreeReaderArray<std::vector<float>> * m_ljet_JERSFDown;
-    TTreeReaderArray<std::vector<int>> * m_ljet_ID_loose;
-    TTreeReaderArray<std::vector<int>> * m_ljet_ID_medium;
-    TTreeReaderArray<std::vector<int>> * m_ljet_ID_tight;
-    TTreeReaderArray<std::vector<int>> * m_ljet_ID_tightlepveto;
+    TTreeReaderValue<std::vector<float>> * m_ljet_pt;
+    TTreeReaderValue<std::vector<float>> * m_ljet_eta;
+    TTreeReaderValue<std::vector<float>> * m_ljet_phi;
+    TTreeReaderValue<std::vector<float>> * m_ljet_e;
+    TTreeReaderValue<std::vector<float>> * m_ljet_tau1;
+    TTreeReaderValue<std::vector<float>> * m_ljet_tau2;
+    TTreeReaderValue<std::vector<float>> * m_ljet_tau3;
+    TTreeReaderValue<std::vector<float>> * m_ljet_tau21;
+    TTreeReaderValue<std::vector<float>> * m_ljet_tau32;
+    TTreeReaderValue<std::vector<float>> * m_ljet_charge;
+    TTreeReaderValue<std::vector<float>> * m_ljet_SDmass;
+    TTreeReaderValue<std::vector<float>> * m_ljet_CSVv2;
+    TTreeReaderValue<std::vector<float>> * m_ljet_JERSF;
+    TTreeReaderValue<std::vector<float>> * m_ljet_JERSFUp;
+    TTreeReaderValue<std::vector<float>> * m_ljet_JERSFDown;
+    TTreeReaderValue<std::vector<int>> * m_ljet_ID_loose;
+    TTreeReaderValue<std::vector<int>> * m_ljet_ID_medium;
+    TTreeReaderValue<std::vector<int>> * m_ljet_ID_tight;
+    TTreeReaderValue<std::vector<int>> * m_ljet_ID_tightlepveto;
 
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjetIndex0;
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjetIndex1;
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjet_pt;
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjet_eta;
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjet_phi;
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjet_e;
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjet_charge;
-    TTreeReaderArray<std::vector<float>> * m_ljet_subjet_CSVv2;
-    TTreeReaderArray<std::vector<float>> * m_ljet_jec;
-    TTreeReaderArray<std::vector<float>> * m_ljet_jer_up;
-    TTreeReaderArray<std::vector<float>> * m_ljet_jer_down;
+    TTreeReaderValue<std::vector<int>> * m_ljet_subjetIndex0;
+    TTreeReaderValue<std::vector<int>> * m_ljet_subjetIndex1;
+    TTreeReaderValue<std::vector<float>> * m_ljet_subjet_pt;
+    TTreeReaderValue<std::vector<float>> * m_ljet_subjet_eta;
+    TTreeReaderValue<std::vector<float>> * m_ljet_subjet_phi;
+    TTreeReaderValue<std::vector<float>> * m_ljet_subjet_e;
+    TTreeReaderValue<std::vector<float>> * m_ljet_subjet_charge;
+    TTreeReaderValue<std::vector<float>> * m_ljet_subjet_CSVv2;
+    TTreeReaderValue<std::vector<float>> * m_ljet_jec;
+    TTreeReaderValue<std::vector<float>> * m_ljet_jer_up;
+    TTreeReaderValue<std::vector<float>> * m_ljet_jer_down;
 
     // truth large-R jet info
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_pt;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_eta;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_phi;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_e;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_charge;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_subjet_pt;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_subjet_eta;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_subjet_phi;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_subjet_e;
-    TTreeReaderArray<std::vector<float>> * m_truth_ljet_subjet_charge;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_pt;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_eta;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_phi;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_e;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_charge;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_subjet_pt;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_subjet_eta;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_subjet_phi;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_subjet_e;
+    TTreeReaderValue<std::vector<float>> * m_truth_ljet_subjet_charge;
 
     // Jet info
     TTreeReaderValue<float> * m_weight_jet_jer;
 
-    TTreeReaderArray<std::vector<float>> * m_jet_pt;
-    TTreeReaderArray<std::vector<float>> * m_jet_eta;
-    TTreeReaderArray<std::vector<float>> * m_jet_phi;
-    TTreeReaderArray<std::vector<float>> * m_jet_e;
-    TTreeReaderArray<std::vector<float>> * m_jet_charge;
-    TTreeReaderArray<std::vector<float>> * m_jet_CSVv2;
-    TTreeReaderArray<std::vector<int>> * m_jet_ID_loose;
-    TTreeReaderArray<std::vector<int>> * m_jet_ID_medium;
-    TTreeReaderArray<std::vector<int>> * m_jet_ID_tight;
-    TTreeReaderArray<std::vector<int>> * m_jet_ID_tightlepveto;
-    TTreeReaderArray<std::vector<float>> * m_jet_jec;
-    TTreeReaderArray<std::vector<float>> * m_jet_jer_up;
-    TTreeReaderArray<std::vector<float>> * m_jet_jer_down;
+    TTreeReaderValue<std::vector<float>> * m_jet_pt;
+    TTreeReaderValue<std::vector<float>> * m_jet_eta;
+    TTreeReaderValue<std::vector<float>> * m_jet_phi;
+    TTreeReaderValue<std::vector<float>> * m_jet_e;
+    TTreeReaderValue<std::vector<float>> * m_jet_charge;
+    TTreeReaderValue<std::vector<float>> * m_jet_CSVv2;
+    TTreeReaderValue<std::vector<int>> * m_jet_ID_loose;
+    TTreeReaderValue<std::vector<int>> * m_jet_ID_medium;
+    TTreeReaderValue<std::vector<int>> * m_jet_ID_tight;
+    TTreeReaderValue<std::vector<int>> * m_jet_ID_tightlepveto;
+    TTreeReaderValue<std::vector<float>> * m_jet_jec;
+    TTreeReaderValue<std::vector<float>> * m_jet_jer_up;
+    TTreeReaderValue<std::vector<float>> * m_jet_jer_down;
 
     // truth jet info
-    TTreeReaderArray<std::vector<float>> * m_truth_jet_pt;
-    TTreeReaderArray<std::vector<float>> * m_truth_jet_eta;
-    TTreeReaderArray<std::vector<float>> * m_truth_jet_phi;
-    TTreeReaderArray<std::vector<float>> * m_truth_jet_e;
-    TTreeReaderArray<std::vector<float>> * m_truth_jet_charge;
+    TTreeReaderValue<std::vector<float>> * m_truth_jet_pt;
+    TTreeReaderValue<std::vector<float>> * m_truth_jet_eta;
+    TTreeReaderValue<std::vector<float>> * m_truth_jet_phi;
+    TTreeReaderValue<std::vector<float>> * m_truth_jet_e;
+    TTreeReaderValue<std::vector<float>> * m_truth_jet_charge;
 
     // Reconstructed neutrino
     TTreeReaderValue<std::vector<float>> * m_nu_pt;
@@ -345,20 +355,28 @@ class Event {
 
 
     // General truth information
-    TTreeReaderArray<std::vector<float>> * mc_pt;
-    TTreeReaderArray<std::vector<float>> * mc_eta;
-    TTreeReaderArray<std::vector<float>> * mc_phi;
-    TTreeReaderArray<std::vector<float>> * mc_e;
-    TTreeReaderArray<std::vector<float>> * mc_pdgId;
-    TTreeReaderArray<std::vector<float>> * mc_charge;
-    TTreeReaderArray<std::vector<int>> * mc_mom_idx;
+    TTreeReaderValue<std::vector<float>> * mc_pt;
+    TTreeReaderValue<std::vector<float>> * mc_eta;
+    TTreeReaderValue<std::vector<float>> * mc_phi;
+    TTreeReaderValue<std::vector<float>> * mc_e;
+    TTreeReaderValue<std::vector<float>> * mc_pdgId;
+    TTreeReaderValue<std::vector<float>> * mc_charge;
+    TTreeReaderValue<std::vector<int>> * mc_mom_idx;
 
     TTreeReaderValue<float> * m_mc_ht;                // evt_Gen_Ht
 
     // HLT 
-    TTreeReaderArray<int> * m_HLT_Ele45_WPLoose_Gsf;          // HLT_Ele45_WPLoose_Gsf
-    TTreeReaderArray<int> * m_HLT_Mu50;            // HLT_Mu50
-    TTreeReaderArray<int> * m_HLT_TkMu50;          // HLT_TkMu50
+    TTreeReaderValue<int> * m_HLT_Ele45_WPLoose_Gsf;          // HLT_Ele45_WPLoose_Gsf
+    TTreeReaderValue<int> * m_HLT_Mu50;            // HLT_Mu50
+    TTreeReaderValue<int> * m_HLT_TkMu50;          // HLT_TkMu50
+
+    TTreeReaderValue<std::vector<float>> * m_mc_pt;
+    TTreeReaderValue<std::vector<float>> * m_mc_eta;
+    TTreeReaderValue<std::vector<float>> * m_mc_phi;
+    TTreeReaderValue<std::vector<float>> * m_mc_e;
+    TTreeReaderValue<std::vector<float>> * m_mc_charge;
+    TTreeReaderValue<std::vector<float>> * m_mc_pdgId;
+    TTreeReaderValue<std::vector<float>> * m_mc_mom_idx;
 };
 
 #endif

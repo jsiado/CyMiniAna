@@ -18,6 +18,7 @@ enum class jet_id  {LOOSE, MEDIUM, TIGHT, TIGHTLEPVETO, NONE};
 // base object (consistent reference to TLorentzVector)
 struct CmaBase {
     TLorentzVector p4;
+    int isGood;
 };
 
 
@@ -58,16 +59,21 @@ struct Jet : CmaBase{
 
     float charge;
     int index;    // index in vector of jets
+    float radius;
 
     bool loose;
     bool medium;
     bool tight;
     bool tightlepveto;
+
+    int truth_jet;   // index in vector of truth jets that is closest to this jet
+    int containment; // level of containment for partons
+    std::vector<int> truth_partons;  // vector containing partons that are truth-matched to jet
+    int matchId;    // keep track of jets matched to top or anti-top
 };
 
 struct Ljet : Jet{
     // extra ljet attributes
-    int isGood;
     // substructure
     float tau1;
     float tau2;
@@ -92,7 +98,7 @@ struct Lepton : CmaBase{
     int index;       // index in vector of leptons
 
     float key;
-    float miniIso;
+    float iso;
     bool loose;
     bool medium;
     bool tight;
@@ -197,7 +203,13 @@ struct MET : CmaBase{
 // Truth information
 struct Parton : CmaBase {
     int pdgId;
-    int index;       // index in vector of truth partons
+    int index;        // index in vector of truth partons
+    int parent0_idx;  // index in truth record of parent0
+    int parent1_idx;  // index in truth record of parent1
+    int child0_idx;   // index in truth record of child0
+    int child1_idx;   // index in truth record of child1
+    int charge;
+
     int decayIdx;    // index in truth record
     int parent_ref;  // index in truth vector of parent
     int parent_idx;  // index in truth record of parent
@@ -205,6 +217,8 @@ struct Parton : CmaBase {
     int containment; // record value used to calculate containment
 
     // Heavy Object Booleans
+    bool isWprime;
+    bool isVLQ;
     bool isTop;
     bool isW;
     bool isZ;
@@ -246,5 +260,19 @@ struct Wprime : CmaBase{
     Jet jet;
 };
 
-#endif
 
+
+
+// ------------------------ // 
+// Struct to contain sample information (processing the input file)
+
+struct Sample {
+    std::string primaryDataset;
+    float XSection;
+    float KFactor;
+    float sumOfWeights;
+    unsigned int NEvents;
+};
+
+
+#endif

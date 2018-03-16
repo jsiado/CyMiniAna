@@ -51,7 +51,8 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
     m_sumOfMCWeights.clear();
     m_NEvents.clear();
     if (m_isMC){
-        cma::getSampleWeights( t_metadataFile,m_XSections,m_KFactors,m_sumOfMCWeights,m_NEvents );
+        m_mapOfSamples.clear();
+        cma::getSampleWeights( t_metadataFile,m_mapOfSamples );
     }
 }
 
@@ -389,9 +390,9 @@ void EventSaverFlatNtuple::endJob(){
        - Fill the metadata tree (only 1 "event")
     */
     if (m_isMC){
-        m_xsection = m_XSections.at( m_sampleName );
-        m_kfactor  = m_KFactors.at( m_sampleName );
-        m_sumOfWeights = m_sumOfMCWeights.at( m_sampleName );
+        m_xsection = m_mapOfSamples.at(m_sampleName).XSection;
+        m_kfactor  = m_mapOfSamples.at(m_sampleName).KFactor;
+        m_sumOfWeights = m_mapOfSamples.at(m_sampleName).sumOfWeights;
     }
     else{
         m_xsection = 1;
