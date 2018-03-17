@@ -4,8 +4,9 @@ Last Updated:  28 September 2016
 
 Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
-University of Michigan, Ann Arbor, MI 48109
+Texas A&M University
 -----
+
 Class to handle calculating and drawing all of the systematic uncertainties.
 Need to calculate systematics with respect to nominal samples --
   do this for each sample (ttbar, wjets, zjets, etc.)
@@ -18,33 +19,24 @@ from math import fabs
 from copy import deepcopy
 from collections import OrderedDict
 
-## ------------------------------ ##
-## Setup Matplotlib Configuration ##
+from hepPlotter import HepPlotter
+import hepPlotterTools as hpt
+import hepPlotterLabels as hpl
+
+import numpy as np
 import matplotlib
 mpl_version = matplotlib.__version__
-matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend.
 from matplotlib import rc
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import AutoMinorLocator
-import numpy as np
 
-rc('text', usetex=True)
-rc('font', family='sans-serif')
+fontProperties = {}
 if mpl_version.startswith('1.5'):
     fontProperties = {}
 else:
     fontProperties = {'family':'sans-serif','sans-serif':['Helvetica']}
-params = {'text.latex.preamble' : [r'\usepackage{amsmath}']}
-plt.rcParams.update(params)
-os.environ['PATH'] = os.environ['PATH']+':/usr/texbin'+':/Library/TeX/texbin'  # LaTeX support
-## ------------------------------ ##
-
-from hepPlotter import HepPlotter
-import hepPlotterTools as hpt
-import hepPlotterLabels as hpl
-
 
 
 class HepPlotterSystematics(object):

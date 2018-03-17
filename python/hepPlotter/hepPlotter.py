@@ -24,12 +24,11 @@ import ROOT
 from math import fabs
 from copy import deepcopy
 from collections import OrderedDict
-os.environ['PATH'] = os.environ['PATH']+':/usr/texbin'+':/Library/TeX/texbin' # LaTeX support
 
 ## Setup Matplotlib Configuration ##
 import matplotlib
 mpl_version = matplotlib.__version__
-matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend.
+matplotlib.use('PDF')                  # No 'dvipng' support at the LPC yet, need PDFs instead
 from matplotlib import rc
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
@@ -51,10 +50,13 @@ else:
     plt.register_cmap(name='magma',   cmap=cmaps.magma)
     plt.register_cmap(name='inferno', cmap=cmaps.inferno)
     plt.register_cmap(name='plasma',  cmap=cmaps.plasma)
+
+# the following may not do anything, might be useful in non-CMSSW environments
+os.environ['PATH'] = os.environ['PATH']+':/usr/texbin'+':/Library/TeX/texbin' # LaTeX support
 ## ------------------------------ ##
+
 import hepPlotterTools as hpt
 import hepPlotterLabels as hpl
-
 
 
 

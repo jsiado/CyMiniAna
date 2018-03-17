@@ -22,30 +22,24 @@ from collections import OrderedDict
 
 os.environ['PATH'] = os.environ['PATH']+':/usr/texbin'+':/Library/TeX/texbin'  # LaTeX support
 
-## Setup Matplotlib Configuration ##
-import matplotlib
+from hepPlotter import HepPlotter
+import hepPlotterTools as hpt
+import hepPlotterLabels as hpl
+
 import numpy as np
+import matplotlib
 mpl_version = matplotlib.__version__
-matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend.
 from matplotlib import rc
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import AutoMinorLocator
 
-rc('text', usetex=True)
-rc('font', family='sans-serif')
-if mpl_version.startswith('1.5'):
+fontProperties = {}
+if mpl_version.startswith('1.5') or mpl_version.startswith('2'):
     fontProperties = {}
 else:
     fontProperties = {'family':'sans-serif','sans-serif':['Helvetica']}
-params = {'text.latex.preamble' : [r'\usepackage{amsmath}']}
-plt.rcParams.update(params)
-## ------------------------------ ##
-from hepPlotter import HepPlotter
-import hepPlotterTools as hpt
-import hepPlotterLabels as hpl
-
 
 
 class HepPlotterDataMC(HepPlotter):
