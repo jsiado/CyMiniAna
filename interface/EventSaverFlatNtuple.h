@@ -61,6 +61,7 @@ class EventSaverFlatNtuple : public edm::one::EDAnalyzer<edm::one::SharedResourc
     std::string t_sampleName;
     std::string t_metadataFile;
 
+    std::map<std::string,Sample> m_mapOfSamples;     // map of Sample structs
     std::map<std::string, float> m_XSections;        // map sample name to XSection
     std::map<std::string, float> m_KFactors;         // map sample name to KFactor
     std::map<std::string, float> m_sumOfMCWeights;   // map sample name to sum of weights

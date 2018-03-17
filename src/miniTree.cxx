@@ -31,7 +31,7 @@ void miniTree::initialize(TTree* t, TFile& outputFile) {
     m_ttree = m_oldTTree->CloneTree(0);  // clone the tree (branches) but copy no data
 
     /*** setup new branches here ***/
-    if ( m_config->getDNN() )
+    if ( m_config->DNNinference() )      // creating new scores
         m_ttree->Branch( "DNN", &m_dnn, "DNN/F" );
 
     /*** disable branches here ***/

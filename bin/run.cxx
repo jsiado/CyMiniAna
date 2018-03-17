@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> treenames = config.treeNames();
     std::string selection(config.selection());
 
-    bool makeNewFile      = config.makeNewFile();
+    bool makeTTree        = config.makeTTree();
     bool makeHistograms   = config.makeHistograms();
     bool makeEfficiencies = config.makeEfficiencies();
     bool doSystWeights    = config.calcWeightSystematics(); // systemaics associated with scale factors
@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
             // -- Make new Tree in Root file
 
             miniTree miniTTree(config);          // initialize TTree for new file
-            if (makeNewFile)
+            if (makeTTree)
                 miniTTree.initialize( myReader.GetTree(), *outputFile );
 
             // -- Number of Entries to Process -- //
@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
 
                 if (passEvent){
                     cma::DEBUG("RUN : Passed selection, now save information");
-                    if (makeNewFile)       miniTTree.saveEvent(event);
+                    if (makeTTree)         miniTTree.saveEvent(event);
                     if (makeHistograms)    histMaker.fill( event );
                     if (makeEfficiencies)  effMaker.fill( event );
                 }

@@ -20,36 +20,35 @@ configuration::configuration(const std::string &configFile) :
   m_configFile(configFile),
   m_isMC(false),
   m_isGridFile(false),
-  m_isZeroLeptonAnalysis(false),
-  m_isOneLeptonAnalysis(false),
-  m_isTwoleptonAnalysis(false),
   m_useTruth(false),
   m_useJets(false),
   m_useLeptons(false),
   m_useLargeRJets(false),
-  m_useRCJets(false),
-  m_useNeutrino(false),
-  m_useFlags(false),
+  m_useNeutrinos(false),
   m_useTtbar(false),
+  m_useDNN(false),
+  m_useWprime(false),
   m_input_selection("SetMe"),
   m_selection("SetMe"),
   m_cutsfile("SetMe"),
   m_treename("SetMe"),
   m_filename("SetMe"),
+  m_primaryDataset("SetMe"),
+  m_NTotalEvents(0),
   m_verboseLevel("SetMe"),
   m_nEventsToProcess(0),
   m_firstEvent(0),
   m_outputFilePath("SetMe"),
   m_customFileEnding("SetMe"),
-  m_makeNewFile(false),
+  m_makeTTree(false),
   m_makeHistograms(false),
   m_sumWeightsFiles("SetMe"),
   m_cma_absPath("SetMe"),
   m_metadataFile("SetMe"),
-  m_getDNN(false),
+  m_DNNinference(false),
+  m_DNNtraining(false),
   m_dnnFile("SetMe"),
   m_dnnKey("SetMe"),
-  m_getHME(false),
   m_doRecoEventLoop(false),
   m_doTruthEventLoop(false),
   m_matchTruthToReco(true),
@@ -130,15 +129,6 @@ void configuration::initialize() {
     m_input_selection  = getConfigOption("input_selection"); // "grid", "pre", etc.
     m_selection        = getConfigOption("selection");
 
-    m_isZeroLeptonAnalysis = cma::str2bool( getConfigOption("isZeroLeptonAnalysis") );
-    m_isOneLeptonAnalysis  = cma::str2bool( getConfigOption("isOneLeptonAnalysis") );
-    m_isTwoleptonAnalysis  = cma::str2bool( getConfigOption("isTwoleptonAnalysis") );
-
-    if ( (m_isZeroLeptonAnalysis + m_isOneLeptonAnalysis + m_isTwoleptonAnalysis) != 1 ){
-        cma::ERROR("CONFIG : Must choose only one of 'isZeroLeptonAnalysis', 'isOneLeptonAnalysis', 'isTwoLeptonAnalysis'");
-        exit(1);
-    }
-
 
     // check that b-tag and top-tag WPs are recognized as one of supported values
     check_btag_WP(getConfigOption("jet_btag_wkpt"));
@@ -152,17 +142,18 @@ void configuration::initialize() {
     m_useJets          = cma::str2bool( getConfigOption("useJets") );
     m_useLeptons       = cma::str2bool( getConfigOption("useLeptons") );
     m_useLargeRJets    = cma::str2bool( getConfigOption("useLargeRJets") );
-    m_useRCJets        = cma::str2bool( getConfigOption("useRCJets") );
-    m_useNeutrino      = cma::str2bool( getConfigOption("useNeutrino") );
-    m_useFlags         = cma::str2bool( getConfigOption("useFlags") );
-    m_makeNewFile      = cma::str2bool( getConfigOption("makeNewFile") );
+    m_useNeutrinos     = cma::str2bool( getConfigOption("useNeutrinos") );
+    m_useDNN           = cma::str2bool( getConfigOption("useDNN") );
+    m_useWprime        = cma::str2bool( getConfigOption("useWprime") );
+    m_makeTTree        = cma::str2bool( getConfigOption("makeTTree") );
     m_makeHistograms   = cma::str2bool( getConfigOption("makeHistograms") );
     m_makeEfficiencies = cma::str2bool( getConfigOption("makeEfficiencies") );
     m_dnnFile          = getConfigOption("dnnFile");
     m_dnnKey           = getConfigOption("dnnKey");
-    m_getDNN           = cma::str2bool( getConfigOption("getDNN") );
+    m_DNNtraining      = cma::str2bool( getConfigOption("DNNtraining") );
+    m_DNNinference     = cma::str2bool( getConfigOption("DNNinference") );
     m_doRecoEventLoop  = cma::str2bool( getConfigOption("doRecoEventLoop") );
-    m_kinematicReco   = cma::str2bool( getConfigOption("kinematicReco") );
+    m_kinematicReco    = cma::str2bool( getConfigOption("kinematicReco") );
     m_metadataFile     = getConfigOption("metadataFile");
     m_calcWeightSystematics             = cma::str2bool( getConfigOption("calcWeightSystematics") );
     m_listOfWeightSystematicsFile       = getConfigOption("weightSystematicsFile");
@@ -177,7 +168,8 @@ void configuration::initialize() {
     m_KFactor.clear();
     m_AMI.clear();
     m_NEvents.clear();
-    cma::getSampleWeights( m_metadataFile,m_XSection,m_KFactor,m_AMI,m_NEvents );
+    m_mapOfSamples.clear();
+    cma::getSampleWeights( m_metadataFile, m_mapOfSamples );
 
     // systematics that are weights in the nominal tree
     m_listOfWeightSystematics.resize(0);
@@ -230,33 +222,14 @@ std::string configuration::getConfigOption( std::string item ){
     return value;
 }
 
-
-std::string configuration::verboseLevel(){
-    /* Return the verbosity level */
-    return m_verboseLevel;
-}
-
-std::string configuration::getAbsolutePath(){
-    /* Return the absolute path of the CyMiniAna directory (batch jobs) */
-    return m_cma_absPath;
-}
-
 void configuration::setTreename(std::string treeName){
     m_treename = treeName;
     return;
 }
 
-std::string configuration::treename(){
-    return m_treename;
-}
-
 void configuration::setFilename(std::string fileName){
     m_filename = fileName;
     return;
-}
-
-std::string configuration::filename(){
-    return m_filename;
 }
 
 bool configuration::isNominalTree(){
@@ -274,79 +247,65 @@ bool configuration::isNominalTree( const std::string &tree_name ){
     return isNominal;
 }
 
-void configuration::checkFileType( TFile& file ){
-    // -- Check the sum of weights tree DSIDs (to determine Data || MC)
-    m_isMC = false;
-    // check filename!
-    // std::string name = file.GetName();
-    // if (name.startswith("JetHT") or "SingleElectron" or "SingleMuon")
-    // isMC = false;
+void configuration::inspectFile( TFile& file ){
+    /* Compare filenames to determine file type */
+    m_primaryDataset = "";
+    m_NTotalEvents = 0;
+
+    // check if file is MC
+    for (const auto& mc : m_mcFiles){
+        m_isMC = (m_filename.find(mc)!=std::string::npos);
+        m_primaryDataset = mc;
+        if (m_isMC) break;
+    }
+
+    // get the metadata
+    if (m_primaryDataset.size()>0) m_NTotalEvents = m_mapOfSamples.at(m_primaryDataset).NEvents;
+    else{
+        cma::WARNING("CONFIGURATION : Primary dataset name not found, checking the map");
+        for (const auto& s : m_mapOfSamples){
+            Sample samp = s.second;
+            std::size_t found = m_filename.find(samp.primaryDataset);
+            if (found!=std::string::npos){ 
+                m_primaryDataset = samp.primaryDataset;
+                m_NTotalEvents   = samp.NEvents;
+                break;
+            } // end if the filename contains this primary dataset
+        } // end loop over map of samples (to access metadata info)
+    } // end else
+
+
+    // Protection against accessing truth information that may not exist
+    if (!m_isMC && m_useTruth){
+        cma::WARNING("CONFIGURATION : 'useTruth=true' but 'isMC=false'");
+        cma::WARNING("CONFIGURATION : Setting 'useTruth' to false");
+        m_useTruth = false;
+    }
+
     return;
 }
 
-bool configuration::isMC(){
-    return m_isMC;
-}
 
 bool configuration::isMC( TFile& file ){
     /* Check the sum of weights tree DSIDs (to determine Data || MC) */
-    checkFileType( file );
+    inspectFile( file );
     return m_isMC;
 }
 
 
-// Kind of analysis (0/1/2-leptons)
-bool configuration::isZeroLeptonAnalysis(){
-    /* All-hadronic */
-    return m_isZeroLeptonAnalysis;
-}
-
-bool configuration::isOneLeptonAnalysis(){
-    /* Semi-leptonic */
-    return m_isOneLeptonAnalysis;
-}
-
-bool configuration::isTwoleptonAnalysis(){
-    /* Dileptonic */
-    return m_isTwoleptonAnalysis;
-}
 
 // weights + systematics
-bool configuration::calcWeightSystematics(){
-    return m_calcWeightSystematics;
-}
-
-std::map<std::string,unsigned int> configuration::mapOfWeightVectorSystematics(){
-    return m_mapOfWeightVectorSystematics;
-}
-
-std::vector<std::string> configuration::listOfWeightSystematics(){
-    return m_listOfWeightSystematics;
-}
-
-std::string configuration::listOfWeightSystematicsFile(){
-    return m_listOfWeightSystematicsFile;
-}
-
-std::string configuration::listOfWeightVectorSystematicsFile(){
-    return m_listOfWeightVectorSystematicsFile;
-}
-
-std::string configuration::metadataFile(){
-    return m_metadataFile;
-}
-
 double configuration::XSectionMap( std::string mcChannelNumber ){
     /* XSection values */
     double XSectionValue(0.0);
 
-    if (m_XSection.find(mcChannelNumber)==m_XSection.end()){
+    if (m_mapOfSamples.find(mcChannelNumber)==m_mapOfSamples.end()){
         XSectionValue = 1.;
         cma::WARNING("CONFIG : Request for XSection value that does not exist "+mcChannelNumber);
         cma::WARNING("CONFIG : -- returning 1.0");
     }
     else{
-        XSectionValue = m_XSection.at( mcChannelNumber );
+        XSectionValue = m_mapOfSamples.at( mcChannelNumber ).XSection;
     }
 
     return XSectionValue;
@@ -356,13 +315,13 @@ double configuration::KFactorMap( std::string mcChannelNumber ){
     /* KFactor values */
     double KFactorValue(0.0);
 
-    if (m_KFactor.find(mcChannelNumber)==m_KFactor.end()){
+    if (m_mapOfSamples.find(mcChannelNumber)==m_mapOfSamples.end()){
         KFactorValue = 1.;
        	cma::WARNING("CONFIG : Request for KFactor value that does not exist "+mcChannelNumber);
         cma::WARNING("CONFIG : -- returning 1.0");
     }
     else{
-        KFactorValue = m_KFactor.at( mcChannelNumber );
+        KFactorValue = m_mapOfSamples.at( mcChannelNumber ).KFactor;
     }
 
     return KFactorValue;
@@ -372,13 +331,13 @@ double configuration::sumWeightsMap( std::string mcChannelNumber ){
     /* Sum of Weights values */
     double AMIValue(0.0);
 
-    if (m_AMI.find(mcChannelNumber)==m_AMI.end()){
+    if (m_mapOfSamples.find(mcChannelNumber)==m_mapOfSamples.end()){
         AMIValue = 1.;
         cma::WARNING("CONFIG : Request for SumOfWeights value that does not exist "+mcChannelNumber);
         cma::WARNING("CONFIG : -- returning 1.0");
     }
     else{
-        AMIValue = m_AMI.at( mcChannelNumber );
+        AMIValue = m_mapOfSamples.at( mcChannelNumber ).sumOfWeights;
     }
 
     return AMIValue;
@@ -396,186 +355,9 @@ void configuration::check_btag_WP(const std::string &wkpt){
     return;
 }
 
-
-configuration::Era configuration::convert(const std::string& era) {
-    /* Convert string to era enum */
-    if(era == "run2_13tev_25ns") return configuration::run2_13tev_25ns;
-    else if(era == "run2_13tev_2015_25ns") return configuration::run2_13tev_2015_25ns;
-    else if(era == "run2_13tev_2016_25ns") return configuration::run2_13tev_2016_25ns;
-    else if(era == "run2_13tev_25ns_74X") return configuration::run2_13tev_25ns_74X;
-    else {
-        cma::ERROR("CONFIGURATION : ERA convert conversion is not implemented: "+era);
-        exit(97);
-    }
-}
-
-std::string configuration::convert(const Era& era) {
-    /* Convert era to string */
-    if(era == run2_13tev_25ns) return "run2_13tev_25ns";
-    else if(era == run2_13tev_2015_25ns) return "run2_13tev_2015_25ns";
-    else if(era == run2_13tev_2016_25ns) return "run2_13tev_2016_25ns";
-    else if(era == run2_13tev_25ns_74X) return "run2_13tev_25ns_74X";
-    else{
-        cma::ERROR("CONFIGURATION : ERA convert conversion is not implemented: "+std::to_string(era));
-        exit(97);
-    }
-}
-
-bool configuration::useJets(){
-    return m_useJets;
-}
-
-bool configuration::useLeptons(){
-    return m_useLeptons;
-}
-
-bool configuration::useLargeRJets(){
-    return m_useLargeRJets;
-}
-
-bool configuration::useRCJets(){
-    return m_useRCJets;
-}
-
-bool configuration::useNeutrino(){
-    return m_useNeutrino;
-}
-
-bool configuration::useFlags(){
-    return m_useFlags;
-}
-
-bool configuration::useTtbar(){
-    return m_useTtbar;
-}
-
-std::string configuration::configFileName(){
-    return m_configFile;
-}
-
-std::string configuration::selection(){
-    return m_selection;
-}
-
-std::string configuration::cutsfile(){
-    return m_cutsfile;
-}
-
-std::string configuration::jet_btagWkpt(){
-    return m_jet_btag_wkpt;
-}
-
-std::vector<std::string> configuration::btagWkpts(){
-    return m_btag_WPs;
-}
-
-int configuration::nEventsToProcess(){
-    return m_nEventsToProcess;
-}
-
-unsigned long long configuration::firstEvent(){
-    return m_firstEvent;
-}
-
-std::string configuration::outputFilePath(){
-    return m_outputFilePath;
-}
-
-std::string configuration::customFileEnding(){
-    return m_customFileEnding;
-}
-
-double configuration::LUMI(){
-    return m_LUMI;
-}
-
-bool configuration::useTruth(){
-    return m_useTruth;
-}
-
-bool configuration::isGridFile(){
-    return m_isGridFile;
-}
-
-std::vector<std::string> configuration::filesToProcess(){
-    return m_filesToProcess;
-}
-
-std::vector<std::string> configuration::treeNames(){
-    return m_treeNames;
-}
-
-bool configuration::makeNewFile(){
-    return m_makeNewFile;
-}
-
-bool configuration::makeHistograms(){
-    return m_makeHistograms;
-}
-
-bool configuration::makeEfficiencies(){
-    return m_makeEfficiencies;
-}
-
-std::vector<std::string> configuration::qcdSelections(){
-    return m_qcdSelections;
-}
-
-// values for DNN
-std::string configuration::dnnFile(){
-    return m_dnnFile;  // file with dnn values (*.json)
-}
-std::string configuration::dnnKey(){
-    return m_dnnKey;   // key in dnnFile to access NN
-}
-// build the DNN
-bool configuration::getDNN(){
-    return m_getDNN;
-}
-// build the HME
-bool configuration::getHME(){
-    return m_getHME;
-}
-bool configuration::doRecoEventLoop(){
-    return m_doRecoEventLoop;
-}
-bool configuration::doTruthEventLoop(){
-    return m_doTruthEventLoop;
-}
-
-bool configuration::matchTruthToReco(){
-    /* true  -- match truth events to reco events (loop over reco events)
-     * false -- match reco events to truth events (loop over truth events)
-     */
-    return m_matchTruthToReco;
-}
-
 void configuration::setMatchTruthToReco(bool truthToReco){
     m_matchTruthToReco = truthToReco;
     return;
-}
-
-bool configuration::kinematicReco(){
-    return m_kinematicReco;
-}
-unsigned int configuration::NJetSmear(){
-    return m_NJetSmear;
-}
-unsigned int configuration::NMassPoints(){
-    return m_NMassPoints;
-}
-unsigned int configuration::massMin(){
-    return m_massMin;
-}
-unsigned int configuration::massMax(){
-    return m_massMax;
-}
-
-double configuration::minDNN(){
-    return m_minDNN;
-}
-double configuration::maxDNN(){
-    return m_maxDNN;
 }
 
 // THE END
