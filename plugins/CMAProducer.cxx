@@ -36,9 +36,9 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
   m_useNeutrinos(iConfig.getParameter<bool>("useNeutrinos")),
   m_buildNeutrinos(iConfig.getParameter<bool>("buildNeutrinos")),
   m_kinematicReco(iConfig.getParameter<bool>("kinematicReco")),
-  m_LUMI(iConfig.getParameter<double>("LUMI")),
-  m_metadataFile(iConfig.getParameter<std::string>("metadataFile")),
-  m_sampleName(iConfig.getParameter<std::string>("sampleName")){
+  m_LUMI(iConfig.getParameter<double>("LUMI")){
+  //m_metadataFile(iConfig.getParameter<std::string>("metadataFile")),
+  //m_sampleName(iConfig.getParameter<std::string>("sampleName")){
     // Generator information (parton-level information)
     m_XSection.clear();
     m_KFactor.clear();
@@ -46,7 +46,7 @@ CMAProducer::CMAProducer(const edm::ParameterSet& iConfig) :
     m_NEvents.clear();
     m_mapOfSamples.clear();
     if (m_isMC){
-        cma::getSampleWeights( m_metadataFile,m_mapOfSamples );
+        //cma::getSampleWeights( m_metadataFile,m_mapOfSamples );
         t_genEvtInfoProd = consumes<GenEventInfoProduct>(iConfig.getParameter<std::string>("genEvtInfoProdName"));  // generator info
     }
 
@@ -196,10 +196,10 @@ void CMAProducer::produce(edm::Event& evt, const edm::EventSetup& ){
     evt.getByToken(t_genEvtInfoProd,h_genEvtInfoProd);
     float mc_weight = h_genEvtInfoProd->weight();
 
-    Sample s = m_mapOfSamples.at(m_sampleName);
+//    Sample s = m_mapOfSamples.at(m_sampleName);
     m_event_weight  = 1.0;
-    m_event_weight *= s.XSection * s.KFactor * mc_weight / s.sumOfWeights;
-    m_event_weight /= m_LUMI;
+//    m_event_weight *= s.XSection * s.KFactor * mc_weight / s.sumOfWeights;
+//    m_event_weight /= m_LUMI;
 
     /* Set values to store in the event */
     (*e_MET).p4 = m_MET.p4;

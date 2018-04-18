@@ -65,7 +65,8 @@ options.parseArguments()
 filenames = [
 #          'file:config/B2GEDMNtuple_1.root'
 #          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/June/05June/B2GAnaFW_80X_V3p2_June/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p2_June/170605_115340/0000/B2GEDMNtuple_1.root'
-          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
+#          'root://cmsxrootd.fnal.gov//store/user/oiorio/samples/May/17May/B2GAnaFW_80X_V3p1/SingleMuon/Run2016B/SingleMuon/Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1/170517_122621/0000/B2GEDMNtuple_105.root'
+          'root://cmseos.fnal.gov//store/group/lpctlbsm/wprime-qQ/feb2018/WpSamples/Wp1500NarTp1200NarLH/RunIISummer16MiniAODv2/WprimeToTBprimeJets_Wp1500NarTp1200NarLH_TuneCUETP8M2T4_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1_B2GAnaFW_80X_V3p1_ALL/180131_194300/0000/Sample_1_1.root'
 ]
 
 data_path = 'data/'   # path to files needed in CyMiniAna
@@ -93,15 +94,6 @@ process.maxEvents    = cms.untracked.PSet( input = cms.untracked.int32(options.m
 process.TFileService = cms.Service("TFileService", fileName = cms.string("output.root") )
 
 
-## Get the sampleName
-sampleNamesDict = {}
-sampleNames = open(data_path+"sampleNames.txt","r").readlines()
-for line in sampleNames:
-    k,j = line.split()
-    sampleNamesDict[k] = j
-
-sample_name = sampleNamesDict[ process.source.fileNames[0] ]
-
 
 ## CMA Producer
 process.CMAProducer = cms.EDProducer('CMAProducer',
@@ -115,8 +107,8 @@ process.CMAProducer = cms.EDProducer('CMAProducer',
     kinematicReco  = cms.bool(False),
     LUMI = cms.double(1.0),
     data_path = cms.string(data_path),
-    metadataFile = cms.string(data_path+"metadataFile.txt"),
-    sampleName = cms.string(sample_name),
+    #metadataFile = cms.string(data_path+"metadataFile.txt"),
+    #sampleName = cms.string(sample_name),
     # Physics Objects
     # - labels to access data
     neutrinoLabels  = neutrinoLabels,
@@ -170,7 +162,7 @@ process.tree = cms.EDAnalyzer("EventSaverFlatNtuple",
     evtnoLabel      = cms.InputTag("eventInfo", "evtInfoEventNumber"),
     puNtrueIntLabel = cms.InputTag("eventUserData", "puNtrueInt"),
     metadataFile = cms.string(data_path+"metadataFile.txt"),
-    sampleName   = cms.string(sample_name),
+    #sampleName   = cms.string(sample_name),
     genParticles = cms.InputTag("filteredPrunedGenParticles"),
     genEvtInfoProdName = cms.string('generator'),
 )

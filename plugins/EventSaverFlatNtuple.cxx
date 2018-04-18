@@ -15,8 +15,8 @@ Write data to flat ntuple
 using namespace edm;
 
 EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
-  t_sampleName(cfg.getParameter<std::string>("sampleName")),
-  t_metadataFile(cfg.getParameter<std::string>("metadataFile")),
+//  t_sampleName(cfg.getParameter<std::string>("sampleName")),
+//  t_metadataFile(cfg.getParameter<std::string>("metadataFile")),
   m_truthTool(cfg,consumesCollector()),
   t_electrons(consumes<std::vector<Electron>>(edm::InputTag("CMAProducer","electrons","CyMiniAna"))),
   t_muons(consumes<std::vector<Muon>>(edm::InputTag("CMAProducer","muons","CyMiniAna"))),
@@ -45,14 +45,14 @@ EventSaverFlatNtuple::EventSaverFlatNtuple( const ParameterSet & cfg ) :
     m_useLeptons     = cfg.getParameter<bool>("useLeptons");     // filling lepton branches
     m_useNeutrinos   = cfg.getParameter<bool>("useNeutrinos");   // filling neutrino branches 
 
-    m_sampleName = t_sampleName;
+//    m_sampleName = t_sampleName;
     m_XSections.clear();
     m_KFactors.clear();
     m_sumOfMCWeights.clear();
     m_NEvents.clear();
     if (m_isMC){
         m_mapOfSamples.clear();
-        cma::getSampleWeights( t_metadataFile,m_mapOfSamples );
+//        cma::getSampleWeights( t_metadataFile,m_mapOfSamples );
     }
 }
 
@@ -390,9 +390,9 @@ void EventSaverFlatNtuple::endJob(){
        - Fill the metadata tree (only 1 "event")
     */
     if (m_isMC){
-        m_xsection = m_mapOfSamples.at(m_sampleName).XSection;
-        m_kfactor  = m_mapOfSamples.at(m_sampleName).KFactor;
-        m_sumOfWeights = m_mapOfSamples.at(m_sampleName).sumOfWeights;
+        m_xsection = 1.0; //m_mapOfSamples.at(m_sampleName).XSection;
+        m_kfactor  = 1.0; //m_mapOfSamples.at(m_sampleName).KFactor;
+        m_sumOfWeights = 1.0; //m_mapOfSamples.at(m_sampleName).sumOfWeights;
     }
     else{
         m_xsection = 1;
@@ -409,7 +409,7 @@ void EventSaverFlatNtuple::endJob(){
 void EventSaverFlatNtuple::initialize_branches(){
     /* Setup the output trees */
     // Metadata
-    m_metadata_ttree->Branch("sampleName",   &m_sampleName);                      // string
+//    m_metadata_ttree->Branch("sampleName",   &m_sampleName);                      // string
     m_metadata_ttree->Branch("xsection",     &m_xsection,     "xsection/F");      // float
     m_metadata_ttree->Branch("kfactor",      &m_kfactor,      "kfactor/F");       // float
     m_metadata_ttree->Branch("sumOfWeights", &m_sumOfWeights, "sumOfWeights/F");  // float
