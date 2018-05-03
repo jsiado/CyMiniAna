@@ -12,6 +12,100 @@ to be called from other python scripts.
 (All information in one file => one location to update!)
 """
 import ROOT
+import numpy as np
+
+def getHistSeparation( S, B ):
+    """Compare TH1* S and B -- need same dimensions
+       Copied from : https://root.cern.ch/doc/master/MethodBase_8cxx_source.html#l02740
+    """
+    separation = 0
+
+    nstep  = S.GetNbinsX()
+    xaxis  = S.GetXaxis()
+
+    nS = S.GetSumOfWeights()
+    nB = B.GetSumOfWeights()
+    for bin in range(nstep):
+        s = S.GetBinContent( bin+1 )/nS
+        b = B.GetBinContent( bin+1 )/nB
+        if (s+b)>0: separation += (s - b)*(s - b)/(s + b)
+
+    separation *= 0.5
+
+    return separation
+
+
+def GetSeparation2D( S, B ):
+    """Compare TH2* S and B -- need same dimensions"""
+    separation = 0
+
+    nbinsx = S.GetNbinsX()
+    xaxis  = S.GetXaxis()
+
+    nbinsy = S.GetNbinsY()
+    yaxis  = S.GetYaxis()
+
+    integral_s = S.Integral()
+    integral_b = B.Integral()
+
+    for x in range(nbinsx):
+        for y in range(nbinsy):
+            s = S.GetBinContent( x+1,y+1 )/integral_s
+            b = B.GetBinContent( x+1,y+1 )/integral_b
+
+            if (s+b) > 0: separation += (s - b)*(s - b)/(s + b)
+
+    separation *= 0.5
+
+    return separation
+
+
+
+def getSeparation(sig,bkg):
+    """Calculate separation between two distributions"""
+    separation = 0
+
+    nS = 1.0*np.sum(sig)
+    nB = 1.0*np.sum(bkg)
+    for ss,bb in zip(sig,bkg):
+        s = ss/nS
+        b = bb/nB
+        
+        if (s+b) > 0: separation += (s - b)*(s - b)/(s + b)
+    separation *= 0.5
+
+    return separation
+
+
+def read_config(filename,separation=" "):
+    """
+    Read configuration file with data stored like:
+       'config option'
+    And the 'config' and 'option' are separated by a character, e.g., " "
+    """
+    data = file2list(filename)
+    cfg = {}
+    for i in data:
+        j = i.split(separation)
+        cfg[j[0]] = j[1]
+    return cfg
+
+
+def extract(str_value, start_='{', stop_='}'):
+    """Extract a string between two symbols, e.g., parentheses."""
+    extraction = str_value[str_value.index(start_)+1:str_value.index(stop_)]
+    return extraction
+
+
+def to_csv(filename,data):
+    """Write data to CSV file"""
+    if not filename.endswith(".csv"): filename += ".csv"
+    f = open(filename,"w")
+    for d in data:
+        f.write(d)
+    f.close()
+
+    return
 
 
 def deltaR(tlvA,tlvB,dR=0.75):

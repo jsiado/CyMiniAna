@@ -12,10 +12,10 @@ Make histograms for systematic uncertainties (& nominal)
 to go into plots || TRexFitter
 
 */
-#include "Analysis/CyMiniAna/interface/histogrammerFlatNtuple.h"
+#include "Analysis/CyMiniAna/interface/histogrammer.h"
 
 
-histogrammerFlatNtuple::histogrammerFlatNtuple( configuration& cmaConfig, std::string name ) :
+histogrammer::histogrammer( configuration& cmaConfig, std::string name ) :
   m_config(&cmaConfig),
   m_name(name),
   m_putOverflowInLastBin(true),
@@ -35,20 +35,20 @@ histogrammerFlatNtuple::histogrammerFlatNtuple( configuration& cmaConfig, std::s
         m_name = m_name+"_"; // add '_' to end of string, if needed
   }
 
-histogrammerFlatNtuple::~histogrammerFlatNtuple() {}
+histogrammer::~histogrammer() {}
 
 
 /**** INITIALIZE HISTOGRAMS ****/
 
 // -- 1D Histograms
-void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned int nBins, const double x_min, const double x_max ){
+void histogrammer::init_hist( const std::string& name, const unsigned int nBins, const double x_min, const double x_max ){
     /* Initialize histogram -- equal bins */
     m_map_histograms1D["h_"+name] = new TH1D(("h_"+name).c_str(), ("h_"+name).c_str(),nBins,x_min,x_max);
     m_map_histograms1D["h_"+name]->Sumw2();
 
     return;
 }
-void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned int nBins, const double *xbins ){
+void histogrammer::init_hist( const std::string& name, const unsigned int nBins, const double *xbins ){
     /* Initialize histogram -- variable bins */
     m_map_histograms1D["h_"+name] = new TH1D(("h_"+name).c_str(), ("h_"+name).c_str(),nBins,xbins);
     m_map_histograms1D["h_"+name]->Sumw2();
@@ -56,7 +56,7 @@ void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned 
     return;
 }
 // -- 2D Histograms
-void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned int nBinsX, const double x_min, const double x_max,
+void histogrammer::init_hist( const std::string& name, const unsigned int nBinsX, const double x_min, const double x_max,
                               const unsigned int nBinsY, const double y_min, const double y_max ){
     /* Initialize histogram -- equal bins */
     m_map_histograms2D["h_"+name] = new TH2D(("h_"+name).c_str(), ("h_"+name).c_str(),
@@ -65,7 +65,7 @@ void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned 
 
     return;
 }
-void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned int nBinsX, const double *xbins,
+void histogrammer::init_hist( const std::string& name, const unsigned int nBinsX, const double *xbins,
                               const unsigned int nBinsY, const double *ybins ){
     /* Initialize histogram -- variable bins */
     m_map_histograms2D["h_"+name] = new TH2D(("h_"+name).c_str(), ("h_"+name).c_str(),
@@ -75,7 +75,7 @@ void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned 
     return;
 }
 // -- 3D Histograms
-void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned int nBinsX, const double x_min, const double x_max,
+void histogrammer::init_hist( const std::string& name, const unsigned int nBinsX, const double x_min, const double x_max,
                               const unsigned int nBinsY, const double y_min, const double y_max,
                               const unsigned int nBinsZ, const double z_min, const double z_max ){
     /* Initialize histogram -- equal bins */
@@ -85,7 +85,7 @@ void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned 
 
     return;
 }
-void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned int nBinsX, const double *xbins,
+void histogrammer::init_hist( const std::string& name, const unsigned int nBinsX, const double *xbins,
                               const unsigned int nBinsY, const double *ybins,
                               const unsigned int nBinsZ, const double *zbins ){
     /* Initialize histogram -- variable bins */
@@ -97,50 +97,44 @@ void histogrammerFlatNtuple::init_hist( const std::string& name, const unsigned 
 }
 
 
-void histogrammerFlatNtuple::initialize( TFile& outputFile, bool doSystWeights ){
+void histogrammer::initialize( TFile& outputFile, bool doSystWeights ){
     /* Setup some values and book histograms */
     m_doSystWeights = doSystWeights;
     outputFile.cd();
 
 
-    // loop over treenames (typically systematic uncertainties)
-    for (auto& treename : m_config->treeNames() ){
-        std::size_t found = treename.find("/");   // protection against directory structure
-        if (found!=std::string::npos){
-            treename = treename.substr(found+1);
-        }
+    // loop over selections (typically only one treename)
+    for (const auto& sel : m_config->selections() ) {
+        bookHists( m_name+sel );
 
-        bookHists( m_name+treename );
-    }
+        // weight systematics
+        if (m_isMC && m_doSystWeights){
+            for (const auto& syst : m_config->listOfWeightSystematics()){
+                bookHists( m_name+sel+syst );
+            } // end weight systematics
 
+            // vector weight systematics
+            for (const auto& syst : m_config->mapOfWeightVectorSystematics()){
+                for (unsigned int el=0;el<syst.second;++el){
+                    std::string weightIndex = std::to_string(el);
+                    bookHists( m_name+sel+weightIndex+"_"+syst.first );
+                } // end components of vector
+            } // end vector weight systematics
+        } // end if MC and save weight systematics
+    } // end loop over selections
 
-
-
-    // weight systematics
-    if (m_isMC && m_doSystWeights){
-        // In ATLAS these were only necessary for the nominal tree.
-        // Do not need to make them for every systematic variation!
-        for (const auto& syst : m_config->listOfWeightSystematics()){
-            bookHists( m_name+syst );
-        } // end weight systematics
-
-        // vector weight systematics
-        for (const auto& syst : m_config->mapOfWeightVectorSystematics()){
-            for (unsigned int el=0;el<syst.second;++el){
-                std::string weightIndex = std::to_string(el);
-                bookHists( m_name+weightIndex+"_"+syst.first );
-            } // end components of vector
-        } // end vector weight systematics
-    } // end if MC and save weight systematics
+    return;
 }
 
-void histogrammerFlatNtuple::bookHists( std::string name ){
+
+void histogrammer::bookHists( std::string name ){
     /* 
       Book histograms -- modify/inherit this function for analysis-specific hists 
 
       @param name   This is the string used to identify histograms for different systematics/event weights
     */
     m_names.resize(0); // append names to this to keep track of later
+    cma::DEBUG("HISTOGRAMMER : Book histograms "+name);
 
     if (m_useJets){
         init_hist("n_jets_"+name,   31, -0.5,  30.5);
@@ -206,7 +200,7 @@ void histogrammerFlatNtuple::bookHists( std::string name ){
 
 /**** FILL HISTOGRAMS ****/
 
-void histogrammerFlatNtuple::fill( const std::string& name, const double& value, const double& weight ){
+void histogrammer::fill( const std::string& name, const double& value, const double& weight ){
     /* TH1D */
     TH1D* this_hist = m_map_histograms1D.at("h_"+name);
 
@@ -215,7 +209,7 @@ void histogrammerFlatNtuple::fill( const std::string& name, const double& value,
     return;
 }
 
-void histogrammerFlatNtuple::fill( const std::string& name, 
+void histogrammer::fill( const std::string& name, 
                          const double& xvalue, const double& yvalue, const double& weight ){
     /* TH2D */
     TH2D* this_hist = m_map_histograms2D.at("h_"+name);
@@ -225,7 +219,7 @@ void histogrammerFlatNtuple::fill( const std::string& name,
     return;
 }
 
-void histogrammerFlatNtuple::fill( const std::string& name, 
+void histogrammer::fill( const std::string& name, 
                          const double& xvalue, const double& yvalue, const double& zvalue, const double& weight ){
     /* TH3D */
     TH3D* this_hist = m_map_histograms3D.at("h_"+name);
@@ -236,51 +230,53 @@ void histogrammerFlatNtuple::fill( const std::string& name,
 }
 
 
-void histogrammerFlatNtuple::fill( Event& event ){
-    /* Fill histograms -- fill histograms based on treename or systematic weights ("nominal" but different weight)
+void histogrammer::fill( Event& event, const std::vector<unsigned int>& evtsel_decisions ){
+    /* Fill histograms -- fill histograms based on selection, tree, or systematic weights ("nominal" but different weight)
        This is the function to modify / inherit for analysis-specific purposes
     */
-    std::string treeName = event.treeName();
-    double event_weight  = event.nominal_weight();
+    double event_weight = event.nominal_weight();
 
-    fill( m_name+treeName, event, event_weight );
+    std::vector<std::string> selections = m_config->selections();
+    for (unsigned int ss=0, size=selections.size(); ss<size; ss++){
+        std::string sel( selections.at(ss) );
+        if (!evtsel_decisions.at(ss)) continue;
+        fill( m_name+sel, event, event_weight );
 
+        // if there are systematics stored as weights (e.g., b-tagging, pileup, etc.)
+        // the following calls the fill() function with different event weights
+        // to make histograms
+        bool isNominal = m_config->isNominalTree( event.treeName() );
+        if (m_isMC && isNominal && m_doSystWeights){
+            // weight systematics
+            event_weight = 1.0;
+            for (const auto& syst : m_config->listOfWeightSystematics()){
+                event_weight = event.getSystEventWeight( syst );
+                fill( m_name+sel+syst, event, event_weight );
+            } // end weight systematics
 
-    // if there are systematics stored as weights (e.g., b-tagging, pileup, etc.)
-    // the following calls the fill() function with different event weights
-    // to make histograms
-    // In ATLAS, these weights only existed in the 'nominal' tree
-    bool isNominal = m_config->isNominalTree( treeName );
-    if (m_isMC && isNominal && m_doSystWeights){
-        // weight systematics
-        event_weight = 1.0;
-        for (const auto& syst : m_config->listOfWeightSystematics()){
-            event_weight = event.getSystEventWeight( syst );
-            fill( m_name+syst, event, event_weight );
-        } // end weight systematics
+            // vector weight systematics
+            event_weight = 1.0;
+            for (const auto& syst : m_config->mapOfWeightVectorSystematics()){
+                for (unsigned int el=0;el<syst.second;++el){
+                    event_weight = event.getSystEventWeight( syst.first, el );
+                    std::string weightIndex = std::to_string(el);
 
-        // vector weight systematics
-        event_weight = 1.0;
-        for (const auto& syst : m_config->mapOfWeightVectorSystematics()){
-            for (unsigned int el=0;el<syst.second;++el){
-                event_weight = event.getSystEventWeight( syst.first, el );
-                std::string weightIndex = std::to_string(el);
-
-                fill( m_name+weightIndex+"_"+syst.first, event, event_weight );
-            } // end components of vector
-        } // end vector weight systematics
-    } // end if nominal and doSystWeights
+                    fill( m_name+sel+weightIndex+"_"+syst.first, event, event_weight );
+                } // end components of vector
+            } // end vector weight systematics
+        } // end if nominal and doSystWeights
+    } // end loop over selections
 
     return;
 }
 
 
-void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double event_weight){
+void histogrammer::fill( const std::string& name, Event& event, double event_weight){
     /* Fill histograms -- just use information from the event and fill histogram
        This is the function to modify / inherit for analysis-specific purposes
     */
-    cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill histograms.");
-    cma::DEBUG("HISTOGRAMMERFLATNTUPLE : event weight = "+std::to_string(event_weight) );
+    cma::DEBUG("HISTOGRAMMER : Fill histograms "+name);
+    cma::DEBUG("HISTOGRAMMER : event weight = "+std::to_string(event_weight) );
 
     // physics information
     std::vector<Jet> jets = event.jets();
@@ -291,7 +287,7 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
     MET met = event.met();
 
     if (m_useJets){
-        cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill small-R jets");
+        cma::DEBUG("HISTOGRAMMER : Fill small-R jets");
         fill("n_btags_"+name, event.btag_jets().size(), event_weight );
         fill("n_jets_"+name, jets.size(), event_weight );
 
@@ -299,11 +295,12 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
             fill("jet_pt_"+name,  jet.p4.Pt(),   event_weight);
             fill("jet_eta_"+name, jet.p4.Eta(),  event_weight);
             fill("jet_phi_"+name, jet.p4.Phi(),  event_weight);
-            fill("jet_bdisc_"+name, jet.CSVv2,  event_weight);
+            fill("jet_bdisc_"+name, jet.bdisc,  event_weight);
         }
     }
 
     if (m_useLargeRJets){
+        cma::DEBUG("HISTOGRAMMER : Fill large-R jets");
         fill("n_ljets_"+name, ljets.size(), event_weight );
 
         for (const auto& ljet : ljets){
@@ -320,10 +317,10 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
             fill("ljet_tau32_"+name, ljet.tau32, event_weight);
 
             if (ljet.subjets.size()>0){
-                fill("ljet_subjet0_bdisc_"+name, ljet.subjets.at(0).CSVv2, event_weight);
+                fill("ljet_subjet0_bdisc_"+name, ljet.subjets.at(0).bdisc, event_weight);
                 fill("ljet_subjet0_charge_"+name,ljet.subjets.at(0).charge,event_weight);
                 if (ljet.subjets.size()>1){
-                    fill("ljet_subjet1_bdisc_"+name, ljet.subjets.at(1).CSVv2, event_weight);
+                    fill("ljet_subjet1_bdisc_"+name, ljet.subjets.at(1).bdisc, event_weight);
                     fill("ljet_subjet1_charge_"+name,ljet.subjets.at(1).charge,event_weight);
                 }
             }
@@ -331,7 +328,7 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
     } // end if use ljets
 
     if (m_useLeptons){
-        cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill leptons");
+        cma::DEBUG("HISTOGRAMMER : Fill leptons");
         for (const auto& el : electrons){
             fill("el_pt_"+name,  el.p4.Pt(),  event_weight);
             fill("el_eta_"+name, el.p4.Eta(), event_weight);
@@ -349,7 +346,7 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
 
 
     if (m_config->useNeutrinos()){
-        cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill neutrinos");
+        cma::DEBUG("HISTOGRAMMER : Fill neutrinos");
         fill("nu_pt_"+name,  neutrinos.at(0).p4.Pt(),  event_weight);
         fill("nu_eta_"+name, neutrinos.at(0).p4.Eta(), event_weight);
         fill("nu_phi_"+name, neutrinos.at(0).p4.Phi(), event_weight);
@@ -357,17 +354,17 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
 
 
     // kinematics
-    cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill kinematics");
+    cma::DEBUG("HISTOGRAMMER : Fill kinematics");
     fill("met_met_"+name, met.p4.Pt(),  event_weight);
     fill("met_phi_"+name, met.p4.Phi(), event_weight);
     fill("ht_"+name,      event.HT(),   event_weight);
 
 
 /*
-    cma::DEBUG("HISTOGRAMMERFLATNTUPLE : Fill VLQ/Wprime");
+    cma::DEBUG("HISTOGRAMMER : Fill VLQ/Wprime");
 */
 
-    cma::DEBUG("HISTOGRAMMERFLATNTUPLE : End histograms");
+    cma::DEBUG("HISTOGRAMMER : End histograms");
 
     return;
 }
@@ -378,7 +375,7 @@ void histogrammerFlatNtuple::fill( const std::string& name, Event& event, double
 
 /**** OVER/UNDERFLOW ****/
 
-void histogrammerFlatNtuple::overUnderFlow(){
+void histogrammer::overUnderFlow(){
     /* Call overflow and underflow functions at once */
     overFlow();
     underFlow();
@@ -386,10 +383,10 @@ void histogrammerFlatNtuple::overUnderFlow(){
 }
 
 
-void histogrammerFlatNtuple::overFlow() {
+void histogrammer::overFlow() {
     /* Add overflow to last bin */
     if (!m_putOverflowInLastBin){
-        cma::INFO("HISTOGRAMMERFLATNTUPLE : Not putting overflow in last bin(s)");
+        cma::INFO("HISTOGRAMMER : Not putting overflow in last bin(s)");
         return;
     }
     else{
@@ -430,10 +427,10 @@ void histogrammerFlatNtuple::overFlow() {
     return;
 }
 
-void histogrammerFlatNtuple::underFlow() {
+void histogrammer::underFlow() {
     /* Add underflow to first bin */
     if (!m_putUnderflowInFirstBin){
-        cma::INFO("HISTOGRAMMERFLATNTUPLE : Not putting underflow in first bin(s)");
+        cma::INFO("HISTOGRAMMER : Not putting underflow in first bin(s)");
         return;
     }
     else{

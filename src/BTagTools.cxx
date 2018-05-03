@@ -64,23 +64,6 @@ std::map<std::string,double> BTagTools::execute(const Jet& jet) const{
 }
 
 
-void BTagTools::getBTagDecisions(Jet& jet) const{
-    /* Check b-tagging for a jet */
-    if (jet.CSVv2 >= m_CSVv2L){
-        jet.isbtagged.at("L") = true;
-        if (jet.CSVv2 >= m_CSVv2M){
-            jet.isbtagged.at("M") = true;
-            // tight WP only for AK4 jets
-            if (!m_isBoosted && jet.CSVv2 >= m_CSVv2T){
-                jet.isbtagged.at("T") = true;
-            }
-        }
-    }
-
-    return;
-}
-
-
 float BTagTools::getBTagSF(const std::vector<Jet>& jets) const{
     /* Calculate the event weight due to b-tagging 
        Method 1a: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale

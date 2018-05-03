@@ -13,7 +13,7 @@ Make histograms of deep learning features
 
 
 histogrammer4ML::histogrammer4ML( configuration& cmaConfig, std::string name ) :
-  histogrammerFlatNtuple::histogrammerFlatNtuple(cmaConfig,name),
+  histogrammer::histogrammer(cmaConfig,name),
   m_config(&cmaConfig),
   m_name(name){}
 
@@ -40,7 +40,7 @@ void histogrammer4ML::bookHists(){
     */
     cma::DEBUG("HISTOGRAMMER : Init. histograms: "+m_name);
 
-    histogrammerFlatNtuple::init_hist("feature_"+m_name,  5000,0,5000,50,0,5);
+    histogrammer::init_hist("feature_"+m_name,  5000,0,5000,50,0,5);
 
     return;
 }
@@ -53,7 +53,7 @@ void histogrammer4ML::fill( const std::map<std::string,double> features, double 
     */
     cma::DEBUG("HISTOGRAMMER : Fill histograms: "+m_name);
 
-    histogrammerFlatNtuple::fill("feature_"+m_name,  features.at("feature"), weight );
+    histogrammer::fill("feature_"+m_name,  features.at("feature"), weight );
 
     cma::DEBUG("HISTOGRAMMER : End histograms");
 

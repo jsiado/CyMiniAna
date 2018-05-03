@@ -16,11 +16,15 @@ Tool for performing deep learning tasks
 DeepLearning::DeepLearning( configuration& cmaConfig ) :
   m_config(&cmaConfig),
   m_lwnn(nullptr){
+    m_features.clear();
+
     // Setup lwtnn
-    std::ifstream input_cfg = cma::open_file( m_config->dnnFile() );
-    lwt::JSONConfig cfg     = lwt::parse_json( input_cfg );
-    m_lwnn   = new lwt::LightweightNeuralNetwork(cfg.inputs, cfg.layers, cfg.outputs);
     m_dnnKey = m_config->dnnKey();
+    if (m_config->DNNinference()){
+      std::ifstream input_cfg = cma::open_file( m_config->dnnFile() );
+      lwt::JSONConfig cfg     = lwt::parse_json( input_cfg );
+      m_lwnn   = new lwt::LightweightNeuralNetwork(cfg.inputs, cfg.layers, cfg.outputs);
+    }
   }
 
 DeepLearning::~DeepLearning() {
@@ -38,7 +42,7 @@ void DeepLearning::training(){
 void DeepLearning::inference(){
     /* Obtain results from LWTNN */
     loadFeatures();
-    m_discriminant = m_lwnn->compute(m_dnnInputs);
+    m_discriminant = m_lwnn->compute(m_features);
 
     return;
 }
@@ -46,33 +50,18 @@ void DeepLearning::inference(){
 
 void DeepLearning::loadFeatures(){
     /* Calculate DNN features */
-    m_dnnInputs.clear();
+    m_features.clear();
 
     // feature calculations
-    m_dnnInputs["target"] = 1;
+    m_features["target"] = 1;
     cma::DEBUG("EVENT : Set DNN input values ");
 
     return;
 }
 
-std::map<std::string,double> DeepLearning::features(){
-    /* return features */
-    return m_dnnInputs;
-}
-
-std::map<std::string,double> DeepLearning::predictions(){
-    /* Return the full map to the user */
-    return m_discriminant;
-}
-
-double DeepLearning::prediction(){
-    /* Return the score for the default key */
-    return m_discriminant.at(m_dnnKey);
-}
-
-double DeepLearning::prediction(const std::string& key){
+double DeepLearning::prediction(const std::string& key) const{
     /* Just return the prediction (after execute!) */
-    return m_discriminant.at(key);
+    return m_predictions.at(key);
 }
 
 // THE END //
