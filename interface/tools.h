@@ -38,7 +38,8 @@ namespace cma{
     /* Split a string with some delimiter (comma) */
     void split(const std::string &s, char delim, std::vector<std::string> &elems);
 
-    /* Get the list of TTrees in a file */
+    /* Get the list of Branches in TTree / TTrees in file */
+    void getListOfBranches( TTree* tree, std::vector<std::string>& treeBranches );
     void getListOfKeys( TFile* file, std::vector<std::string> &fileKeys );
 
     /* calculate values for normalizing monte carlo samples */
@@ -60,6 +61,9 @@ namespace cma{
 
     /* DeltaR matching of TLorentzVectors (default deltaR=0.75) */
     bool deltaRMatch( const TLorentzVector &particle1, const TLorentzVector &particle2, const double deltaR=0.75 );
+
+    /* Relative pT between two TLorentzVectors */
+    float ptrel( const TLorentzVector& a, const TLorentzVector& b);
 
     /* Calculate the median of a vector */
     template<typename T>

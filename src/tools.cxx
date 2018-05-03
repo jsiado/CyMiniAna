@@ -91,6 +91,22 @@ void split(const std::string &s, char delim, std::vector<std::string> &elems) {
 }
 
 
+void getListOfBranches( TTree* tree, std::vector<std::string>& treeBranches ){
+    /* Find the list of branches in the TTree */
+    treeBranches.clear();
+
+    TList* list = (TList*)tree->GetListOfBranches();
+    TIter iter(list->MakeIterator());
+    while(TObject* obj = iter()){
+        TKey* key = (TKey*)obj;
+        std::string branchname( key->GetName() );
+        treeBranches.push_back( branchname );
+    }
+
+    return;
+}
+
+
 void getListOfKeys( TFile* file, std::vector<std::string> &fileKeys ){
     /* Find the list of TTrees in a file */
     fileKeys.clear();
@@ -215,6 +231,19 @@ bool deltaRMatch( const TLorentzVector &particle1, const TLorentzVector &particl
     }
 
     return isMatched;
+}
+
+
+float ptrel( const TLorentzVector& a, const TLorentzVector& b){
+    /* pTrel between two objects 
+       - https://github.com/UHH2/UHH2/blob/master/common/src/Utils.cxx#L34
+    */
+    TVector3 a3 = a.Vect();
+    TVector3 b3 = b.Vect();
+
+    float pt_rel = a3.Cross(b3).Mag()/b3.Mag();
+
+    return pt_rel;
 }
 
 

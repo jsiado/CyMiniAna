@@ -1,16 +1,6 @@
 #ifndef EVENTSELECTION_H
 #define EVENTSELECTION_H
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDFilter.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-
-#include <boost/dynamic_bitset.hpp>
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -18,8 +8,10 @@
 #include "TSystem.h"
 #include "TCanvas.h"
 #include "TRandom3.h"
+#include "TEfficiency.h"
 #include "TF1.h"
 #include "TMath.h"
+#include "TRandom.h"
 #include "TLorentzVector.h"
 
 #include <vector>
@@ -28,50 +20,54 @@
 #include <sstream>
 #include <iostream>
 
-#include "Analysis/CyMiniAna/interface/tools.h"
+#include "Analysis/CyMiniAna/interface/Event.h"
+#include "Analysis/CyMiniAna/interface/configuration.h"
 #include "Analysis/CyMiniAna/interface/physicsObjects.h"
-#include "Analysis/CyMiniAna/interface/objectSelection.h"
 
+class eventSelection{
 
-class eventSelection : public edm::EDFilter {
   public:
     // constructor and destructor
-    explicit eventSelection(const edm::ParameterSet&);
+    eventSelection(configuration &cmaConfig, const std::string &level="");
     virtual ~eventSelection();
 
-    // External access to information in this class
-    virtual std::vector<std::string> cutNames();     // Return a vector of the cut names (for labeling bins in cutflow histograms)
-    virtual unsigned int numberOfCuts();             // Return the number of cuts (for binning cutflow histograms)
+    // Run once at the start of the job to setup the cuts
+    virtual void initialize(const std::string& selection, const std::string& cutsfile);
+    virtual void initialize(const std::string &cutsfile);
 
-    static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+    virtual void finalize();
 
-  private:
-
-    virtual void beginJob() override;
-    virtual bool filter(edm::Event&, const edm::EventSetup&) override;
-    virtual void endJob() override;
-    virtual void beginRun(edm::Run const& run, edm::EventSetup const& es);
-
-    // Run once at the start of the job to setup the cuts: called from beginJob()
     virtual void identifySelection();
-    virtual void getCutNames();
 
-    // Run for every event (in every systematic) that needs saving: called from filter()
-    //virtual bool applySelection(Event &event, TH1D &cutflow, TH1D &cutflow_unweighted);
+    // Run for every tree (before the event loop)
+    void setCutflowHistograms(TFile& outputFile);
+
+    // Run for every event (in every systematic) that needs saving
+    virtual bool applySelection(const Event& event);
+
+    // -- Selections put into functions (easily reference them in other cuts)
+    // Single lepton selections
+    bool oneLeptonSelection(double cutflow_bin);
+    bool ejetsSelection(double cutflow_bin, const Lepton& lep);
+    bool mujetsSelection(double cutflow_bin);
+
+    // Helper functions: Provide external access to information in this class
+    void fillCutflows(double cutflow_bin);                                // fill cutflow histograms
+    virtual void getCutNames();
+    virtual std::vector<std::string> cutNames(){ return m_cutflowNames;}  // Return a vector of the cut names 
+    virtual unsigned int numberOfCuts(){ return m_numberOfCuts;}          // Return the number of cuts
+
+  protected:
 
     // struct for holding information on a 'cut'
     //  ideally this could be extended so that cuts are parsed & written by code, not humans!
     struct Cut{
         std::string name;       // name of cut
-        std::string comparison; // sign of cut (<,<=,>,>=,==,!=), and '<<' = window cut; '>>' = window veto
+        std::string comparison; // sign of cut (<,<=,>,>=,==,!=)
         float value;            // float value -- cast to int if needed
-        float value_lower;      // float for lower bound of window cut
-        float value_upper;      // float for upper bound of window cut
     };
 
-    // cutflow histograms
-    edm::Service<TFileService> m_fs;
-    std::map<std::string,TH1D*> m_hists;     // map of histograms (cutflows, others)
+    configuration* m_config;
 
     // cut information
     std::string m_level;     // useful if you want to define one 'family' of selections 
@@ -82,37 +78,37 @@ class eventSelection : public edm::EDFilter {
     std::vector<std::string> m_cutflowNames;
     std::vector<Cut> m_cuts;
 
+    // cutflow histograms
+    TH1D* m_cutflow;
+    TH1D* m_cutflow_unw;
+
     // booleans for each selection
-    bool m_preSelection;
     bool m_dummySelection;
-    bool m_allHadDNNSelection;
-    bool m_exampleSelection;
-    bool m_example2Selection;
+    bool m_isOneLeptonAnalysis;
 
-    std::vector<std::string> m_hltPaths;
+    // physics information
+    float m_nominal_weight;
+    std::vector<Ljet> m_ljets;
+    std::vector<Jet> m_jets;
+    std::vector<Muon> m_muons;
+    std::vector<Electron> m_electrons;
+    std::vector<Lepton> m_leptons;
+    std::vector<Neutrino> m_neutrinos;
+    MET m_met;
+    float m_ht;
+    float m_st;
 
-    // Handles and Tokens
-    edm::EDGetTokenT<std::vector<Electron>> t_electrons;
-    edm::EDGetTokenT<std::vector<Muon>> t_muons;
-    edm::EDGetTokenT<std::vector<Neutrino>> t_neutrinos;
-    edm::EDGetTokenT<std::vector<Jet>> t_jets;
-    edm::EDGetTokenT<std::vector<Ljet>> t_ljets;
-    edm::EDGetTokenT<MET> t_met;
-    edm::EDGetTokenT<double> t_HT;
-    edm::EDGetTokenT<double> t_ST;
-    edm::EDGetTokenT<std::vector<float>> t_trigBit;
-    edm::InputTag t_trigName;
+    std::vector<std::string> m_ejetsTriggers;
+    std::vector<std::string> m_mujetsTriggers;
 
-    edm::Handle<std::vector<Electron>> m_electrons;
-    edm::Handle<std::vector<Muon>> m_muons;
-    edm::Handle<std::vector<Neutrino>> m_neutrinos;
-    edm::Handle<std::vector<Jet>> m_jets;
-    edm::Handle<std::vector<Ljet>> m_ljets;
-    edm::Handle<MET> m_met;
-    edm::Handle<double> m_HT;
-    edm::Handle<double> m_ST;
-    edm::Handle<std::vector<float>> h_trigBit;
-    edm::Handle<std::vector<std::string>> h_trigName;
+    std::map<std::string,unsigned int> m_triggers;
+    std::map<std::string,unsigned int> m_filters;
+
+    unsigned int m_NLeptons;
+    unsigned int m_NElectrons;
+    unsigned int m_NMuons;
+    unsigned int m_NJets;
+    unsigned int m_NLjets;
 };
 
 #endif

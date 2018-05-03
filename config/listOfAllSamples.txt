@@ -1,1 +1,1 @@
-root://cmseos.fnal.gov//store/user/lpctlbsm/wprime-qQ/feb2018/SingleMuon/crab_SingleMuon-oiorio-Run2016B-03Feb2017_ver2-v2_B2GAnaFW_80X_V3p1-d397a9668679/180201_215704/0000/output_81.root
+root://cmseos.fnal.gov//store/group/lpctop/ttbarAC/ttbarAC_skim_v0.2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/crab_ttbarAC_ttbar/180427_220608/0000/ttbarAC_outtree_90.root

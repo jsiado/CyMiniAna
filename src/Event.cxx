@@ -30,203 +30,215 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     m_useTruth     = m_config->useTruth();          // access and use truth information
     m_grid         = m_config->isGridFile();        // file directly from original analysis team
     m_useJets      = m_config->useJets();           // use AK4 jets in analysis
-    m_useLjets     = m_config->useLargeRJets();     // use AK8 jets in analysis
+    m_useLargeRJets= m_config->useLargeRJets();     // use AK8 jets in analysis
     m_useLeptons   = m_config->useLeptons();        // use leptons in analysis
     m_useNeutrinos = m_config->useNeutrinos();      // use neutrinos in analysis
     m_useWprime    = m_config->useWprime();         // use reconstructed Wprime in analysis
-    m_useDNN       = m_config->useDNN();            // use DNN in analysis
 
-
-    m_neutrinoReco = m_config->neutrinoReco();      // reconstruct neutrino
-    m_wprimeReco   = m_config->wprimeReco();        // reconstruct Wprime
-    m_DNNinference = m_config->DNNinference();      // use DNN to predict values
-    m_DNNtraining  = m_config->DNNtraining();       // load DNN features (save/use later)
+    m_kinematicReco = m_config->kinematicReco();
+    m_neutrinoReco  = m_config->neutrinoReco();      // reconstruct neutrino
+    m_wprimeReco    = m_config->wprimeReco();        // reconstruct Wprime
+    m_DNNinference  = m_config->DNNinference();      // use DNN to predict values
+    m_DNNtraining   = m_config->DNNtraining();       // load DNN features (save/use later)
     m_getDNN = (m_DNNinference || m_DNNtraining);
+    m_useDNN = m_config->useDNN();                   // use DNN in analysis
 
     // b-tagging working points
-    m_cMVAv2L = m_config->cMVAv2L();
-    m_cMVAv2M = m_config->cMVAv2M();
-    m_cMVAv2T = m_config->cMVAv2T();
     m_CSVv2L  = m_config->CSVv2L();
     m_CSVv2M  = m_config->CSVv2M();
     m_CSVv2T  = m_config->CSVv2T();
 
 
     //** Access branches from Tree **//
-    m_eventNumber  = new TTreeReaderValue<int>(m_ttree,"eventNumber");
-    m_runNumber    = new TTreeReaderValue<int>(m_ttree,"runNumber");
-    m_rho          = new TTreeReaderValue<float>(m_ttree,"rho");
-    m_npv          = new TTreeReaderValue<int>(m_ttree,"npv");
-    m_lumiblock    = new TTreeReaderValue<int>(m_ttree,"lumiblock");
-    m_NGoodVtx     = new TTreeReaderValue<int>(m_ttree,"nGoodVtx");
-    m_LHAPDF_ID    = new TTreeReaderValue<int>(m_ttree,"LHA_PDF_ID");
-    m_NIsoTrk      = new TTreeReaderValue<int>(m_ttree,"nIsoTrk");
-    m_true_pileup  = new TTreeReaderValue<int>(m_ttree,"true_pileup");
+    m_eventNumber  = new TTreeReaderValue<unsigned long long>(m_ttree,"eventNumber");
+    m_runNumber    = new TTreeReaderValue<unsigned int>(m_ttree,"runNumber");
+    m_lumiblock    = new TTreeReaderValue<unsigned int>(m_ttree,"lumiblock");
 
+    m_npv = new TTreeReaderValue<unsigned int>(m_ttree,"npv");
+    m_rho = new TTreeReaderValue<float>(m_ttree,"rho");
+    m_true_pileup = new TTreeReaderValue<unsigned int>(m_ttree,"true_pileup");
+
+    /** Triggers **/
+    m_HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50 = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50");
+    m_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165 = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165");
+    m_HLT_Ele115_CaloIdVT_GsfTrkIdT    = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_Ele115_CaloIdVT_GsfTrkIdT");
+    m_HLT_Mu40_Eta2P1_PFJet200_PFJet50 = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_Mu40_Eta2P1_PFJet200_PFJet50");
+    m_HLT_Mu50    = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_Mu50");
+    m_HLT_TkMu50  = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_TkMu50");
+    m_HLT_PFHT800 = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_PFHT800");
+    m_HLT_PFHT900 = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_PFHT900");
+    m_HLT_AK8PFJet450 = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_AK8PFJet450");
+    m_HLT_PFHT700TrimMass50  = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_PFHT700TrimMass50");
+    m_HLT_PFJet360TrimMass30 = new TTreeReaderValue<unsigned int>(m_ttree,"HLT_PFJet360TrimMass30");
     //m_HLT_Ele45_WPLoose_Gsf = new TTreeReaderValue<int>(m_ttree,"HLT_Ele45_WPLoose_Gsf");
-    //m_HLT_Mu50   = new TTreeReaderValue<int>(m_ttree,"HLT_Mu50");
     //m_HLT_TkMu50 = new TTreeReaderValue<int>(m_ttree,"HLT_TkMu50");
+
+    /** Filters **/
+    m_Flag_goodVertices  = new TTreeReaderValue<unsigned int>(m_ttree,"Flag_goodVertices");
+    m_Flag_eeBadScFilter = new TTreeReaderValue<unsigned int>(m_ttree,"Flag_eeBadScFilter");
+    m_Flag_HBHENoiseFilter    = new TTreeReaderValue<unsigned int>(m_ttree,"Flag_HBHENoiseFilter");
+    m_Flag_HBHENoiseIsoFilter = new TTreeReaderValue<unsigned int>(m_ttree,"Flag_HBHENoiseIsoFilter");
+    m_Flag_globalTightHalo2016Filter = new TTreeReaderValue<unsigned int>(m_ttree,"Flag_globalTightHalo2016Filter");
+    m_Flag_EcalDeadCellTriggerPrimitiveFilter = new TTreeReaderValue<unsigned int>(m_ttree,"Flag_EcalDeadCellTriggerPrimitiveFilter");
 
     /** JETS **/
     if (m_useJets){
       // small-R jet information
-      m_jet_pt   = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_pt");
-      m_jet_eta  = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_eta");
-      m_jet_phi  = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_phi");
-      m_jet_e    = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_e");
-      m_jet_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_charge");
-      m_jet_CSVv2  = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_CSV");
-      //m_jet_JERSF  = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_jer");
-      m_jet_jer_up   = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_jer_up");
-      m_jet_jer_down = new TTreeReaderValue<std::vector<float>>(m_ttree,"jet_jer_down");
+      m_jet_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4pt");
+      m_jet_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4eta");
+      m_jet_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4phi");
+      m_jet_m   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4mass");
+      m_jet_bdisc    = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4bDisc");
+      m_jet_deepCSV  = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4deepCSV");
+      m_jet_area     = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4area");
+      m_jet_uncorrPt = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4uncorrPt");
+      m_jet_uncorrE  = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK4uncorrE");
     }
 
-    if (m_useLjets){
+    if (m_useLargeRJets){
       // large-R Jet information
-      m_ljet_pt   = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_pt");
-      m_ljet_eta  = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_eta");
-      m_ljet_phi  = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_phi");
-      m_ljet_e    = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_e");
-      m_ljet_tau1 = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_tau1");
-      m_ljet_tau2 = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_tau2");
-      m_ljet_tau3 = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_tau3");
-      m_ljet_tau21  = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_tau21");
-      m_ljet_tau32  = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_tau32");
-      m_ljet_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_charge");
-      m_ljet_CSVv2  = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_CSV");
-      m_ljet_SDmass = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_SDmass");
-      m_ljet_ID_loose  = new TTreeReaderValue<std::vector<int>>(m_ttree,"ljet_ID_loose");
-      m_ljet_ID_medium = new TTreeReaderValue<std::vector<int>>(m_ttree,"ljet_ID_medium");
-      m_ljet_ID_tight  = new TTreeReaderValue<std::vector<int>>(m_ttree,"ljet_ID_tight");
-      m_ljet_ID_tightlepveto = new TTreeReaderValue<std::vector<int>>(m_ttree,"ljet_ID_tightlepveto");
-      m_ljet_jer_up   = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_jer_up");
-      m_ljet_jer_down = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_jer_down");
+      m_ljet_pt     = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8pt");
+      m_ljet_eta    = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8eta");
+      m_ljet_phi    = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8phi");
+      m_ljet_m      = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8mass");
+      m_ljet_SDmass = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8SDmass");
+      m_ljet_tau1   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8tau1");
+      m_ljet_tau2   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8tau2");
+      m_ljet_tau3   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8tau3");
+      m_ljet_area   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8area");
+      m_ljet_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8charge");
+      m_ljet_subjet0_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0charge");
+      m_ljet_subjet0_bdisc  = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0bDisc");
+      m_ljet_subjet0_deepCSV= new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0deepCSV");
+      m_ljet_subjet0_pt     = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0pt");
+      m_ljet_subjet0_mass   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0mass");
 
-      m_ljet_subjetIndex0 = new TTreeReaderValue<std::vector<int>>(m_ttree,"ljet_subjetIndex0");
-      m_ljet_subjetIndex1 = new TTreeReaderValue<std::vector<int>>(m_ttree,"ljet_subjetIndex1");
-      m_ljet_subjet_pt    = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_subjet_pt");
-      m_ljet_subjet_eta   = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_subjet_eta");
-      m_ljet_subjet_phi   = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_subjet_phi");
-      m_ljet_subjet_e     = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_subjet_e");
-      m_ljet_subjet_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_subjet_charge");
-      m_ljet_subjet_CSVv2  = new TTreeReaderValue<std::vector<float>>(m_ttree,"ljet_subjet_CSV");
+      if (m_config->isGridFile()){
+          m_ljet_subjet0_tau1   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0tau1");
+          m_ljet_subjet0_tau2   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0tau2");
+          m_ljet_subjet0_tau3   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet0tau3");
+          m_ljet_subjet1_tau1   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1tau1");
+          m_ljet_subjet1_tau2   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1tau2");
+          m_ljet_subjet1_tau3   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1tau3");
+      }
+
+      m_ljet_subjet1_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1charge");
+      m_ljet_subjet1_bdisc  = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1bDisc");
+      m_ljet_subjet1_deepCSV= new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1deepCSV");
+      m_ljet_subjet1_pt     = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1pt");
+      m_ljet_subjet1_mass   = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8subjet1mass");
+
+      m_ljet_BEST_class = new TTreeReaderValue<std::vector<int>>(m_ttree,"AK8BEST_class");
+      m_ljet_BEST_t = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8BEST_t");
+      m_ljet_BEST_w = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8BEST_w");
+      m_ljet_BEST_z = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8BEST_z");
+      m_ljet_BEST_h = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8BEST_h");
+      m_ljet_BEST_j = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8BEST_j");
+
+      m_ljet_uncorrPt = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8uncorrPt");
+      m_ljet_uncorrE  = new TTreeReaderValue<std::vector<float>>(m_ttree,"AK8uncorrE");
     }
+
 
     /** LEPTONS **/
     if (m_useLeptons){
-      m_el_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"el_pt");
-      m_el_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"el_eta");
-      m_el_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"el_phi");
-      m_el_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"el_e");
-      m_el_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"el_charge");
-      m_el_iso    = new TTreeReaderValue<std::vector<int>>(m_ttree,"el_iso");
-      //m_el_veto   = new TTreeReaderValue<std::vector<int>>(m_ttree,"el_ID_veto");
-      m_el_loose  = new TTreeReaderValue<std::vector<int>>(m_ttree,"el_ID_loose");
-      m_el_medium = new TTreeReaderValue<std::vector<int>>(m_ttree,"el_ID_medium");
-      m_el_tight  = new TTreeReaderValue<std::vector<int>>(m_ttree,"el_ID_tight");
+      m_el_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"ELpt");
+      m_el_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"ELeta");
+      m_el_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"ELphi");
+      m_el_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"ELenergy");
+      m_el_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"ELcharge");
+      //m_el_iso = new TTreeReaderValue<std::vector<float>>(m_ttree,"ELiso");
+      m_el_id_loose  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"ELlooseID");
+      m_el_id_medium = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"ELmediumID");
+      m_el_id_tight  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"ELtightID");
+      m_el_id_loose_noIso  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"ELlooseIDnoIso");
+      m_el_id_medium_noIso = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"ELmediumIDnoIso");
+      m_el_id_tight_noIso  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"ELtightIDnoIso");
 
-      m_mu_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_pt");
-      m_mu_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_eta");
-      m_mu_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_phi");
-      m_mu_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_e");
-      m_mu_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"mu_charge");
-      m_mu_iso    = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_iso");
-      m_mu_loose  = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_ID_loose");
-      m_mu_medium = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_ID_medium");
-      //m_mu_medium2016 = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_ID_medium2016");
-      m_mu_tight   = new TTreeReaderValue<std::vector<int>>(m_ttree,"mu_ID_tight");
+      m_mu_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"MUpt");
+      m_mu_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"MUeta");
+      m_mu_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"MUphi");
+      m_mu_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"MUenergy");
+      m_mu_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"MUcharge");
+      m_mu_iso = new TTreeReaderValue<std::vector<float>>(m_ttree,"MUcorrIso");
+      m_mu_id_loose  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"MUlooseID");
+      m_mu_id_medium = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"MUmediumID");
+      m_mu_id_tight  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"MUtightID");
     }
 
-    /** EVENT KINEMATICS **/
-    m_met_met  = new TTreeReaderValue<float>(m_ttree,"met_met");
-    m_met_phi  = new TTreeReaderValue<float>(m_ttree,"met_phi");
-    m_met_met_sf = new TTreeReaderValue<float>(m_ttree,"met_met_sf");
-    m_met_phi_sf = new TTreeReaderValue<float>(m_ttree,"met_phi_sf");
-
-    // DNN material
-    if (!m_getDNN && m_useDNN)  // always false for now
-        m_dnn_score = new TTreeReaderValue<float>(m_ttree,"dnn_score");
-
-    /** CUSTOM RECONSTRUCTED OBJECTS **/
-    if (m_useNeutrinos && !m_neutrinoReco){
-      // Neutrino isn't stored in the baseline ntuples, requires reconstruction
-      m_nu_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_pt");
-      m_nu_eta = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_eta");
-      m_nu_phi = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_phi");
+    if (!m_kinematicReco && m_useNeutrinos){
+        // Neutrinos aren't stored in the baseline ntuples, requires 'kinematicReco' to create
+        m_nu_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_pt");
+        m_nu_eta = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_eta");
+        m_nu_phi = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_phi");
     }
 
-    if (m_useWprime && !m_wprimeReco){
-      // Wprime/VLQ information not stored in baseline ntuples
-      // Designed for Wprime -> bT -> bbW -> bblv
-      // -- use lepton + reconstructed neutrino as 'lv'
-      m_vlq_pt  = new TTreeReaderValue<float>(m_ttree, "vlq_pt");
-      m_vlq_eta = new TTreeReaderValue<float>(m_ttree, "vlq_eta");
-      m_vlq_phi = new TTreeReaderValue<float>(m_ttree, "vlq_phi");
-      m_vlq_e   = new TTreeReaderValue<float>(m_ttree, "vlq_e");
-      m_jet_vlq_index    = new TTreeReaderValue<int>(m_ttree, "jet_vlq_index");       // b-jet (from T decay) index in m_jets
-
-      m_wprime_pt  = new TTreeReaderValue<float>(m_ttree, "wprime_pt");
-      m_wprime_eta = new TTreeReaderValue<float>(m_ttree, "wprime_eta");
-      m_wprime_phi = new TTreeReaderValue<float>(m_ttree, "wprime_phi");
-      m_wprime_e   = new TTreeReaderValue<float>(m_ttree, "wprime_e");
-      m_jet_wprime_index    = new TTreeReaderValue<int>(m_ttree, "jet_wprime_index"); // b-jet (from Wprime decay) index in m_jets
+    if (!m_kinematicReco && m_getDNN){
+        // Load ttbar variables from file
+        m_leptop_jet  = new TTreeReaderValue<int>(m_ttree, "leptop_jet");
+        m_hadtop_ljet = new TTreeReaderValue<int>(m_ttree, "hadtop_ljet");
     }
 
-    /** EVENT WEIGHTS AND TRUTH INFORMATION **/
+    m_met_met  = new TTreeReaderValue<float>(m_ttree,"METpt");
+    m_met_phi  = new TTreeReaderValue<float>(m_ttree,"METphi");
+
+    m_HTAK8    = new TTreeReaderValue<float>(m_ttree,"HTak8");
+    m_HTAK4    = new TTreeReaderValue<float>(m_ttree,"HTak4");
+
+    // set some event weights and access necessary branches
     m_xsection       = 1.0;
     m_kfactor        = 1.0;
     m_sumOfWeights   = 1.0;
     m_LUMI           = m_config->LUMI();
 
+    Sample ss = m_config->sample();
+
     // MC information
     if (m_isMC){
-      m_weight_mc     = new TTreeReaderValue<float>(m_ttree,"weight_mc");
-      m_weight_pileup = new TTreeReaderValue<float>(m_ttree,"weight_pileup");
-      m_treeXSection     = new TTreeReaderValue<float>(m_ttree,"xsection");      //m_config->XSectionMap( m_fileName );
-      m_treeKFactor      = new TTreeReaderValue<float>(m_ttree,"kfactor");       //m_config->KFactorMap(  m_fileName );
-      m_treeSumOfWeights = new TTreeReaderValue<float>(m_ttree,"sumOfWeights");  //m_config->sumWeightsMap( m_fileName );
+      //m_weight_mc    = 1;//new TTreeReaderValue<float>(m_ttree,"evt_Gen_Weight");
+      m_xsection     = ss.XSection;
+      m_kfactor      = ss.KFactor;        // most likely =1
+      m_sumOfWeights = ss.sumOfWeights;
 
-      //m_mc_ht = new TTreeReaderValue<float>(m_ttree,"evt_Gen_Ht");
-
-      m_mc_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"mc_pt");
-      m_mc_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"mc_eta");
-      m_mc_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"mc_phi");
-      m_mc_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"mc_e");
-      m_mc_charge  = new TTreeReaderValue<std::vector<float>>(m_ttree,"mc_charge");
-      m_mc_pdgId   = new TTreeReaderValue<std::vector<float>>(m_ttree,"mc_pdgId");
-      m_mc_mom_idx = new TTreeReaderValue<std::vector<float>>(m_ttree,"mc_mom_dix");
-
-      if (m_config->useTruth()){
-        m_truth_jet_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_jet_pt");
-        m_truth_jet_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_jet_eta");
-        m_truth_jet_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_jet_phi");
-        m_truth_jet_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_jet_e");
-
-        m_truth_ljet_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_ljet_pt");
-        m_truth_ljet_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_ljet_eta");
-        m_truth_ljet_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_ljet_phi");
-        m_truth_ljet_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_ljet_e");
-        m_truth_ljet_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"truth_ljet_charge");
-      } // end useTruth
+      m_mc_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"GENpt");
+      m_mc_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"GENeta");
+      m_mc_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"GENphi");
+      m_mc_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"GENenergy");
+      m_mc_pdgId  = new TTreeReaderValue<std::vector<int>>(m_ttree,"GENid");
+      m_mc_status = new TTreeReaderValue<std::vector<int>>(m_ttree,"GENstatus");
+      m_mc_parent_idx = new TTreeReaderValue<std::vector<int>>(m_ttree,"GENparent_idx");
+      m_mc_child0_idx = new TTreeReaderValue<std::vector<int>>(m_ttree,"GENchild0_idx");
+      m_mc_child1_idx = new TTreeReaderValue<std::vector<int>>(m_ttree,"GENchild1_idx");
+      m_mc_isHadTop = new TTreeReaderValue<std::vector<int>>(m_ttree,"GENisHadTop");
+/*
+      m_mc_ht = new TTreeReaderValue<float>(m_ttree,"evt_Gen_Ht");
+      m_truth_jet_pt  = new TTreeReaderValue<float>(m_ttree,"jetAK4CHS_GenJetPt");
+      m_truth_jet_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK4CHS_GenJetEta");
+      m_truth_jet_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK4CHS_GenJetPhi");
+      m_truth_jet_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK4CHS_GenJetCharge");
+      m_truth_ljet_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK8CHS_GenJetPt");
+      m_truth_ljet_eta = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK8CHS_GenJetEta");
+      m_truth_ljet_phi = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK8CHS_GenJetPhi");
+      m_truth_ljet_e   = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK8CHS_GenJetE");
+      m_truth_ljet_charge     = new TTreeReaderValue<std::vector<float>>(m_ttree,"jetAK8CHS_GenJetCharge");
+      m_truth_ljet_subjet_charge = new TTreeReaderValue<std::vector<float>>(m_ttree,"subjetAK8CHS_GenJetCharge");
+*/
     } // end isMC
 
 
-    /** External Tools to perform specific tasks **/
-    // Kinematic reconstruction tools
-    m_neutrinoTool = new NeutrinoReco(cmaConfig);
-    m_neutrinoTool->initialize();
-
-    m_wprimeTool = new WprimeReco(cmaConfig);
-    m_wprimeTool->initialize();
-
-    // Truth matching tool -- called from physics object functions after truth information setup
+    // Truth matching tool
     m_truthMatchingTool = new truthMatching(cmaConfig);
     m_truthMatchingTool->initialize();
 
-    // Deep learning
+    // DNN material
     m_deepLearningTool = new DeepLearning(cmaConfig);
-} // end constructor
+    if (!m_getDNN && m_useDNN)
+        m_dnn_score = new TTreeReaderValue<float>(m_ttree,"ljet_CWoLa");
 
+
+    // Kinematic reconstruction algorithms
+    m_neutrinoRecoTool = new NeutrinoReco(cmaConfig);
+} // end constructor
 
 Event::~Event() {}
 
@@ -273,6 +285,7 @@ void Event::updateEntry(Long64_t entry){
     return;
 }
 
+
 void Event::clear(){
     /* Clear many of the vectors/maps for each event -- SAFETY PRECAUTION */
     m_truth_ljets.clear();
@@ -311,6 +324,12 @@ void Event::execute(Long64_t entry){
     initialize_weights();
     cma::DEBUG("EVENT : Setup weights ");
 
+    // Filters
+    initialize_filters();
+
+    // Triggers
+    initialize_triggers();
+
     // Truth Information
     if (m_useTruth){
         initialize_truth();
@@ -324,7 +343,7 @@ void Event::execute(Long64_t entry){
     }
 
     // Large-R Jets
-    if (m_useLjets){
+    if (m_useLargeRJets){
         initialize_ljets();
         cma::DEBUG("EVENT : Setup large-R jets ");
     }
@@ -339,8 +358,6 @@ void Event::execute(Long64_t entry){
     initialize_kinematics();
     cma::DEBUG("EVENT : Setup kinematic variables ");
 
-    // -- External Tools -- //
-
     // Neutrinos
     if (m_useNeutrinos){
         // relies on kinematic reconstruction, unless the information is saved in root file
@@ -348,19 +365,46 @@ void Event::execute(Long64_t entry){
         cma::DEBUG("EVENT : Setup neutrinos ");
     }
 
-    // VLQ/Wprime system
+    // Kinematic reconstruction (if they values aren't in the root file)
     if (m_useWprime){
-        // relies on other event information unless stored in root file
     }
-
-    // DNN
-    if (m_useDNN){
-        if (m_getDNN) deepLearning();                // calculate (inference or training)
-        else m_DNN = 0.0; //*(*m_dnn_score); // load from ntuple
-    }
-    else m_DNN = 0.0;
 
     cma::DEBUG("EVENT : Setup Event ");
+
+    return;
+}
+
+
+void Event::initialize_filters(){
+    /* Setup the filters */
+    m_filters.clear();
+
+    m_filters["goodVertices"] = **m_Flag_goodVertices;
+    m_filters["eeBadScFilter"] = **m_Flag_eeBadScFilter;
+    m_filters["HBHENoiseFilter"] = **m_Flag_HBHENoiseFilter;
+    m_filters["HBHENoiseIsoFilter"] = **m_Flag_HBHENoiseIsoFilter;
+    m_filters["globalTightHalo2016Filter"] = **m_Flag_globalTightHalo2016Filter;
+    m_filters["EcalDeadCellTriggerPrimitiveFilter"] = **m_Flag_EcalDeadCellTriggerPrimitiveFilter;
+
+    return;
+}
+
+
+void Event::initialize_triggers(){
+    /* Setup triggers */
+    m_triggers.clear();
+
+    m_triggers["HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50"] = **m_HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50;
+    m_triggers["HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165"] = **m_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165;
+    m_triggers["HLT_Ele115_CaloIdVT_GsfTrkIdT"]    = **m_HLT_Ele115_CaloIdVT_GsfTrkIdT;
+    m_triggers["HLT_Mu40_Eta2P1_PFJet200_PFJet50"] = **m_HLT_Mu40_Eta2P1_PFJet200_PFJet50;
+    m_triggers["HLT_Mu50"]    = **m_HLT_Mu50;
+    m_triggers["HLT_TkMu50"]  = **m_HLT_TkMu50;
+    m_triggers["HLT_PFHT800"] = **m_HLT_PFHT800;
+    m_triggers["HLT_PFHT900"] = **m_HLT_PFHT900;
+    m_triggers["HLT_AK8PFJet450"] = **m_HLT_AK8PFJet450;
+    m_triggers["HLT_PFHT700TrimMass50"]  = **m_HLT_PFHT700TrimMass50;
+    m_triggers["HLT_PFJet360TrimMass30"] = **m_HLT_PFJet360TrimMass30;
 
     return;
 }
@@ -370,39 +414,50 @@ void Event::initialize_truth(){
     /* Setup truth information (MC and physics objects) */
     m_truth_partons.clear();
 
-    for (unsigned int i=0,size=(*m_mc_pt)->size();i<size;i++){
-        Parton p;
-        p.p4.SetPtEtaPhiE( (*m_mc_pt)->at(i), (*m_mc_eta)->at(i), (*m_mc_phi)->at(i), (*m_mc_e)->at(i) );
+    unsigned int nPartons( (*m_mc_pt)->size() );
+    cma::DEBUG("EVENT : N Partons = "+std::to_string(nPartons));
 
-        p.pdgId = (*m_mc_pdgId)->at(i);
-        p.index = i;
-        p.parent0_idx = (*m_mc_mom_idx)->at(i);
+    // loop over truth partons
+    unsigned int p_idx(0);
+    for (unsigned int i=0; i<nPartons; i++){
+
+        Parton parton;
+        parton.p4.SetPtEtaPhiE((*m_mc_pt)->at(i),(*m_mc_eta)->at(i),(*m_mc_phi)->at(i),(*m_mc_e)->at(i));
+
+        int status = (*m_mc_status)->at(i);
+        int pdgId  = (*m_mc_pdgId)->at(i);
+        unsigned int abs_pdgId = std::abs(pdgId);
+
+        parton.pdgId  = pdgId;
+        parton.status = status;
 
         // simple booleans for type
-        unsigned int abs_pdgId = std::abs( (*m_mc_pdgId)->at(i) );
-        //p.isWprime
-        //p.isVLQ
-        p.isTop = ( abs_pdgId==6 );
-        p.isW   = ( abs_pdgId==24 );
-        p.isZ   = ( abs_pdgId==23 );
-        p.isHiggs  = ( abs_pdgId==25 );
-        p.isLepton = ( abs_pdgId>=11 && abs_pdgId<=16 );
-        p.isQuark  = ( abs_pdgId<7 );
+        parton.isTop = ( abs_pdgId==6 );
+        parton.isW   = ( abs_pdgId==24 );
+        parton.isLepton = ( abs_pdgId>=11 && abs_pdgId<=16 );
+        parton.isQuark  = ( abs_pdgId<7 );
 
-        if (p.isLepton){
-            p.isTau  = ( abs_pdgId==15 );
-            p.isMuon = ( abs_pdgId==13 );
-            p.isElectron = ( abs_pdgId==11 );
-            p.isNeutrino = ( abs_pdgId==12 || abs_pdgId==14 || abs_pdgId==16 );
+        if (parton.isLepton){
+            parton.isTau  = ( abs_pdgId==15 ) ? 1 : 0;
+            parton.isMuon = ( abs_pdgId==13 ) ? 1 : 0;
+            parton.isElectron = ( abs_pdgId==11 ) ? 1 : 0;
+            parton.isNeutrino = ( abs_pdgId==12 || abs_pdgId==14 || abs_pdgId==16 ) ? 1 : 0;
         }
-        else if (p.isQuark){
-            p.isLight  = ( abs_pdgId<5 );
-            p.isBottom = ( abs_pdgId==5 );
+        else if (parton.isQuark){
+            parton.isLight  = ( abs_pdgId<5 ) ? 1 : 0;
+            parton.isBottom = ( abs_pdgId==5 ) ? 1 : 0;
         }
 
+        parton.index      = p_idx;                    // index in vector of truth_partons
+        parton.parent_idx = (*m_mc_parent_idx)->at(i);
+        parton.child0_idx = (*m_mc_child0_idx)->at(i);
+        parton.child1_idx = (*m_mc_child1_idx)->at(i);
 
-        m_truth_partons.push_back(p);
+        m_truth_partons.push_back( parton );
+        p_idx++;
     }
+
+    m_truthMatchingTool->setTruthPartons(m_truth_partons);
 
     return;
 }
@@ -411,22 +466,38 @@ void Event::initialize_truth(){
 void Event::initialize_jets(){
     /* Setup struct of jets (small-r) and relevant information 
      * b-tagging: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+        CSVv2L -0.5884
+        CSVv2M 0.4432
+        CSVv2T 0.9432
      */
-    m_jets.resize((*m_jet_pt)->size());
+    unsigned int nJets = (*m_jet_pt)->size();
+    m_jets.clear();
+
     for (const auto& btagWP : m_config->btagWkpts() ){
         m_btag_jets[btagWP].clear();
     }
 
-    for (unsigned int i=0,size=(*m_jet_pt)->size(); i<size; i++){
+    unsigned int idx(0);
+    for (unsigned int i=0; i<nJets; i++){
         Jet jet;
-        jet.p4.SetPtEtaPhiE( (*m_jet_pt)->at(i),(*m_jet_eta)->at(i),(*m_jet_phi)->at(i),(*m_jet_e)->at(i));
+        jet.p4.SetPtEtaPhiM( (*m_jet_pt)->at(i),(*m_jet_eta)->at(i),(*m_jet_phi)->at(i),(*m_jet_m)->at(i));
 
-        jet.cMVAv2 = (*m_jet_CSVv2)->at(i);
-        jet.index  = i;
+        bool isGood(jet.p4.Pt()>50 && std::abs(jet.p4.Eta())<2.4);
+        if (!isGood) continue;
+
+        jet.bdisc    = (*m_jet_bdisc)->at(i);
+        jet.deepCSV  = (*m_jet_deepCSV)->at(i);
+        jet.area     = (*m_jet_area)->at(i);
+        jet.uncorrE  = (*m_jet_uncorrE)->at(i);
+        jet.uncorrPt = (*m_jet_uncorrPt)->at(i);
+
+        jet.index  = idx;
+        jet.isGood = isGood;
 
         getBtaggedJets(jet);
 
-        m_jets[i] = jet;
+        m_jets.push_back(jet);
+        idx++;
     }
 
     m_btag_jets_default = m_btag_jets.at(m_config->jet_btagWkpt());
@@ -436,45 +507,95 @@ void Event::initialize_jets(){
 
 
 void Event::initialize_ljets(){
-    /* Setup struct of large-R jets and relevant information */
-    m_ljets.resize((*m_ljet_pt)->size());
+    /* Setup struct of large-R jets and relevant information 
+      0 :: Top      (lepton Q < 0)
+      1 :: Anti-top (lepton Q > 0)
+    */
+    unsigned int nLjets = (*m_ljet_pt)->size();
+    m_ljets.clear();
 
-    for (unsigned int i=0,size=(*m_ljet_pt)->size(); i<size; i++){
+    unsigned int idx(0);
+    for (unsigned int i=0; i<nLjets; i++){
         Ljet ljet;
-        ljet.p4.SetPtEtaPhiE( (*m_ljet_pt)->at(i),(*m_ljet_eta)->at(i),(*m_ljet_phi)->at(i),(*m_ljet_e)->at(i));
-        ljet.tau1  = (*m_ljet_tau1)->at(i);
-        ljet.tau2  = (*m_ljet_tau2)->at(i);
-        ljet.tau3  = (*m_ljet_tau3)->at(i);
-        ljet.tau21 = (*m_ljet_tau21)->at(i);
-        ljet.tau32 = (*m_ljet_tau32)->at(i);
+        ljet.p4.SetPtEtaPhiM( (*m_ljet_pt)->at(i),(*m_ljet_eta)->at(i),(*m_ljet_phi)->at(i),(*m_ljet_m)->at(i));
+        ljet.softDropMass = (*m_ljet_SDmass)->at(i);
+
+        ljet.tau1   = (*m_ljet_tau1)->at(i);
+        ljet.tau2   = (*m_ljet_tau2)->at(i);
+        ljet.tau3   = (*m_ljet_tau3)->at(i);
+        ljet.tau21  = ljet.tau2 / ljet.tau1;
+        ljet.tau32  = ljet.tau3 / ljet.tau2;
+        //bool toptag = (ljet.softDropMass>105. && ljet.softDropMass<210 && ljet.tau32<0.65);
+
+        // check if the AK8 is 'good'
+        bool isGood(ljet.p4.Pt()>400. && fabs(ljet.p4.Eta())<2.4); // && toptag);
+        if (!isGood) continue;
+
         ljet.charge = (*m_ljet_charge)->at(i);
-        ljet.softDropMass  = (*m_ljet_SDmass)->at(i);
 
-        int subjet_idx_0   = (*m_ljet_subjetIndex0)->at(i);
-        int subjet_idx_1   = (*m_ljet_subjetIndex1)->at(i);
-        ljet.vSubjetIndex0 = subjet_idx_0;
-        ljet.vSubjetIndex1 = subjet_idx_1;
+        ljet.BEST_t = (*m_ljet_BEST_t)->at(i);
+        ljet.BEST_w = (*m_ljet_BEST_w)->at(i);
+        ljet.BEST_z = (*m_ljet_BEST_z)->at(i);
+        ljet.BEST_h = (*m_ljet_BEST_h)->at(i);
+        ljet.BEST_j = (*m_ljet_BEST_j)->at(i);
+        ljet.BEST_class = (*m_ljet_BEST_class)->at(i);
 
-        ljet.subjets.clear();
-        Jet subjet0;
-        Jet subjet1;
-        if (subjet_idx_0>=0){
-            subjet0.p4.SetPtEtaPhiE( (*m_ljet_subjet_pt)->at(subjet_idx_0), (*m_ljet_subjet_eta)->at(subjet_idx_0), 
-                                     (*m_ljet_subjet_phi)->at(subjet_idx_0), (*m_ljet_subjet_e)->at(subjet_idx_0));
-            subjet0.CSVv2  = (*m_ljet_subjet_CSVv2)->at(subjet_idx_0);
-            subjet0.charge = (*m_ljet_subjet_charge)->at(subjet_idx_0);
-            ljet.subjets.push_back(subjet0);
+        ljet.subjet0_bdisc  = (*m_ljet_subjet0_bdisc)->at(i);
+        ljet.subjet0_charge = (*m_ljet_subjet0_charge)->at(i);
+        ljet.subjet0_mass   = (*m_ljet_subjet0_mass)->at(i);
+        ljet.subjet0_pt     = (*m_ljet_subjet0_pt)->at(i);
+        ljet.subjet1_bdisc  = (*m_ljet_subjet1_bdisc)->at(i);
+        ljet.subjet1_charge = (*m_ljet_subjet1_charge)->at(i);
+        ljet.subjet1_mass   = (*m_ljet_subjet1_mass)->at(i);
+        ljet.subjet1_pt     = (*m_ljet_subjet1_pt)->at(i);
+
+        float subjet0_tau1(-999.);
+        float subjet0_tau2(-999.);
+        float subjet0_tau3(-999.);
+        float subjet1_tau1(-999.);
+        float subjet1_tau2(-999.);
+        float subjet1_tau3(-999.);
+
+        if (m_config->isGridFile()){
+            // older files will not have this option
+            subjet0_tau1 = (*m_ljet_subjet0_tau1)->at(i);
+            subjet0_tau2 = (*m_ljet_subjet0_tau2)->at(i);
+            subjet0_tau3 = (*m_ljet_subjet0_tau3)->at(i);
+            subjet1_tau1 = (*m_ljet_subjet1_tau1)->at(i);
+            subjet1_tau2 = (*m_ljet_subjet1_tau2)->at(i);
+            subjet1_tau3 = (*m_ljet_subjet1_tau3)->at(i);
         }
-        if (subjet_idx_1>=0){
-            subjet1.p4.SetPtEtaPhiE( (*m_ljet_subjet_pt)->at(subjet_idx_1), (*m_ljet_subjet_eta)->at(subjet_idx_1), 
-                                     (*m_ljet_subjet_phi)->at(subjet_idx_1), (*m_ljet_subjet_e)->at(subjet_idx_1));
-            subjet1.CSVv2  = (*m_ljet_subjet_CSVv2)->at(subjet_idx_1);
-            subjet1.charge = (*m_ljet_subjet_charge)->at(subjet_idx_1);
-            ljet.subjets.push_back(subjet1);
-        }
 
-        m_ljets[i] = ljet;
+        ljet.subjet0_tau1 = subjet0_tau1; //(*m_ljet_subjet0_tau1)->at(i);
+        ljet.subjet0_tau2 = subjet0_tau2; //(*m_ljet_subjet0_tau2)->at(i);
+        ljet.subjet0_tau3 = subjet0_tau3; //(*m_ljet_subjet0_tau3)->at(i);
+        ljet.subjet1_tau1 = subjet1_tau1; //(*m_ljet_subjet1_tau1)->at(i);
+        ljet.subjet1_tau2 = subjet1_tau2; //(*m_ljet_subjet1_tau2)->at(i);
+        ljet.subjet1_tau3 = subjet1_tau3; //(*m_ljet_subjet1_tau3)->at(i);
+
+        ljet.target = -1;      // not used in this analysis
+        ljet.isGood = isGood;
+        ljet.index  = idx;
+
+        ljet.area     = (*m_ljet_area)->at(i);
+        ljet.uncorrE  = (*m_ljet_uncorrE)->at(i);
+        ljet.uncorrPt = (*m_ljet_uncorrPt)->at(i);
+
+        // Truth-matching to jet
+        ljet.truth_partons.clear();
+        if (m_useTruth){ // && m_config->isTtbar()) {
+            cma::DEBUG("EVENT : Truth match AK8");          // match subjets (and then the AK8 jet) to truth tops
+
+            m_truthMatchingTool->matchJetToTruthTop(ljet);  // match to partons
+
+            cma::DEBUG("EVENT : ++ Ljet had top = "+std::to_string(ljet.isHadTop)+" for truth top "+std::to_string(ljet.matchId));
+        } // end truth matching ljet to partons
+
+        m_ljets.push_back(ljet);
+        idx++;
     }
+
+    deepLearningPrediction();   // store features in map (easily access later)
 
     return;
 }
@@ -488,37 +609,55 @@ void Event::initialize_leptons(){
 
     // Muons
     unsigned int nMuons = (*m_mu_pt)->size();
-    m_muons.resize(nMuons);
-
     for (unsigned int i=0; i<nMuons; i++){
-        Muon mu;
+        Lepton mu;
         mu.p4.SetPtEtaPhiE( (*m_mu_pt)->at(i),(*m_mu_eta)->at(i),(*m_mu_phi)->at(i),(*m_mu_e)->at(i));
+        bool isMedium   = (*m_mu_id_medium)->at(i);
+        bool isTight    = (*m_mu_id_tight)->at(i);
+
+        bool iso = customIsolation(mu);    // 2D isolation cut between leptons & AK4 (need AK4 initialized first!)
+
+        bool isGood(mu.p4.Pt()>50 && std::abs(mu.p4.Eta())<2.4 && isMedium && iso);
+        if (!isGood) continue;
 
         mu.charge = (*m_mu_charge)->at(i);
-        mu.loose  = (*m_mu_loose)->at(i);
-        mu.medium = (*m_mu_medium)->at(i);
-        mu.tight  = (*m_mu_tight)->at(i);
+        mu.loose  = (*m_mu_id_loose)->at(i);
+        mu.medium = isMedium; 
+        mu.tight  = isTight; 
         mu.iso    = (*m_mu_iso)->at(i);
-        mu.isGood = (mu.p4.Pt()>50 && std::abs(mu.p4.Eta())<2.1);
+        mu.isGood = isGood;
 
-        m_muons[i] = mu;
+        mu.isMuon = true;
+        mu.isElectron = false;
+
+        m_leptons.push_back(mu);
     }
 
     // Electrons
     unsigned int nElectrons = (*m_el_pt)->size();
-    m_electrons.resize(nElectrons);
     for (unsigned int i=0; i<nElectrons; i++){
-        Electron el;
+        Lepton el;
         el.p4.SetPtEtaPhiE( (*m_el_pt)->at(i),(*m_el_eta)->at(i),(*m_el_phi)->at(i),(*m_el_e)->at(i));
+        bool isTightNoIso = (*m_el_id_tight_noIso)->at(i);
+
+        bool iso = customIsolation(el);    // 2D isolation cut between leptons & AK4 (need AK4 initialized first!)
+
+        bool isGood(el.p4.Pt()>50 && std::abs(el.p4.Eta())<2.4 && isTightNoIso && iso);
+        if (!isGood) continue;
 
         el.charge = (*m_el_charge)->at(i);
-        el.loose  = (*m_el_loose)->at(i);
-        el.medium = (*m_el_medium)->at(i);
-        el.tight  = (*m_el_tight)->at(i);
-        el.iso    = (*m_el_iso)->at(i);
-        el.isGood = (el.p4.Pt()>50 && std::abs(el.p4.Eta())<2.1);
+        el.loose  = (*m_el_id_loose)->at(i);
+        el.medium = (*m_el_id_medium)->at(i);
+        el.tight  = (*m_el_id_tight)->at(i);
+        el.loose_noIso  = (*m_el_id_loose_noIso)->at(i);
+        el.medium_noIso = (*m_el_id_medium_noIso)->at(i);
+        el.tight_noIso  = isTightNoIso;
+        el.isGood = isGood;
 
-        m_electrons[i] = el;
+        el.isMuon = false;
+        el.isElectron = true;
+
+        m_leptons.push_back(el);
     }
 
     return;
@@ -529,14 +668,25 @@ void Event::initialize_neutrinos(){
     /* Build the neutrinos */
     m_neutrinos.clear();
 
-    if (m_neutrinoReco)
-        m_neutrinoTool->execute();
+    Neutrino nu1;
+    nu1.p4.SetPtEtaPhiM( m_met.p4.Pt(), 0, m_met.p4.Phi(), 0);   // "dummy" value pz=0
+
+    int nlep = m_leptons.size();
+    if (nlep<1){
+        // not enough leptons to do reconstruction, so just create dummy value
+        m_neutrinos.push_back(nu1);
+        return;
+    }
+
+    m_neutrinoRecoTool->setObjects(m_leptons.at(0),m_met);
+    if (m_neutrinoReco){
+        // reconstruct neutrinos!
+        nu1 = m_neutrinoRecoTool->execute();        // tool assumes 1-lepton final state
+        m_neutrinos.push_back(nu1);
+    }
     else{
-        for (unsigned int i=0,size=(*m_nu_pt)->size();i<size;i++){
-            Neutrino nu;
-            nu.p4.SetPtEtaPhiM( (*m_nu_pt)->at(i), (*m_nu_eta)->at(i), (*m_nu_phi)->at(i), 0.0);
-            m_neutrinos.push_back(nu);
-        }
+        // Assign neutrinos from root file
+        m_neutrinos.push_back(nu1);                 // dummy value for now
     }
 
     return;
@@ -547,22 +697,11 @@ void Event::initialize_weights(){
     /* Event weights */
     m_nominal_weight = 1.0;
 
-    if (m_isMC){
-        m_xsection     = (**m_treeXSection);
-        m_kfactor      = (**m_treeKFactor);
-        m_sumOfWeights = (**m_treeSumOfWeights);
-    }
-    else{
-        m_xsection     = 1.0;
-        m_kfactor      = 1.0;
-        m_sumOfWeights = 1.0;
-    }
-
     m_weight_btag.clear();
     if (m_isMC){
-        m_nominal_weight  = (**m_weight_pileup) * (**m_weight_mc) * (**m_weight_btagSF);
+        m_nominal_weight  = 1.0; //(**m_weight_pileup) * (**m_weight_mc);
         m_nominal_weight *= (m_xsection) * (m_kfactor) * m_LUMI / (m_sumOfWeights);
-/*      // weights not in CMS (so far):
+/*      // event weights
         m_weight_btag["70"] = (**m_weight_btag_70);
         m_weight_btag["77"] = (**m_weight_btag_77);
         m_weight_btag_default = m_weight_btag[m_config->jet_btagWkpt()];
@@ -574,15 +713,17 @@ void Event::initialize_weights(){
 }
 
 
+
 void Event::initialize_kinematics(){
-    /* Kinematic variables (HT, ST, MET) 
-       Recalculate HT and ST (in case the jets/leptons change)
-     */
+    /* Kinematic variables (HT, ST, MET) */
+    m_HT_ak4 = **m_HTAK4;
+    m_HT_ak8 = **m_HTAK8;
+
     m_HT = 0.0;
     m_ST = 0.0;
 
     // Get hadronic transverse energy
-    if (m_config->useJets()){
+    if (m_useJets){
         // include small-R jet pT
         for (auto &small_jet : m_jets ){
             m_HT += small_jet.p4.Pt();
@@ -601,15 +742,54 @@ void Event::initialize_kinematics(){
     // Get MET and lepton transverse energy
     m_ST += m_HT;
     m_ST += m_met.p4.Pt();
-    if (m_config->useLeptons()){
+
+    if (m_useLeptons){
         for (const auto& lep : m_leptons)
             m_ST += lep.p4.Pt(); 
     }
+
+    // transverse mass of the W (only relevant for 1-lepton)
+    float mtw(0.0);
+
+    if (m_leptons.size()>0){
+        Lepton lep = m_leptons.at(0);
+        float dphi = m_met.p4.Phi() - lep.p4.Phi();
+        mtw = sqrt( 2 * lep.p4.Pt() * m_met.p4.Pt() * (1-cos(dphi)) );
+    }
+    m_met.mtw = mtw;
 
     return;
 }
 
 
+bool Event::customIsolation( Lepton& lep ){
+    /* 2D isolation cut for leptons 
+       - Check that the lepton and nearest AK4 jet satisfies
+         DeltaR() < 0.4 || pTrel>25
+    */
+    bool pass(false);
+    //int min_index(-1);                    // index of AK4 closest to lep
+    float drmin(100.0);                   // min distance between lep and AK4s
+    float ptrel(0.0);                     // pTrel between lepton and AK4s
+
+    if (m_jets.size()<1) return false;    // no AK4 -- event will fail anyway
+
+    for (const auto& jet : m_jets){
+        float dr = lep.p4.DeltaR( jet.p4 );
+        if (dr < drmin) {
+            drmin = dr;
+            ptrel = cma::ptrel( lep.p4,jet.p4 );
+            //min_index = jet.index;
+        }
+    }
+
+    lep.drmin = drmin;
+    lep.ptrel = ptrel;
+
+    if (drmin > 0.4 || ptrel > 25) pass = true;
+
+    return pass;
+}
 
 
 /*** GETTER FUNCTIONS ***/
@@ -620,38 +800,19 @@ void Event::initialize_kinematics(){
 //    ELSE USE ALGORITHM
 
 
-
-void Event::deepLearning(){
-    /* Dan Guest's lightweight DNN framework */
-    if (m_DNNinference){
-        // do some inference and get DNN scores
-        cma::DEBUG("EVENT : Calculate DNN ");
-        m_deepLearningTool->inference();
-    }
-    else{
-        // setting up training -- likely for flatTree4ML and histogrammer4ML
-        m_deepLearningTool->training();
-        std::map<std::string,double> features = m_deepLearningTool->features();
-        // store the features somewhere (depends on what we're doing, leave empty for now)
-    }
-
-    return;
-}
-
-
 void Event::getBtaggedJets( Jet& jet ){
     /* Determine the b-tagging */
     jet.isbtagged["L"] = false;
     jet.isbtagged["M"] = false;
     jet.isbtagged["T"] = false;
 
-    if (jet.CSVv2 > m_CSVv2L){
+    if (jet.bdisc > m_CSVv2L){
         jet.isbtagged["L"] = true;
         m_btag_jets["L"].push_back(jet.index);  // 0 = index of this jet
-        if (jet.CSVv2 > m_CSVv2M){
+        if (jet.bdisc > m_CSVv2M){
             jet.isbtagged["M"] = true;
             m_btag_jets["M"].push_back(jet.index);
-            if (jet.CSVv2 > m_CSVv2T){
+            if (jet.bdisc > m_CSVv2T){
                 jet.isbtagged["T"] = true;
                 m_btag_jets["T"].push_back(jet.index);
             }
@@ -713,10 +874,8 @@ double Event::getSystEventWeight( const std::string &syst, const int weightIndex
 }
 
 
-
-
 /*** RETURN PHYSICS INFORMATION ***/
-std::vector<int> Event::btag_jets(const std::string &wkpt){
+std::vector<int> Event::btag_jets(const std::string &wkpt) const{
     /* Small-R Jet b-tagging */
     std::string tmp_wkpt(wkpt);
     if(m_btag_jets.find(wkpt) == m_btag_jets.end()){
@@ -727,13 +886,27 @@ std::vector<int> Event::btag_jets(const std::string &wkpt){
     return m_btag_jets.at(tmp_wkpt);
 }
 
+void Event::deepLearningPrediction(){
+    /* Deep learning for large-R jets -- CWoLa */
+    if (m_DNNinference){
+        cma::DEBUG("EVENT : Calculate DNN ");
+        m_deepLearningTool->inference();
+    }
+    else if (m_DNNtraining){
+        m_deepLearningTool->training();
+        //ljet.features = m_deepLearningTool->features();  // store the features on the ljet to make easily accessible later
+    }
+
+    return;
+}
+
 
 /*** RETURN WEIGHTS ***/
 float Event::weight_mc(){
-    return **m_weight_mc;
+    return 1.0; //**m_weight_mc;
 }
 float Event::weight_pileup(){
-    return **m_weight_pileup;
+    return 1.0; //**m_weight_pileup;
 }
 
 float Event::weight_btag(const std::string &wkpt){
@@ -771,75 +944,66 @@ void Event::truth(){
     return;
 }
 
-int Event::eventNumber(){
-    return **m_eventNumber;
-}
-
-//unsigned int Event::runNumber(){
-int Event::runNumber(){
-    return **m_runNumber;
-}
-
-int Event::lumiblock(){
-    return **m_lumiblock;
-}
-
-
-
 
 /*** DELETE VARIABLES ***/
 void Event::finalize(){
     // delete variables
     cma::DEBUG("EVENT : Finalize() ");
 
-    if (m_config->useJets()){
-      cma::DEBUG("EVENT : Finalize() jets ");
+    delete m_eventNumber;
+    delete m_runNumber;
+    delete m_lumiblock;
+
+    if (m_useJets){
       delete m_jet_pt;
       delete m_jet_eta;
       delete m_jet_phi;
-      delete m_jet_e;
-      delete m_jet_charge;
-      delete m_jet_CSVv2;
-      delete m_jet_jer_up;
-      delete m_jet_jer_down;
+      delete m_jet_m;
+      delete m_jet_bdisc;
+      delete m_jet_deepCSV;
+      delete m_jet_area;
+      delete m_jet_uncorrPt;
+      delete m_jet_uncorrE;
     }
-    if (m_config->useLargeRJets()){
-      cma::DEBUG("EVENT : Finalize() ljets ");
+
+    if (m_useLargeRJets){
       delete m_ljet_pt;
       delete m_ljet_eta;
       delete m_ljet_phi;
-      delete m_ljet_e;
+      delete m_ljet_m;
       delete m_ljet_tau1;
       delete m_ljet_tau2;
       delete m_ljet_tau3;
-      delete m_ljet_tau21;
-      delete m_ljet_tau32;
       delete m_ljet_charge;
       delete m_ljet_SDmass;
-      delete m_ljet_CSVv2;
-      delete m_ljet_jer_up;
-      delete m_ljet_jer_down;
-      delete m_ljet_subjetIndex0;
-      delete m_ljet_subjetIndex1;
-      delete m_ljet_subjet_pt;
-      delete m_ljet_subjet_eta;
-      delete m_ljet_subjet_phi;
-      delete m_ljet_subjet_e;
-      delete m_ljet_subjet_charge;
-      delete m_ljet_subjet_CSVv2;
+      delete m_ljet_subjet0_charge;
+      delete m_ljet_subjet0_bdisc;
+      delete m_ljet_subjet0_deepCSV;
+      delete m_ljet_subjet0_pt;
+      delete m_ljet_subjet0_mass;
+      delete m_ljet_subjet1_charge;
+      delete m_ljet_subjet1_bdisc;
+      delete m_ljet_subjet1_deepCSV;
+      delete m_ljet_subjet1_pt;
+      delete m_ljet_subjet1_mass;
+      delete m_ljet_area;
+      delete m_ljet_uncorrPt;
+      delete m_ljet_uncorrE;
     }
-    if (m_config->useLeptons()){
-      cma::DEBUG("EVENT : Finalize() leptons ");
+
+    if (m_useLeptons){
       delete m_el_pt;
       delete m_el_eta;
       delete m_el_phi;
       delete m_el_e;
       delete m_el_charge;
-      delete m_el_iso;
-      //delete m_el_veto;
-      delete m_el_loose;
-      delete m_el_medium;
-      delete m_el_tight;
+      //delete m_el_iso;
+      delete m_el_id_loose;
+      delete m_el_id_medium;
+      delete m_el_id_tight;
+      delete m_el_id_loose_noIso;
+      delete m_el_id_medium_noIso;
+      delete m_el_id_tight_noIso;
 
       delete m_mu_pt;
       delete m_mu_eta;
@@ -847,47 +1011,50 @@ void Event::finalize(){
       delete m_mu_e;
       delete m_mu_charge;
       delete m_mu_iso;
-      delete m_mu_loose;
-      delete m_mu_medium;
-      delete m_mu_tight;
+      delete m_mu_id_loose;
+      delete m_mu_id_medium;
+      delete m_mu_id_tight;
     }
 
-    cma::DEBUG("EVENT : Finalize() met ");
     delete m_met_met;
     delete m_met_phi;
-    delete m_met_met_sf;
-    delete m_met_phi_sf;
+    delete m_HTAK8;
+    delete m_HTAK4;
 
-    // Event info 
-    cma::DEBUG("EVENT : Finalize() event ");
-    delete m_eventNumber;
-    delete m_runNumber;
-    delete m_rho;
-    delete m_lumiblock;
-    delete m_NGoodVtx;             // evt_NGoodVtx
-    delete m_LHAPDF_ID;            // evt_LHA_PDF_ID
-    delete m_NIsoTrk;              // evt_NIsoTrk
-    delete m_true_pileup;
+    delete m_HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50;
+    delete m_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165;
+    delete m_HLT_Ele115_CaloIdVT_GsfTrkIdT;
+    delete m_HLT_Mu40_Eta2P1_PFJet200_PFJet50;
+    delete m_HLT_Mu50;
+    delete m_HLT_PFHT800;
+    delete m_HLT_PFHT900;
+    delete m_HLT_AK8PFJet450;
+    delete m_HLT_PFHT700TrimMass50;
+    delete m_HLT_PFJet360TrimMass30;
 
+    delete m_Flag_goodVertices;
+    delete m_Flag_eeBadScFilter;
+    delete m_Flag_HBHENoiseFilter;
+    delete m_Flag_HBHENoiseIsoFilter;
+    delete m_Flag_globalTightHalo2016Filter;
+    delete m_Flag_EcalDeadCellTriggerPrimitiveFilter;
 
     if (m_isMC){
-      cma::DEBUG("EVENT : Finalize() mc ");
-      delete m_weight_mc;
-      delete m_weight_pileup;
-
-      delete m_treeXSection;
-      delete m_treeKFactor;
-      delete m_treeSumOfWeights;
-
       delete m_mc_pt;
       delete m_mc_eta;
       delete m_mc_phi;
       delete m_mc_e;
-      delete m_mc_charge;
       delete m_mc_pdgId;
-      delete m_mc_mom_idx;
+      delete m_mc_status;
+      delete m_mc_isHadTop;
+/*
+        delete m_weight_mc;
+        delete m_weight_pileup;
+        delete m_weight_pileup_UP;
+        delete m_weight_pileup_DOWN;
 
-      if (m_useTruth){
+        delete m_mc_ht;
+
         delete m_truth_jet_pt;
         delete m_truth_jet_eta;
         delete m_truth_jet_phi;
@@ -896,12 +1063,17 @@ void Event::finalize(){
         delete m_truth_ljet_pt;
         delete m_truth_ljet_eta;
         delete m_truth_ljet_phi;
-        delete m_truth_ljet_e;
+        delete m_truth_ljet_m;
         delete m_truth_ljet_charge;
-      } // end useTruth
+        delete m_truth_ljet_subjet0_charge;
+        delete m_truth_ljet_subjet0_bdisc;
+        delete m_truth_ljet_subjet1_charge;
+        delete m_truth_ljet_subjet1_bdisc;
+*/
     } // end isMC
 
     return;
 }
+
 
 // THE END

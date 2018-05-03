@@ -23,10 +23,11 @@ class DeepLearning {
     void inference();
     void loadFeatures();
 
-    std::map<std::string,double> predictions();
-    double prediction();
-    double prediction(const std::string& key);
-    std::map<std::string,double> features();
+    std::map<std::string,double> predictions() const {return m_predictions;}
+    double prediction() const {return m_DNN;}
+    double prediction(const std::string& key) const;
+
+    std::map<std::string,double> features() const {return m_features;}
 
   protected:
 
@@ -36,7 +37,9 @@ class DeepLearning {
     std::vector<Ljet> m_ljets;
 
     lwt::LightweightNeuralNetwork* m_lwnn;       // LWTNN tool
-    std::map<std::string, double> m_dnnInputs;   // values for inputs to the DNN
+
+    std::map<std::string, double> m_features;    // values for inputs to the DNN
+    std::map<std::string,double> m_predictions;  // map of DNN predictions
     std::string m_dnnKey;                        // default key for accessing map of values
     float m_DNN;                                 // DNN prediction for one key
 

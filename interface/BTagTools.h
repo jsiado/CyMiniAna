@@ -26,7 +26,6 @@ class BTagTools {
     virtual ~BTagTools();
 
     std::map<std::string,double> execute(const Jet& jet) const;
-    void getBTagDecisions(Jet& jet) const;
     float getBTagSF(const std::vector<Jet>& jets) const;
 
   private:
