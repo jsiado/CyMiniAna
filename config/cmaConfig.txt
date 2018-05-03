@@ -21,8 +21,8 @@ output_path ./
 weightSystematicsFile config/weightSystematics.txt
 weightVectorSystematicsFile config/weightVectorSystematics.txt
 calcWeightSystematics false
-selection none
-cutsfile config/cuts_none.txt
+selection mujets,ejets
+cutsfile config/cuts_mujets.txt,config/cuts_ejets.txt
 treenames config/treenames.txt
 inputfile config/listOfAllSamples.txt
 NEvents -1

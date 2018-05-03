@@ -184,7 +184,7 @@ bool eventSelection::applySelection(const Event &event) {
     // Perform selections
     // -- use if/else if statements to maintain orthogonality
 
-    // -- Filter (only necessary for data)
+    // -- Filter (only necessary for data -- need to pass ALL filters)
     bool passFilter(true);
     if (!m_config->isMC()){
         for (const auto& x : m_filters){
@@ -224,6 +224,7 @@ bool eventSelection::ejetsSelection(double cutflow_bin, const Lepton& lep){
         pass = true;
     }
 
+/*
     // cut6 :: DeltaPhi(e,MET)
     float met_triangle = 1.5*m_met.p4.Pt() / 110.;
     if ( std::abs(lep.p4.DeltaPhi(m_met.p4)-1.5) > met_triangle )
@@ -240,6 +241,7 @@ bool eventSelection::ejetsSelection(double cutflow_bin, const Lepton& lep){
         fillCutflows(cutflow_bin+2);
         pass = true;
     }
+*/
 
     return pass;
 }
@@ -280,7 +282,6 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
     bool ejets  = m_selection.compare("ejets")==0;
     bool mujets = m_selection.compare("mujets")==0;
 
-
     // cut0 :: One lepton
     bool nLeptons(false);
     if (ejets)       nLeptons = (m_NElectrons==1 && m_NMuons==0);
@@ -296,7 +297,8 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
 
     Lepton lep = m_leptons.at(0);
 
-    // cut1 :: triggers -- ejets is lepton==electron else mujets
+    // cut1 :: triggers -- different triggers depending on the lepton
+    // -- Need at least 1 trigger to pass
     unsigned int passTrig(0);
     std::vector<std::string> oneLeptonTriggers = (lep.isElectron) ? m_ejetsTriggers : m_mujetsTriggers;
     for (const auto& trig : oneLeptonTriggers){
@@ -311,42 +313,11 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
     }
 
 
-    // cut2 :: >=1 ljets -- Assuming boosted final state
-    if ( m_NLjets < 1 )
-        return false;  // exit the function now; no need to test other cuts!
-    else{
-        fillCutflows(cutflow_bin+2);
-        pass = true;
-    }
-
-    // cut3 :: >=2 jets (should have 1 AK4 near lepton & 1 AK4 inside the AK8)
+    // cut3 :: >=2 jets (bblv final state)
     if ( m_NJets < 2 )
         return false;  // exit the function now; no need to test other cuts!
     else{
         fillCutflows(cutflow_bin+3);
-        pass = true;
-    }
-
-
-    // cut4 :: DeltaR(AK4,lepton)
-    //         >=1 AK4 jet in the same hemisphere as the electron, 0.3 < R(l,jet) < pi/2
-    Jet leptop_ak4;
-
-    if (!leptop_ak4.isGood)
-        return false;
-    else{
-        fillCutflows(cutflow_bin+4);
-        pass = true;
-    }
-
-    // cut5 :: DeltaR(AK8,lepton)
-    //         >=1 AK8 jet in the opposite hemisphere from the electron, R(l,jet) > pi/2
-    //         mark any AK8 jets that don't meet this requirement as "isGood=false"
-    Ljet hadtop_ak8;
-    if (!hadtop_ak8.isGood)
-        return false;
-    else{
-        fillCutflows(cutflow_bin+5);
         pass = true;
     }
 
