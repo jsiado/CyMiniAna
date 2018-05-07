@@ -88,6 +88,7 @@ class Event {
     std::vector<Neutrino> truth_neutrinos() const {return m_truth_neutrinos;}
     std::vector<Ljet> truth_ljets() const {return m_truth_ljets;}
     std::vector<Jet>  truth_jets() const {return m_truth_jets;}
+    std::vector<Parton> truth_partons() const {return m_truth_partons;}
 
     virtual MET met() const {return m_met;}
     virtual float HT() const {return m_HT;}

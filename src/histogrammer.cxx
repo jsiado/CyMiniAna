@@ -177,9 +177,23 @@ void histogrammer::bookHists( std::string name ){
     }
 
     if (m_useNeutrinos){
-        init_hist("nu_pt_"+name,  500, 0.0, 2000);
-        init_hist("nu_eta_"+name,  50, -2.5, 2.5);
-        init_hist("nu_phi_"+name,  64, -3.2, 3.2);
+        init_hist("nu_pt_"+name,     500, 0.0, 2000);
+        init_hist("nu_eta_"+name,     50, -2.5, 2.5);
+        init_hist("nu_phi_"+name,     64, -3.2, 3.2);
+        init_hist("nu_eta_smp_"+name, 50, -2.5, 2.5);
+        init_hist("nu_pz_samples_"+name, 500, -2000,2000);
+
+        if (m_config->useTruth()) {
+            init_hist("nu_deltaPz_"+name,      1000,-2000,2000);
+            init_hist("nu_deltaPz_smp_"+name,  1000,-2000,2000);
+            init_hist("nu_deltaEta_"+name,       50,-5,5);
+            init_hist("nu_deltaEta_smp_"+name,   50,-5,5);
+
+            init_hist("nu_truth_pz_deltaPz_"+name,     500,-2000,2000, 500,-2000,2000);
+            init_hist("nu_truth_pz_deltaPz_smp_"+name, 500,-2000,2000, 500,-2000,2000);
+            init_hist("nu_truth_eta_deltaEta_"+name,     50,-5,5, 50,-5,5);
+            init_hist("nu_truth_eta_deltaEta_smp_"+name, 50,-5,5, 50,-5,5);
+        }
     }
 
     // kinematics
@@ -281,10 +295,12 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
     // physics information
     std::vector<Jet> jets = event.jets();
     std::vector<Ljet> ljets = event.ljets();
-    std::vector<Muon> muons = event.muons();
-    std::vector<Electron> electrons = event.electrons();
+    std::vector<Lepton> leptons = event.leptons();
+    //std::vector<Muon> muons = event.muons();
+    //std::vector<Electron> electrons = event.electrons();
     std::vector<Neutrino> neutrinos = event.neutrinos();
     MET met = event.met();
+    std::vector<Parton> partons = event.truth_partons();
 
     if (m_useJets){
         cma::DEBUG("HISTOGRAMMER : Fill small-R jets");
@@ -329,14 +345,16 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
 
     if (m_useLeptons){
         cma::DEBUG("HISTOGRAMMER : Fill leptons");
-        for (const auto& el : electrons){
+        for (const auto& el : leptons){
+            if (el.isMuon || !el.isGood) continue;
             fill("el_pt_"+name,  el.p4.Pt(),  event_weight);
             fill("el_eta_"+name, el.p4.Eta(), event_weight);
             fill("el_phi_"+name, el.p4.Phi(), event_weight);
             fill("el_charge_"+name, el.charge, event_weight);
         }
 
-        for (const auto& mu : muons){
+        for (const auto& mu : leptons){
+            if (mu.isElectron || !mu.isGood) continue;
             fill("mu_pt_"+name,  mu.p4.Pt(),  event_weight);
             fill("mu_eta_"+name, mu.p4.Eta(), event_weight);
             fill("mu_phi_"+name, mu.p4.Phi(), event_weight);
@@ -347,9 +365,43 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
 
     if (m_config->useNeutrinos()){
         cma::DEBUG("HISTOGRAMMER : Fill neutrinos");
-        fill("nu_pt_"+name,  neutrinos.at(0).p4.Pt(),  event_weight);
-        fill("nu_eta_"+name, neutrinos.at(0).p4.Eta(), event_weight);
-        fill("nu_phi_"+name, neutrinos.at(0).p4.Phi(), event_weight);
+        Neutrino nu = neutrinos.at(0);
+        TLorentzVector tmp_nu;
+        tmp_nu.SetPxPyPzE( nu.p4.Px(), nu.p4.Py(), nu.pz_sampling, nu.p4.E() );
+
+        fill("nu_pt_"+name,  nu.p4.Pt(),  event_weight);
+        fill("nu_eta_"+name, nu.p4.Eta(), event_weight);
+        fill("nu_phi_"+name, nu.p4.Phi(), event_weight);
+        fill("nu_eta_smp_"+name, tmp_nu.Eta(), event_weight);
+
+        for (const auto pz : nu.pz_samplings)
+            fill("nu_pz_samples_"+name, pz, 1.0);   // look at the distribution of pz
+
+        if (m_config->useTruth()){
+            float tru_pz(-999.);
+            float tru_eta(-999.);
+            for (const auto& p : partons){
+                if (p.isNeutrino){
+                    tru_pz  = p.p4.Pz();
+                    tru_eta = p.p4.Eta();
+                }
+            }
+
+            float deltaPz     = tru_pz - nu.p4.Pz();
+            float deltaPz_smp = tru_pz - nu.pz_sampling;
+            fill("nu_deltaPz_"+name, deltaPz, event_weight);           // standard reconstruction
+            fill("nu_deltaPz_smp_"+name, deltaPz_smp, event_weight);   // sampling reconstruction
+
+            float deltaEta     = tru_eta - nu.p4.Eta();
+            float deltaEta_smp = tru_eta - tmp_nu.Eta();
+            fill("nu_deltaEta_"+name,     deltaEta,     event_weight);
+            fill("nu_deltaEta_smp_"+name, deltaEta_smp, event_weight);
+
+            fill("nu_truth_pz_deltaPz_"+name,     tru_pz, deltaPz,     event_weight);
+            fill("nu_truth_pz_deltaPz_smp_"+name, tru_pz, deltaPz_smp, event_weight);
+            fill("nu_truth_eta_deltaEta_"+name,     tru_eta, deltaEta, event_weight);
+            fill("nu_truth_eta_deltaEta_smp_"+name, tru_eta, deltaEta_smp, event_weight);
+        }
     }
 
 

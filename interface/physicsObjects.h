@@ -167,6 +167,8 @@ struct Muon : Lepton{
 
 struct Neutrino : CmaBase{
     // extra neutrino attributes
+    float pz_sampling;
+    std::vector<float> pz_samplings;
 };
 
 struct MET : CmaBase{

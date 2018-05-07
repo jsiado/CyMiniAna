@@ -681,7 +681,14 @@ void Event::initialize_neutrinos(){
     m_neutrinoRecoTool->setObjects(m_leptons.at(0),m_met);
     if (m_neutrinoReco){
         // reconstruct neutrinos!
-        nu1 = m_neutrinoRecoTool->execute();        // tool assumes 1-lepton final state
+        float pz  = m_neutrinoRecoTool->execute(true);        // standard reco; tool assumes 1-lepton final state
+        float nuE = sqrt( pow(m_met.p4.Px(),2) + pow(m_met.p4.Py(),2) + pow(pz,2));
+        nu1.p4.SetPxPyPzE( m_met.p4.Px(), m_met.p4.Py(), pz, nuE );
+
+        float pz_samp   = m_neutrinoRecoTool->execute(false);
+        nu1.pz_sampling = pz_samp;
+        nu1.pz_samplings = m_neutrinoRecoTool->pzSolutions();
+
         m_neutrinos.push_back(nu1);
     }
     else{
