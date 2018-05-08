@@ -92,13 +92,12 @@ void DeepLearning::loadFeatures(){
     // feature calculations
     // LEPTON & MET
     float met_met = m_met.p4.Pt();
-    float met_phi = m_met.p4.Phi();
     m_features["met_met"] = met_met;
-    m_features["met_phi"] = met_phi;
+    m_features["met_phi"] = m_met.p4.Phi();
     m_features["mtw"]     = m_met.mtw;
     m_features["lepton_pt"]  = m_lepton.p4.Pt();
     m_features["lepton_eta"] = m_lepton.p4.Eta();
-    m_features["deltaPhi_lep_met"] = m_lepton.p4.Phi() - met_phi;
+    m_features["deltaPhi_lep_met"] = m_lepton.p4.DeltaPhi( m_met.p4 );
 
     // JETS & MET
     unsigned int n_jets  = m_jets.size();
@@ -121,19 +120,19 @@ void DeepLearning::loadFeatures(){
     m_features["jet3_ptrel"] = 0;
 
     if (n_jets>0){
-        m_features["deltaPhi_j0_met_phi"] = std::abs(m_jets.at(0).p4.Phi() - met_phi);
+        m_features["deltaPhi_j0_met_phi"] = m_jets.at(0).p4.DeltaPhi( m_met.p4 );
         m_features["jet0_bdisc"] = m_jets.at(0).bdisc;
         m_features["jet0_ptrel"] = m_jets.at(0).p4.Pt() / (m_jets.at(0).p4.Pt() + met_met);
         if (n_jets>1){
-            m_features["deltaPhi_j1_met_phi"] = std::abs(m_jets.at(1).p4.Phi() - met_phi);
+            m_features["deltaPhi_j1_met_phi"] = m_jets.at(1).p4.DeltaPhi(m_met.p4);
             m_features["jet1_bdisc"] = m_jets.at(1).bdisc;
             m_features["jet1_ptrel"] = m_jets.at(1).p4.Pt() / (m_jets.at(1).p4.Pt() + met_met);
             if (n_jets>2){
-                m_features["deltaPhi_j2_met_phi"] = std::abs(m_jets.at(2).p4.Phi() - met_phi);
+                m_features["deltaPhi_j2_met_phi"] = m_jets.at(2).p4.DeltaPhi(m_met.p4);
                 m_features["jet2_bdisc"] = m_jets.at(2).bdisc;
                 m_features["jet2_ptrel"] = m_jets.at(2).p4.Pt() / (m_jets.at(2).p4.Pt() + met_met);
                 if (n_jets>3){
-                    m_features["deltaPhi_j3_met_phi"] = std::abs(m_jets.at(3).p4.Phi() - met_phi);
+                    m_features["deltaPhi_j3_met_phi"] = m_jets.at(3).p4.DeltaPhi(m_met.p4);
                     m_features["jet3_bdisc"] = m_jets.at(3).bdisc;
                     m_features["jet3_ptrel"] = m_jets.at(3).p4.Pt() / (m_jets.at(3).p4.Pt() + met_met);
                 } // end at least 4 jets

@@ -1,0 +1,12 @@
+date today
+output_dir eos
+eos_path /store/group/lpctlbsm/wprime-qQ/flatNtuples/viper/ttbar/
+subdir ttbar
+eos_tarball_path /store/group/lpctlbsm/wprime-qQ/flatNtuples/viper/
+files config/listOfTtbarFiles.txt
+username demarley
+executable runML
+test False
+submit True
+verbose True
+config config/cmaConfig.txt

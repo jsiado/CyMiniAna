@@ -144,7 +144,16 @@ class VERBOSE(object):
                            "INFO": 1,
                            "WARNING":2,
                            "ERROR":  3};
-        self.level = "WARNING"
+        self.level     = "WARNING"
+        self.level_int = 2
+
+    def initialize(self):
+        """Setup the integer level value"""
+        self.level_int = self.verboseMap[self.level]
+
+    def level_value(self):
+        """Return the integer value"""
+        return self.level_int
 
     def DEBUG(self,message):
         """Debug level - most verbose"""
@@ -166,10 +175,24 @@ class VERBOSE(object):
         self.verbose("ERROR",message)
         return
 
+    def compare(self,level1,level2=None):
+        """Compare two levels"""
+        if level2 is None:
+            return self.verboseMap[level1]>=self.level_int
+        else:
+            return self.verboseMap[level1]>=self.verboseMap[level2]
+
     def verbose(self,level,message):
-        if self.verboseMap[level] >= self.verboseMap[self.level]:
+        """Print message to the screen"""
+        if self.compare( level ):
             print " {0} :: {1}".format(level,message)
         return
 
+    def HELP(self):
+        """Help message"""
+        print " CyMiniAna Deep Learning "
+        print " To run, execute the command: "
+        print " $ python python/runDeepLearning.py <config> "
+        print " where <config> is a text file that outlines the configuration "
 
 ## THEN ##
