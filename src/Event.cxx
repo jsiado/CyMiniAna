@@ -929,6 +929,7 @@ void Event::deepLearningPrediction(){
 
             // only want to train on single lepton events
             if (n_wdecays2leptons==1){
+                m_deepLearningTool->setNeutrino( m_neutrinos.at(0) );
                 m_deepLearningTool->setTrueNeutrino( true_nu );
                 m_deepLearningTool->setMET( m_met );
                 m_deepLearningTool->setLepton( m_leptons.at(0) );

@@ -82,6 +82,8 @@ class flatTree4ML {
     float m_jet2_ptrel;
     float m_jet3_ptrel;
 
+    float m_nu_pz_standard;
+    float m_nu_pz_sampling;
 
     /**** Metadata ****/
     // which sample has which target value

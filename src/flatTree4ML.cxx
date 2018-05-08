@@ -61,6 +61,8 @@ void flatTree4ML::initialize(TFile& outputFile) {
     m_ttree->Branch( "jet2_ptrel", &m_jet2_ptrel, "jet2_ptrel/F");
     m_ttree->Branch( "jet3_ptrel", &m_jet3_ptrel, "jet3_ptrel/F");
 
+    m_ttree->Branch( "nu_pz_standard", &m_nu_pz_standard, "nu_pz_standard/F");
+    m_ttree->Branch( "nu_pz_sampling", &m_nu_pz_sampling, "nu_pz_sampling/F");
 
     /**** Metadata ****/
     // which sample has which target value
@@ -108,6 +110,9 @@ void flatTree4ML::saveEvent(const std::map<std::string,double> features) {
     m_jet1_ptrel = features.at("jet1_ptrel");
     m_jet2_ptrel = features.at("jet2_ptrel");
     m_jet3_ptrel = features.at("jet3_ptrel");
+
+    m_nu_pz_standard = features.at("pz_standard");
+    m_nu_pz_sampling = features.at("pz_sampling");
 
     /**** Fill the tree ****/
     cma::DEBUG("FLATTREE4ML : Fill the tree");

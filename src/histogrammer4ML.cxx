@@ -55,6 +55,9 @@ void histogrammer4ML::bookHists(){
         histogrammer::init_hist( "jet"+sb+"_ptrel_"+m_name, 50, 0, 1);
     }
 
+    histogrammer::init_hist( "nu_pz_standard_"+m_name, 1000, -3000, 3000);
+    histogrammer::init_hist( "nu_pz_sampling_"+m_name, 1000, -3000, 3000);
+
     return;
 }
 
@@ -80,6 +83,9 @@ void histogrammer4ML::fill( const std::map<std::string,double> features, double 
         histogrammer::fill( "jet"+sb+"_bdisc_"+m_name, features.at("jet"+sb+"_bdisc"), weight);
         histogrammer::fill( "jet"+sb+"_ptrel_"+m_name, features.at("jet"+sb+"_ptrel"), weight);
     }
+
+    histogrammer::fill( "nu_pz_standard_"+m_name, features.at("pz_standard"), weight);
+    histogrammer::fill( "nu_pz_sampling_"+m_name, features.at("pz_sampling"), weight);
 
     cma::DEBUG("HISTOGRAMMER : End histograms");
 

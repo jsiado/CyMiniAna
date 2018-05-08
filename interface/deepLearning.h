@@ -30,6 +30,7 @@ class DeepLearning {
 
     std::map<std::string,double> features() const {return m_features;}
 
+    void setNeutrino(Neutrino& nu);
     void setTrueNeutrino(Parton& nu);
     void setLepton(Lepton& lep);
     void setMET(MET& etmiss);
@@ -41,6 +42,7 @@ class DeepLearning {
 
     Lepton m_lepton;
     MET m_met;
+    Neutrino m_neutrino;
     Parton m_true_neutrino;
     std::vector<Jet> m_jets;
     std::vector<Ljet> m_ljets;
