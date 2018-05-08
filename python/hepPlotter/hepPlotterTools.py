@@ -11,6 +11,8 @@ Simple functions to help with basic plots.
 """
 import ROOT
 import numpy as np
+import matplotlib
+matplotlib.use('PDF')
 import matplotlib.pyplot as plt
 from array import array
 
@@ -106,7 +108,7 @@ def hist1d(nbins,bin_low,bin_high):
 
 def data2list(data,weights=None,normed=False,binning=1):
     """Convert array of data into dictionary of information matching 'hist2list' """
-    data,bins = np.histogram(data,bins=binning,weights=weights,normed=normed)
+    data,bins = np.histogram(data,bins=binning,weights=weights,density=normed)
 
     results = {'data': data,
                'error':np.sqrt(data),
@@ -125,7 +127,7 @@ def data2list2D(data,weights=None,normed=False,binning=1):
     except:
         x = data[0]
         y = data[1]
-    _,bins_x,bins_y = np.histogram2d(x, y, bins=binning,normed=normed,weights=weights)
+    _,bins_x,bins_y = np.histogram2d(x, y, bins=binning,density=normed,weights=weights)
 
     binnsx = []
     binnsy = []

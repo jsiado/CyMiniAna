@@ -48,10 +48,6 @@ def sample_labels():
     samples['wjets']     = Sample(label=r'W+jets',color='yellow')
     samples['zjets']     = Sample(label=r'Z+jets',color='darkorange')
 
-    # Machine Learning (AK8+AK4)
-    samples['QB'] = Sample(label=ttbar+' (QB)',color='white')
-    samples['W']  = Sample(label=ttbar+' (W)',color='white')
-
     # Data
     samples['data']      = Sample(label=r'Data',color='black')
 
@@ -62,6 +58,11 @@ def sample_labels():
     samples['mu']        = Sample(label=r'$\mu$+jets',color='k')
     samples['el']        = Sample(label=r'e+jets',color='k')
     samples['muel']      = Sample(label=r'$\ell$+jets',color='k')
+
+    # Machine Learning (AK8+AK4)
+    samples['QB'] = Sample(label=ttbar+' (QB)',color='white')
+    samples['W']  = Sample(label=ttbar+' (W)',color='white')
+    samples['nu_pz'] = Sample(label=ttbar+' Neutrino',color='red')
 
     return samples
 
@@ -201,10 +202,10 @@ class EnergyStamp(Text):
     """Class for writing center of mass energy on plot"""
     def __init__(self):
         Text.__init__(self)
-        self.text = r"$\sqrt{\text{s}}$ = 13 TeV"
+        self.text = r"(13 TeV)"
         self.fontsize = 18
-        self.ha = 'left'
-        self.va = 'top'
+        self.ha = 'right'
+        self.va = 'bottom'
 
 class LumiStamp(Text):
     """Class for writing luminosity on plot"""
@@ -212,8 +213,8 @@ class LumiStamp(Text):
         Text.__init__(self)
         self.text = r"%s fb$^{\text{-1}}$"%(lumi)
         self.fontsize = 18
-        self.ha = 'left'
-        self.va = 'top'
+        self.ha = 'right'
+        self.va = 'bottom'
 
 class CMSStamp(Text):
     """Class for writing official CMS name & plot type (Simulation, Internal, etc.) on plot"""

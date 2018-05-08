@@ -4,6 +4,7 @@ hep_data /home/demarley/analysis/b2g/viper/ttbar_viper.root
 treename features
 model_name /data/demarley/b2g/viper/
 output_path /data/demarley/b2g/viper/
+method regression
 nHiddenLayers 4
 nNodes 40
 epochs 20

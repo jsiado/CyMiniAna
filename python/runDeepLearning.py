@@ -21,8 +21,8 @@ from time import strftime,localtime
 
 import util
 from config import Config
-from deepLearning.deepLearning import DeepLearning
-
+from deepLearning.classification import Classification
+from deepLearning.regression import Regression
 
 print
 print " ------------------------------ "
@@ -84,7 +84,10 @@ hep_data_name = config.hep_data.split('/')[-1].split('.')[0]
 
 
 ## Setup Deep Learning class
-dnn = DeepLearning()
+if config.method=='regression':
+    dnn = Regression()
+else:
+    dnn = Classification()
 
 dnn.target_names  = ["pz"]
 dnn.target_values = None
@@ -95,7 +98,7 @@ dnn.treename   = config.treename
 dnn.useLWTNN   = True
 dnn.dnn_name   = "dnn"
 dnn.output_dim = config.output_dim
-dnn.dnn_method = 'regression'
+dnn.dnn_method = config.method
 dnn.loss       = config.loss
 dnn.init       = config.init
 dnn.nNodes     = config.nNodes

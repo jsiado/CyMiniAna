@@ -75,9 +75,10 @@ class Config(object):
         setattr(self,'output_dim',   int( self.get('output_dim') ))
         setattr(self,'features',     self.get('features').split(','))
         setattr(self,'percentile',   int( self.get('percentile') ))
-        setattr(self,'activation',   self.get('activation') )
+        setattr(self,'activation',   self.get('activation'))
+        setattr(self,'method',       self.get('method'))
         setattr(self,'nEntries',     int( self.get('nEntries') ))
-        setattr(self,'verbose_level',self.get('verbose') )
+        setattr(self,'verbose_level',self.get('verbose'))
 
         return
 
@@ -103,6 +104,7 @@ class Config(object):
                     'features':[],
                     'percentile':75,
                     'activation':'elu',
+                    'method':'binary',
                     'nEntries':-1,
                     'verbose_level':'INFO'}
 

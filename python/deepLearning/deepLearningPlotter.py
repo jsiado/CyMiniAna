@@ -47,6 +47,7 @@ class Target(object):
         self.binning = 1
 
 
+
 class DeepLearningPlotter(object):
     """Plotting utilities for deep learning"""
     def __init__(self):
@@ -59,7 +60,7 @@ class DeepLearningPlotter(object):
         self.msg_svc      = util.VERBOSE()
         self.filename     = ""
         self.output_dir   = ''
-        self.image_format = 'png'
+        self.image_format = 'pdf'
         self.process_label = ''      # if a single process is used for all training, set this
 
         self.classification = False  # 'binary','multi',False
@@ -93,14 +94,9 @@ class DeepLearningPlotter(object):
                 tmp.color = self.betterColors[i]
                 self.targets.append(tmp)
         else: # regression
-            try:
-                tmp    = Target(target_names[0])
-                tmp.df = self.df.loc[self.df['target']==target_values[0]]
-                tmp.target_value = target_values[0]
-            except TypeError:
-                tmp    = Target(target_names)
-                tmp.df = self.df.loc[self.df['target']==target_values]
-                tmp.target_value = target_values
+            tmp    = Target(target_names)
+            tmp.df = self.df
+            tmp.target_value = None
 
             tmp.label = self.sample_labels[tmp.name].label
             tmp.color = self.sample_labels[tmp.name].color
@@ -157,9 +153,16 @@ class DeepLearningPlotter(object):
         return
 
 
-    def feature_correlations(self):
+    def separations(self):
+        """Plot the separation between different samples for each target
+           1D: Bar graph showing the separation between S/B (0,1)
+           2D: Matrix (a la correlation matrix) with scale (0,1) showing separation between S/B in 2D plane
+        """
+        pass
+
+
+    def correlations(self):
         """Plot correlations between features of the NN"""
-        ## Correlation Matrices of Features (top/antitop) ##
         fontProperties = {'family':'sans-serif'}
         opts = {'cmap': plt.get_cmap("bwr"), 'vmin': -1, 'vmax': +1}
 
@@ -175,12 +178,7 @@ class DeepLearningPlotter(object):
             # Use matplotlib directly
             fig,ax = plt.subplots()
 
-            # hide the upper part of the triangle
-            mask = np.zeros_like(corrmat, dtype=np.bool)    # return array of zeros with same shape as corrmat
-            mask[np.tril_indices_from(mask)] = True
-            corrmat_mask = np.ma.array(corrmat, mask=mask) 
-
-            heatmap1 = ax.pcolor(corrmat_mask, **opts)
+            heatmap1 = ax.pcolor(corrmat, **opts)
             cbar     = plt.colorbar(heatmap1, ax=ax)
 
             cbar.ax.set_yticklabels( [i.get_text().strip('$') for i in cbar.ax.get_yticklabels()], **fontProperties )
@@ -193,11 +191,11 @@ class DeepLearningPlotter(object):
             ax.set_xticklabels(labels, fontProperties, fontsize=18, minor=False, ha='right', rotation=70)
             ax.set_yticklabels(labels, fontProperties, fontsize=18, minor=False)
 
-
             ## CMS/COM Energy Label + Signal name
             cms_stamp = hpl.CMSStamp(self.CMSlabelStatus)
             cms_stamp.coords = [0.02,1.00]
             cms_stamp.fontsize = 16
+            cms_stamp.va = 'bottom'
             ax.text(0.02,1.00,cms_stamp.text,fontsize=cms_stamp.fontsize,
                     ha=cms_stamp.ha,va=cms_stamp.va,transform=ax.transAxes)
 
@@ -205,6 +203,7 @@ class DeepLearningPlotter(object):
             energy_stamp.ha = 'right'
             energy_stamp.coords = [0.99,1.00]
             energy_stamp.fontsize = 16
+            energy_stamp.va = 'bottom'
             ax.text(energy_stamp.coords[0],energy_stamp.coords[1],energy_stamp.text, 
                     fontsize=energy_stamp.fontsize,ha=energy_stamp.ha, va=energy_stamp.va, transform=ax.transAxes)
 
@@ -223,6 +222,7 @@ class DeepLearningPlotter(object):
         if self.classification: self.predictionClassification(train_data,test_data)
         elif self.regression:   self.predictionRegression(train_data,test_data)
         return
+
 
     def predictionRegression(self,train_data={},test_data={}):
         """Plot the training and testing predictions for all k-fold cross-validation results"""
@@ -248,6 +248,7 @@ class DeepLearningPlotter(object):
 
             if self.processlabel: hist.extra_text.Add(self.processlabel,coords=[0.03,0.80],fontsize=14)
 
+            # Plotting the difference between the prediction and 'true' value; could change this to do something else
             train_res = train-trainY
             test_res  = test-testY
             hist.extra_text.Add(r"Train = {0:.2f}$\pm${1:.2f}".format(np.mean(train_res),np.std(train_res)),coords=[0.03,0.80],fontsize=14)
@@ -256,12 +257,12 @@ class DeepLearningPlotter(object):
             hist.initialize()
 
             ## Training Prediction
-            hist.Add(train-trainY, name='train', linecolor='red',
+            hist.Add(train_res, name='train', linecolor='red',
                      linewidth=2, draw='step', label="Train Residual",
                      ratio_den=True,ratio_num=False,ratio_partner='test')
 
             ## Testing Prediction
-            hist.Add(test-testY, name='test', linecolor='blue',
+            hist.Add(test_res, name='test', linecolor='blue',
                      linewidth=2, draw='step', label="Test Residual",
                      ratio_den=False,ratio_num=True,ratio_partner='train')
 
@@ -369,7 +370,12 @@ class DeepLearningPlotter(object):
         return
 
 
-    def loss_history(self,history,kfold=0,val_loss=0.0):
+    def metrics(self,history,kfold=0,val_loss=0.0):
+        """Plot different metrics as a function of epoch for model"""
+        pass
+
+
+    def loss(self,history,kfold=0,val_loss=0.0):
         """Plot loss as a function of epoch for model"""
         self.msg_svc.INFO("DL : Plotting loss as a function of epoch number.")
 
@@ -425,5 +431,6 @@ class DeepLearningPlotter(object):
         """Plot the model architecture to view later"""
         keras_plot(model,to_file='{0}/{1}_model.eps'.format(self.output_dir,name),show_shapes=True)
         return
+
 
 ## THE END ##
