@@ -98,9 +98,12 @@ def variable_labels():
     variables['jet_eta'] =   Variable(binning=hist1d(10,-2.5,  2.5), label=r'Small-R Jet '+_eta)
     variables['btags_n'] =   Variable(binning=hist1d(4, -0.5,  3.5), label=r'Number of b-tags')
     variables['jet_bdisc'] = Variable(binning=hist1d(10, 0.,   1.),  label=r'Small-R Jet b-disc.')
+    
 
     variables['lep_eta'] = Variable(binning=hist1d(10,-2.5,   2.5),label=r'Lepton '+_eta)
     variables['lep_pt']  = Variable(binning=hist1d(10, 25.,  300.),label=r'Lepton p'+_T)
+    variables['lepton_eta'] = variables['lep_eta']
+    variables['lepton_pt']  = variables['lep_pt']
 
     variables['nu_phi']  = Variable(binning=hist1d(10,-2.5,   2.5), label=r'$\nu$ '+_phi)
     variables['nu_eta']  = Variable(binning=hist1d(10,-2.5,   2.5), label=r'$\nu$ '+_eta)
@@ -111,6 +114,25 @@ def variable_labels():
     variables['mass_lb'] = Variable(binning=hist1d(32,  0.,  800.),label=r'm$_{\ell\text{b}}$')
     variables['met_met'] = Variable(binning=hist1d(29, 20.,  500.),label=r'E$_{\text{T}}^{\text{miss}}$ [GeV]')
     variables['met_phi'] = Variable(binning=hist1d(29, 20.,  500.),label=r'$\phi^{\text{miss}}$ [GeV]')
+
+    variables['deltaPhi_lep_met']    = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(Lepton,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j0_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j1_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(2$^{\text{nd}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j2_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(3$^{\text{rd}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j3_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(4$^{\text{th}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+
+    variables['n_jets']     = Variable(binning=hist1d(21, -0.5,  20.5), label=r'Number of Small-R Jets')
+
+    bdisc_bins = array('d',[-1.1,-0.9]+[i*0.1 for i in range(11)])  # default value = -1
+    variables['jet0_bdisc'] = Variable(binning=bdisc_bins, label=r'Leading-p$_{\text{T}}$ Small-R Jet b-disc.')
+    variables['jet1_bdisc'] = Variable(binning=bdisc_bins, label=r'2$^{\text{nd}}$ Leading-p$_{\text{T}}$ Small-R Jet b-disc.')
+    variables['jet2_bdisc'] = Variable(binning=bdisc_bins, label=r'3$^{\text{rd}}$ Leading-p$_{\text{T}}$ Small-R Jet b-disc.')
+    variables['jet3_bdisc'] = Variable(binning=bdisc_bins, label=r'4$^{\text{th}}$ Leading-p$_{\text{T}}$ Small-R Jet b-disc.')
+
+    variables['jet0_ptrel'] = Variable(binning=hist1d(20,0,1), label=r'Leading-p$_{\text{T}}$ Small-R Jet Relative p$_{\text{T}}$')
+    variables['jet1_ptrel'] = Variable(binning=hist1d(20,0,1), label=r'2$^{\text{nd}}$ Leading-p$_{\text{T}}$ Small-R Jet Relative p$_{\text{T}}$')
+    variables['jet2_ptrel'] = Variable(binning=hist1d(20,0,1), label=r'3$^{\text{rd}}$ Leading-p$_{\text{T}}$ Small-R Jet Relative p$_{\text{T}}$')
+    variables['jet3_ptrel'] = Variable(binning=hist1d(20,0,1), label=r'4$^{\text{th}}$ Leading-p$_{\text{T}}$ Small-R Jet Relative p$_{\text{T}}$')
 
     return variables
 

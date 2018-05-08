@@ -44,7 +44,7 @@ from keras.models import Sequential,model_from_json,load_model
 from keras.layers import Dense, Activation
 from keras.callbacks import EarlyStopping
 from keras.utils.np_utils import to_categorical
-from sklearn.model_selection import train_test_split,StratifiedKFold
+from sklearn.model_selection import train_test_split,KFold,cross_val_score
 from sklearn.metrics import roc_curve, auc
 from deepLearningPlotter import DeepLearningPlotter
 
@@ -143,6 +143,8 @@ class DeepLearning(object):
             self.nNodes = [nodes_per_layer for _ in range(self.nHiddenLayers+1)] # 1st layer + nHiddenLayers
 
         ## -- Adjust activation function parameter (flexibilty in config file)
+        for i,a in enumerate(self.activations):
+            if a=='None' or a=='none': self.activations[i] = None
         if len(self.activations)==1:
             # Assume the same activation function for all layers (input,hidden,output)
             self.msg_svc.DEBUG("DL : Setting input, hidden, and output layers ({0}) \n".format(self.nHiddenLayers+2)+\
@@ -245,24 +247,15 @@ class DeepLearning(object):
             earlystop = EarlyStopping(**self.earlystopping)
             callbacks_list = [earlystop]
 
-        ttbar1 = self.df[ self.df['target']==1 ]
-#        ttbar2 = self.df[ self.df['target']==2 ]
+        X = self.df[self.features].values  # self.df[self.features].values
+        Y = self.df['target'].values       # self.df['target'].values
 
-        qcd    = self.df[ self.df['target']==0 ]
-        qcd    = qcd.sample(frac=1)[0:ttbar1.shape[0]]  # equal statistics (shuffle QCD entries first)
-
-        training_df = pd.concat( [qcd,ttbar1] ) #,ttbar2] )  # re-combine into dataframe
-        training_df = training_df.sample(frac=1)             # shuffle entries
-
-        X = training_df[self.features].values  # self.df[self.features].values
-        Y = training_df['target'].values       # self.df['target'].values
-
-        kfold = StratifiedKFold(n_splits=self.kfold_splits, shuffle=True, random_state=seed)
+        kfold   = KFold(n_splits=self.kfold_splits, shuffle=True, random_state=seed)
         nsplits = kfold.get_n_splits(X,Y)
         cvpredictions = []                 # compare outputs from each cross-validation
 
         self.msg_svc.INFO("DL :   Fitting K-Fold cross validation".format(self.kfold_splits))
-        for ind,(train,test) in enumerate(kfold.split(X,Y)):
+        for ind,(train,test) in enumerate(kfold.split(X)):
             self.msg_svc.DEBUG("DL :   - Fitting K-Fold {0}".format(ind))
 
             # store test/train data from each k-fold to compare later
@@ -274,7 +267,7 @@ class DeepLearning(object):
             # Fit the model to training data & save the history
             Y_train = Y[train]
             Y_test  = Y[test]
-            if self.dnn_method=='multi' or self.dnn_method=='regression' and not np.array_equal(Y_train,(Y_train[0],self.output_dim)):
+            if self.dnn_method=='multi' and not np.array_equal(Y_train,(Y_train[0],self.output_dim)):
                 train_shape = Y_train.shape[0]
                 train_total_array = []
                 test_shape = Y_test.shape[0]
@@ -289,6 +282,7 @@ class DeepLearning(object):
                     test_total_array.append( dummy_test.tolist() )
                 Y_train = np.array(train_total_array).T
                 Y_test  = np.array(test_total_array).T
+
             history = self.model.fit(X[train],Y_train,epochs=self.epochs,\
                                      callbacks=callbacks_list,batch_size=self.batch_size,verbose=self.verbose)
             self.histories.append(history)
@@ -435,7 +429,7 @@ class DeepLearning(object):
             self.plotter.prediction(train,test)   # compare DNN prediction for different targets
 
             self.msg_svc.INFO("DL : -- post-training :: ROC")
-            self.plotter.ROC(self.fpr,self.tpr,self.accuracy)  # ROC curve for signal vs background
+            if self.dnn_method=='binary': self.plotter.ROC(self.fpr,self.tpr,self.accuracy)  # ROC curve for signal vs background
             self.msg_svc.INFO("DL : -- post-training :: History")
             self.plotter.loss_history(self.histories) # loss as a function of epoch
 

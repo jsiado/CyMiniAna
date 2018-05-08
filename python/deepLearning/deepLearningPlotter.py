@@ -20,18 +20,19 @@ import os
 import sys
 import json
 import util
-from datetime import date
 import numpy as np
+from array import array
+from datetime import date
+
+import hepPlotter.hepPlotterLabels as hpl
+import hepPlotter.hepPlotterTools as hpt
+from hepPlotter.hepPlotter import HepPlotter
 
 import matplotlib.pyplot as plt
 from matplotlib import rc
 rc('font', family='sans-serif')
 from keras.utils.vis_utils import plot_model as keras_plot
 from sklearn.metrics import roc_curve, auc
-
-import hepPlotter.hepPlotterLabels as hpl
-import hepPlotter.hepPlotterTools as hpt
-from hepPlotter.hepPlotter import HepPlotter
 
 
 
@@ -102,7 +103,7 @@ class DeepLearningPlotter(object):
                 tmp.target_value = target_values
 
             tmp.label = self.sample_labels[tmp.name].label
-            tmp.color = self.betterColors[i]
+            tmp.color = self.sample_labels[tmp.name].color
             self.targets.append(tmp)
 
         return
@@ -219,8 +220,60 @@ class DeepLearningPlotter(object):
     def prediction(self,train_data={},test_data={}):
         """Plot the training and testing predictions"""
         self.msg_svc.INFO("DL : Plotting DNN prediction. ")
+        if self.classification: self.predictionClassification(train_data,test_data)
+        elif self.regression:   self.predictionRegression(train_data,test_data)
+        return
 
-        # Plot all k-fold cross-validation results
+    def predictionRegression(self,train_data={},test_data={}):
+        """Plot the training and testing predictions for all k-fold cross-validation results"""
+        for i,(train,trainY,test,testY) in enumerate(zip(train_data['X'],train_data['Y'],test_data['X'],test_data['Y'])):
+
+            hist = HepPlotter("histogram",1)
+
+            hist.ratio_plot = True
+            hist.ratio_type = "ratio"
+            hist.y_ratio_label = "Test/Train"
+            hist.label_size = 14
+            hist.normed  = True
+            hist.format  = self.image_format
+            hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(i,self.date)
+            hist.binning = array('d',[-3000+300*i for i in range(21)])
+            hist.stacked = False
+            hist.logplot = False
+            hist.x_label = "Residual"
+            hist.y_label = "Arbitrary Units"
+            hist.CMSlabel = 'top left'
+            hist.CMSlabelStatus   = self.CMSlabelStatus
+            hist.numLegendColumns = 1
+
+            if self.processlabel: hist.extra_text.Add(self.processlabel,coords=[0.03,0.80],fontsize=14)
+
+            train_res = train-trainY
+            test_res  = test-testY
+            hist.extra_text.Add(r"Train = {0:.2f}$\pm${1:.2f}".format(np.mean(train_res),np.std(train_res)),coords=[0.03,0.80],fontsize=14)
+            hist.extra_text.Add(r"Test  = {0:.2f}$\pm${1:.2f}".format(np.mean(test_res),np.std(test_res)),coords=[0.03,0.73],fontsize=14)
+
+            hist.initialize()
+
+            ## Training Prediction
+            hist.Add(train-trainY, name='train', linecolor='red',
+                     linewidth=2, draw='step', label="Train Residual",
+                     ratio_den=True,ratio_num=False,ratio_partner='test')
+
+            ## Testing Prediction
+            hist.Add(test-testY, name='test', linecolor='blue',
+                     linewidth=2, draw='step', label="Test Residual",
+                     ratio_den=False,ratio_num=True,ratio_partner='train')
+
+            p = hist.execute()
+            hist.savefig()
+
+        return
+
+
+
+    def predictionClassification(self,train_data={},test_data={}):
+        """Plot the training and testing predictions for all k-fold cross-validation results"""
         for i,(train,trainY,test,testY) in enumerate(zip(train_data['X'],train_data['Y'],test_data['X'],test_data['Y'])):
 
             hist = HepPlotter("histogram",1)
@@ -374,4 +427,3 @@ class DeepLearningPlotter(object):
         return
 
 ## THE END ##
-
