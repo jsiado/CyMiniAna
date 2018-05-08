@@ -114,6 +114,7 @@ class Event {
     void wprimeReconstruction();    // reconstructing Wprime (interface with tool)
     bool customIsolation( Lepton& lep );
     void deepLearningPrediction();
+    std::map<std::string,double> deepLearningFeatures();
 
     // Get weights
     virtual float nominal_weight() const {return m_nominal_weight;}

@@ -1,6 +1,6 @@
 /*
 Created:        --
-Last Updated:   20 February 2018
+Last Updated:    7 May 2018
 
 Dan Marley
 daniel.edison.marley@cernSPAMNOT.ch
@@ -14,8 +14,7 @@ Create and fill TTree for ML
 
 
 flatTree4ML::flatTree4ML(configuration &cmaConfig) : 
-  m_config(&cmaConfig),
-  m_nDeepAK8(16){}
+  m_config(&cmaConfig){}
 
 flatTree4ML::~flatTree4ML() {}
 
@@ -39,7 +38,28 @@ void flatTree4ML::initialize(TFile& outputFile) {
     m_ttree->Branch( "nominal_weight", &m_nominal_weight, "nominal_weight/F" );
 
     // Features
-    m_ttree->Branch( "target", &m_target, "target/I" );  // target value (.e.g, 0 or 1)
+    m_ttree->Branch( "target", &m_target, "target/F" );  // target value (neutrino pz)
+
+    m_ttree->Branch( "met_met", &m_met_met, "met_met/F");
+    m_ttree->Branch( "met_phi", &m_met_phi, "met_phi/F");
+    m_ttree->Branch( "mtw",     &m_mtw,     "mtw/F");
+    m_ttree->Branch( "lepton_pt",  &m_lepton_pt, "lepton_pt/F");
+    m_ttree->Branch( "lepton_eta", &m_lepton_eta, "lepton_eta/F");
+    m_ttree->Branch( "deltaPhi_lep_met", &m_deltaPhi_lep_met, "deltaPhi_lep_met/F");
+
+    m_ttree->Branch( "n_jets", &m_n_jets, "n_jets/I");
+    m_ttree->Branch( "deltaPhi_j0_met_phi", &m_deltaPhi_j0_met_phi, "deltaPhi_j0_met_phi/F");
+    m_ttree->Branch( "deltaPhi_j1_met_phi", &m_deltaPhi_j1_met_phi, "deltaPhi_j1_met_phi/F");
+    m_ttree->Branch( "deltaPhi_j2_met_phi", &m_deltaPhi_j2_met_phi, "deltaPhi_j2_met_phi/F");
+    m_ttree->Branch( "deltaPhi_j3_met_phi", &m_deltaPhi_j3_met_phi, "deltaPhi_j3_met_phi/F");
+    m_ttree->Branch( "jet0_bdisc", &m_jet0_bdisc, "jet0_bdisc/F");
+    m_ttree->Branch( "jet1_bdisc", &m_jet1_bdisc, "jet1_bdisc/F");
+    m_ttree->Branch( "jet2_bdisc", &m_jet2_bdisc, "jet2_bdisc/F");
+    m_ttree->Branch( "jet3_bdisc", &m_jet3_bdisc, "jet3_bdisc/F");
+    m_ttree->Branch( "jet0_ptrel", &m_jet0_ptrel, "jet0_ptrel/F");
+    m_ttree->Branch( "jet1_ptrel", &m_jet1_ptrel, "jet1_ptrel/F");
+    m_ttree->Branch( "jet2_ptrel", &m_jet2_ptrel, "jet2_ptrel/F");
+    m_ttree->Branch( "jet3_ptrel", &m_jet3_ptrel, "jet3_ptrel/F");
 
 
     /**** Metadata ****/
@@ -66,6 +86,29 @@ void flatTree4ML::saveEvent(const std::map<std::string,double> features) {
 
     m_target = features.at("target");
 
+    m_met_met = features.at("met_met");
+    m_met_phi = features.at("met_phi");
+    m_mtw     = features.at("mtw");
+    m_lepton_pt  = features.at("lepton_pt");
+    m_lepton_eta = features.at("lepton_eta");
+    m_deltaPhi_lep_met = features.at("deltaPhi_lep_met");
+
+    m_n_jets = features.at("n_jets");
+    m_deltaPhi_j0_met_phi = features.at("deltaPhi_j0_met_phi");
+    m_deltaPhi_j1_met_phi = features.at("deltaPhi_j1_met_phi");
+    m_deltaPhi_j2_met_phi = features.at("deltaPhi_j2_met_phi");
+    m_deltaPhi_j3_met_phi = features.at("deltaPhi_j3_met_phi");
+
+    m_jet0_bdisc = features.at("jet0_bdisc");
+    m_jet1_bdisc = features.at("jet1_bdisc");
+    m_jet2_bdisc = features.at("jet2_bdisc");
+    m_jet3_bdisc = features.at("jet3_bdisc");
+
+    m_jet0_ptrel = features.at("jet0_ptrel");
+    m_jet1_ptrel = features.at("jet1_ptrel");
+    m_jet2_ptrel = features.at("jet2_ptrel");
+    m_jet3_ptrel = features.at("jet3_ptrel");
+
     /**** Fill the tree ****/
     cma::DEBUG("FLATTREE4ML : Fill the tree");
     m_ttree->Fill();
@@ -85,4 +128,3 @@ void flatTree4ML::finalize(){
 }
 
 // THE END
-

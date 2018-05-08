@@ -19,6 +19,11 @@ enum class jet_id  {LOOSE, MEDIUM, TIGHT, TIGHTLEPVETO, NONE};
 struct CmaBase {
     TLorentzVector p4;
     int isGood;
+
+    void clear(){
+        p4.SetPtEtaPhiE(0,0,0,0);
+        isGood=false;
+    }
 };
 
 

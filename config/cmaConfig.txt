@@ -10,7 +10,7 @@ kinematicReco true
 isExtendedSample false
 useDNN false
 DNNinference false
-DNNtraining false
+DNNtraining true
 jet_btag_wkpt M
 makeTTree true
 makeHistograms true

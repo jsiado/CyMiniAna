@@ -369,6 +369,8 @@ void Event::execute(Long64_t entry){
     if (m_useWprime){
     }
 
+    deepLearningPrediction();   // store features in map (easily access later)
+
     cma::DEBUG("EVENT : Setup Event ");
 
     return;
@@ -594,8 +596,6 @@ void Event::initialize_ljets(){
         m_ljets.push_back(ljet);
         idx++;
     }
-
-    deepLearningPrediction();   // store features in map (easily access later)
 
     return;
 }
@@ -895,18 +895,57 @@ std::vector<int> Event::btag_jets(const std::string &wkpt) const{
 
 void Event::deepLearningPrediction(){
     /* Deep learning for large-R jets -- CWoLa */
+    m_deepLearningTool->clear();
+
     if (m_DNNinference){
         cma::DEBUG("EVENT : Calculate DNN ");
-        m_deepLearningTool->inference();
+        m_deepLearningTool->inference();      //m_leptons.at(0),m_met,m_jets
     }
     else if (m_DNNtraining){
-        m_deepLearningTool->training();
-        //ljet.features = m_deepLearningTool->features();  // store the features on the ljet to make easily accessible later
-    }
+        // train on events with 1 truth-level neutrino from W boson
+        // basic kinematic cuts on lepton, MET, jets
+        cma::DEBUG("EVENT : DNN Training ");
+        if (m_leptons.size()==1 && m_useTruth){
+            cma::DEBUG("EVENT : Begin loop over truth partons ");
+            Parton true_nu;
+            int n_wdecays2leptons(0);
+
+            for (const auto& p : m_truth_partons){
+                // only look for neutrinos from W decays
+                if (p.isW && p.child0_idx>=0 && p.child1_idx>=0){
+                    Parton child0 = m_truth_partons.at( p.child0_idx );
+                    Parton child1 = m_truth_partons.at( p.child1_idx );
+
+                    if (child0.isNeutrino && child1.isLepton){
+                        true_nu = child0;
+                        n_wdecays2leptons++;
+                    }
+                    else if (child1.isNeutrino && child0.isLepton){
+                        true_nu = child1;
+                        n_wdecays2leptons++;
+                    }
+                } // end if parton is W with two defined children
+            } // end loop over truth partons
+
+            // only want to train on single lepton events
+            if (n_wdecays2leptons==1){
+                m_deepLearningTool->setTrueNeutrino( true_nu );
+                m_deepLearningTool->setMET( m_met );
+                m_deepLearningTool->setLepton( m_leptons.at(0) );
+                m_deepLearningTool->setJets( m_jets );
+                m_deepLearningTool->training();
+            } // end training if truth-level neutrino found
+
+        } // end if at least 1 lepton and useTruth
+    } // end if training DNN
 
     return;
 }
 
+std::map<std::string,double> Event::deepLearningFeatures(){
+    /* Return the DNN features to the outside world -- call after deepLearningPrediction() */
+    return m_deepLearningTool->features();
+}
 
 /*** RETURN WEIGHTS ***/
 float Event::weight_mc(){
