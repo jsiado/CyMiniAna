@@ -62,7 +62,7 @@ def sample_labels():
     # Machine Learning (AK8+AK4)
     samples['QB'] = Sample(label=ttbar+' (QB)',color='white')
     samples['W']  = Sample(label=ttbar+' (W)',color='white')
-    samples['nu_pz'] = Sample(label=ttbar+' Neutrino',color='red')
+    samples['nu_pz'] = Sample(label=ttbar,color='red')
 
     return samples
 
@@ -99,7 +99,6 @@ def variable_labels():
     variables['jet_eta'] =   Variable(binning=hist1d(10,-2.5,  2.5), label=r'Small-R Jet '+_eta)
     variables['btags_n'] =   Variable(binning=hist1d(4, -0.5,  3.5), label=r'Number of b-tags')
     variables['jet_bdisc'] = Variable(binning=hist1d(10, 0.,   1.),  label=r'Small-R Jet b-disc.')
-    
 
     variables['lep_eta'] = Variable(binning=hist1d(10,-2.5,   2.5),label=r'Lepton '+_eta)
     variables['lep_pt']  = Variable(binning=hist1d(10, 25.,  300.),label=r'Lepton p'+_T)
@@ -109,18 +108,20 @@ def variable_labels():
     variables['nu_phi']  = Variable(binning=hist1d(10,-2.5,   2.5), label=r'$\nu$ '+_phi)
     variables['nu_eta']  = Variable(binning=hist1d(10,-2.5,   2.5), label=r'$\nu$ '+_eta)
     variables['nu_pt']   = Variable(binning=hist1d(20, 25.,  600.),  label=r'$\nu$ p'+_T)
+    variables['nu_pz_sampling'] = Variable(binning=hist1d(30,-3000,3000), label=r'Neutrin p$_\text{z}$ (Sampling)')
+    variables['nu_pz_standard'] = Variable(binning=hist1d(30,-3000,3000), label=r'Neutrin p$_\text{z}$ (Standard)')
 
     variables['HT']      = Variable(binning=hist1d(50,0.,5000.), label=r'H'+_T)
     variables['mtw']     = Variable(binning=hist1d(12,  0.,  120.),    label=r'$\mathsf{m_T^W}$ [GeV]')
     variables['mass_lb'] = Variable(binning=hist1d(32,  0.,  800.),label=r'm$_{\ell\text{b}}$')
     variables['met_met'] = Variable(binning=hist1d(29, 20.,  500.),label=r'E$_{\text{T}}^{\text{miss}}$ [GeV]')
-    variables['met_phi'] = Variable(binning=hist1d(29, 20.,  500.),label=r'$\phi^{\text{miss}}$ [GeV]')
+    variables['met_phi'] = Variable(binning=hist1d(16, -3.2, 3.2), label=r'$\phi^{\text{miss}}$ [GeV]')
 
-    variables['deltaPhi_lep_met']    = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(Lepton,E$_{\text{T}}^{\text{miss}}$)')
-    variables['deltaPhi_j0_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
-    variables['deltaPhi_j1_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(2$^{\text{nd}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
-    variables['deltaPhi_j2_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(3$^{\text{rd}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
-    variables['deltaPhi_j3_met_phi'] = Variable(binning=hist1d(16,-3.2,3.2), label=r'$\Delta\phi$(4$^{\text{th}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_lep_met']    = Variable(binning=hist1d(8,0.0,3.2), label=r'$\Delta\phi$(Lepton,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j0_met_phi'] = Variable(binning=hist1d(8,0.0,3.2), label=r'$\Delta\phi$(Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j1_met_phi'] = Variable(binning=hist1d(8,0.0,3.2), label=r'$\Delta\phi$(2$^{\text{nd}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j2_met_phi'] = Variable(binning=hist1d(8,0.0,3.2), label=r'$\Delta\phi$(3$^{\text{rd}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
+    variables['deltaPhi_j3_met_phi'] = Variable(binning=hist1d(8,0.0,3.2), label=r'$\Delta\phi$(4$^{\text{th}}$ Leading-p$_{\text{T}}$ Small-R Jet,E$_{\text{T}}^{\text{miss}}$)')
 
     variables['n_jets']     = Variable(binning=hist1d(21, -0.5,  20.5), label=r'Number of Small-R Jets')
 

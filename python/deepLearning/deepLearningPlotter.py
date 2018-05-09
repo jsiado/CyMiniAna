@@ -31,6 +31,7 @@ from hepPlotter.hepPlotter import HepPlotter
 import matplotlib.pyplot as plt
 from matplotlib import rc
 rc('font', family='sans-serif')
+from matplotlib.ticker import AutoMinorLocator,FormatStrFormatter
 from keras.utils.vis_utils import plot_model as keras_plot
 from sklearn.metrics import roc_curve, auc
 
@@ -145,7 +146,7 @@ class DeepLearningPlotter(object):
 
             if self.classification=='binary':
                 separation = util.getSeparation(self.targets[0].df[feature],self.targets[1].df[feature])
-                hist.extra_text.Add("Separation = {0}".format(separation),coords=[0.03,0.73])
+                hist.extra_text.Add("Separation = {0:.2f}".format(separation),coords=[0.03,0.73])
 
             p = hist.execute()
             hist.savefig()
@@ -156,9 +157,55 @@ class DeepLearningPlotter(object):
     def separations(self):
         """Plot the separation between different samples for each target
            1D: Bar graph showing the separation between S/B (0,1)
+               https://matplotlib.org/gallery/lines_bars_and_markers/barh.html
            2D: Matrix (a la correlation matrix) with scale (0,1) showing separation between S/B in 2D plane
         """
-        pass
+        # 1D
+        fig, ax = plt.subplots()
+        data = {}
+
+        # calculate the separations
+        for feature in self.features:
+            separation = util.getSeparation(self.targets[0].df[feature],self.targets[1].df[feature])
+            data[feature] = separation
+
+        sorted_data_keys = sorted( data, key=data.get, reverse=True )  # sort by largest -> smallest separation
+        ticks = range(len(self.features))
+
+        ax.barh( ticks, [data[f] for f in sorted_data_keys], align='center' )
+
+        ax.set_yticks()
+        ax.set_yticklabels(sorted_data_keys)
+        ax.invert_yaxis()
+        ax.set_xlim([0,1])
+
+        ax.set_xlabel(r'Separation',fontsize=22,ha='right',va='top',position=(1,0))
+        ax.set_xticklabels(ax.get_xticks(),fontsize=22)
+        ax.xaxis.set_major_formatter(FormatStrFormatter('%g'))
+
+        ## CMS/COM Energy Label + Signal name
+        cms_stamp = hpl.CMSStamp(self.CMSlabelStatus)
+        cms_stamp.coords = [0.02,1.00]
+        cms_stamp.fontsize = 16
+        cms_stamp.va = 'bottom'
+        ax.text(0.02,1.00,cms_stamp.text,fontsize=cms_stamp.fontsize,
+                ha=cms_stamp.ha,va=cms_stamp.va,transform=ax.transAxes)
+
+        energy_stamp    = hpl.EnergyStamp()
+        energy_stamp.ha = 'right'
+        energy_stamp.coords = [0.99,1.00]
+        energy_stamp.fontsize = 16
+        energy_stamp.va = 'bottom'
+        ax.text(energy_stamp.coords[0],energy_stamp.coords[1],energy_stamp.text, 
+                fontsize=energy_stamp.fontsize,ha=energy_stamp.ha, va=energy_stamp.va, transform=ax.transAxes)
+
+        ax.text(0.03,0.93,target.label,fontsize=16,ha='left',va='top',transform=ax.transAxes)
+
+        plt.savefig(self.output_dir+"/separations1D_{0}_{1}.{2}".format(target.name,self.date,self.image_format),
+                    format=self.image_format,dpi=300,bbox_inches='tight')
+        plt.close()
+
+        return
 
 
     def correlations(self):
@@ -187,9 +234,12 @@ class DeepLearningPlotter(object):
             labels = [i.replace('_','\_') for i in labels]
             # shift location of ticks to center of the bins
             ax.set_xticks(np.arange(len(labels))+0.5, minor=False)
-            ax.set_yticks(np.arange(len(labels))+0.5, minor=False)
             ax.set_xticklabels(labels, fontProperties, fontsize=18, minor=False, ha='right', rotation=70)
+            ax.xaxis.set_major_formatter(FormatStrFormatter('%g'))
+
+            ax.set_yticks(np.arange(len(labels))+0.5, minor=False)
             ax.set_yticklabels(labels, fontProperties, fontsize=18, minor=False)
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%g'))
 
             ## CMS/COM Energy Label + Signal name
             cms_stamp = hpl.CMSStamp(self.CMSlabelStatus)

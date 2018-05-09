@@ -43,9 +43,9 @@ class Regression(DeepLearning):
 
 
     ## Single functions to run all of the necessary pieces
-    def runTraining(self):
+    def runTraining(self,extra_branches=[]):
         """Train NN model"""
-        self.load_hep_data()
+        self.load_hep_data(extra_branches)
         self.build_model()
 
         self.plotter.initialize(self.df,'nu_pz')

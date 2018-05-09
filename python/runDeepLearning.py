@@ -141,7 +141,7 @@ if config.runTraining:
     vb.INFO("RUN :  > Build the NN")
 
     # set properties of the NN
-    dnn.runTraining()    # add extra attributes to plot as list
+    dnn.runTraining(['nu_pz_sampling','nu_pz_standard'])    # add extra attributes to plot as list
 
     ## -- Save information on the NN to a text file to reference later
     outputFile = open(dnn.output_dir+'/ABOUT.txt','w')
