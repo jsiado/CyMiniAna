@@ -1,8 +1,8 @@
 date today
 output_dir eos
-eos_path /store/group/lpctlbsm/wprime-qQ/flatNtuples/viper/ttbar/
+eos_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/
 subdir ttbar
-eos_tarball_path /store/group/lpctlbsm/wprime-qQ/flatNtuples/viper/
+eos_tarball_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/viper/
 files config/listOfTtbarFiles.txt
 username demarley
 executable runML

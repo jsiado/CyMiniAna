@@ -140,6 +140,7 @@ class configuration {
     bool m_isSingleTop;
     bool m_isDiboson;
     bool m_isZjets;
+    bool m_isSignal;
 
     // object declarations
     bool m_useTruth;
@@ -231,57 +232,6 @@ class configuration {
     bool m_kinematicReco;
     bool m_neutrinoReco;
     bool m_wprimeReco;
-
-    std::vector<std::string> m_mcFiles;
-
-    // Primary dataset names for different samples in analysis
-    std::map<std::string,std::string> m_mapOfPrimaryDatasets = {
-        {"ttbar","TT_TuneCUETP8M2T4_13TeV-powheg-pythia8"},
-        {"ttbar-ext","TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-ext"},
-        {"ttbarGOOD","TT_TuneCUETP8M1_13TeV-powheg-pythia8"},
-        {"ttbarGEN","TT_TuneCUETP8M1_13TeV-powheg-pythia8"},
-        {"singletop_schan","ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1"},
-        {"singletop_tchan_top","ST_t-channel_top_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin"},
-        {"singletop_tchan_antitop","ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin"},
-        {"singletop_tWchan_antitop","ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1"},
-        {"singletop_tWchan_top","ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1"},
-        {"wjets1","WJetsToLNu_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8"},
-        {"wjets2","WJetsToLNu_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8"},
-        {"wjets3","WJetsToLNu_Pt-400To600_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8"},
-        {"wjets4","WJetsToLNu_Pt-600ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8"},
-        {"diboson-ww","WW_TuneCUETP8M1_13TeV-pythia8"},
-        {"diboson-wz","WZ_TuneCUETP8M1_13TeV-pythia8"},
-        {"diboson-zz","ZZ_TuneCUETP8M1_13TeV-pythia8"},
-        {"zjets","DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"},
-        {"qcd","QCD_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt0080","QCD_Pt-80to120_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt0120","QCD_Pt-120to170_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt0170","QCD_Pt-170to300_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt0300","QCD_Pt-300to470_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt0470","QCD_Pt-470to600_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt0600","QCD_Pt-600to800_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt0800","QCD_Pt-800to1000_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_mu_pt1000","QCD_Pt-1000toInf_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_el_pt0080","QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_el_pt0120","QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_el_pt0170","QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_el_pt0300","QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_b_pt080","QCD_Pt_80to170_bcToE_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_b_pt170","QCD_Pt_170to250_bcToE_TuneCUETP8M1_13TeV_pythia8"},
-        {"qcd_b_pt250","QCD_Pt_250toInf_bcToE_TuneCUETP8M1_13TeV_pythia8"},
-    };
-
-    std::vector<std::string> m_qcdFiles   = {"qcd","qcd_mu_pt0080","qcd_mu_pt0120","qcd_mu_pt0170","qcd_mu_pt0300",
-                                             "qcd_mu_pt0470","qcd_mu_pt0600","qcd_mu_pt0800","qcd_mu_pt1000",
-                                             "qcd_el_pt0080","qcd_el_pt0120","qcd_el_pt0170","qcd_el_pt0300",
-                                             "qcd_b_pt080","qcd_b_pt170","qcd_b_pt250"};
-    std::vector<std::string> m_ttbarFiles = {"ttbarGOOD","ttbarGEN","ttbar","ttbar-ext"};
-    std::vector<std::string> m_wjetsFiles = {"wjets1","wjets2","wjets3","wjets4"};
-    std::vector<std::string> m_singleTopFiles = {"singletop_schan","singletop_tWchan_antitop",
-                                                 "singletop_tWchan_top","singletop_tchan_antitop",
-                                                 "singletop_tchan_top","singletop_tchan_top"};
-    std::vector<std::string> m_dibosonFiles = {"diboson-ww","diboson-wz","diboson-zz"};
-    std::vector<std::string> m_zjetsFiles = {"zjets"};
 
     std::map<std::string,std::string> m_defaultConfigs = {
              {"isZeroLeptonAnalysis",  "false"},

@@ -161,14 +161,18 @@ void getSampleWeights( std::string metadata_file,
     while( std::getline(in,line) ) {
 
         if (!line.empty() && line[0]!='#') {
+            std::string stype("");
             std::string dsid("");
-            unsigned int NEvents;
-            float xSect,kFact,sumWeights;
+            unsigned int NEvents(1);
+            float xSect(1);
+            float kFact(1);
+            float sumWeights(1);
 
             std::istringstream istr(line);
-            istr >> dsid >> xSect >> sumWeights >> kFact >> NEvents;
+            istr >> stype >> dsid >> xSect >> sumWeights >> kFact >> NEvents;
 
             Sample s;
+            s.sampleType     = stype;
             s.primaryDataset = dsid;
             s.XSection       = xSect;
             s.KFactor        = kFact;
