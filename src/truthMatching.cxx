@@ -47,6 +47,8 @@ void truthMatching::buildWprimeSystem(){
 
     for (const auto& p : m_truth_partons){
         if (p.isWprime && p.child0_idx>=0 && p.child1_idx>=0){
+            m_truth_wp.wprime = p;
+
             Parton child0 = m_truth_partons.at( p.child0_idx );
             Parton child1 = m_truth_partons.at( p.child1_idx );
 

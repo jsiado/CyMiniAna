@@ -465,6 +465,8 @@ void Event::initialize_truth(){
     }
 
     m_truthMatchingTool->setTruthPartons(m_truth_partons);
+    m_truthMatchingTool->buildWprimeSystem();
+    m_truth_wprime = m_truthMatchingTool->wprime();         // build the truth wprime decay chain
 
     return;
 }
@@ -631,7 +633,7 @@ void Event::initialize_leptons(){
 
         bool iso = customIsolation(mu);    // 2D isolation cut between leptons & AK4 (need AK4 initialized first!)
 
-        bool isGood(mu.p4.Pt()>50 && std::abs(mu.p4.Eta())<2.4 && isMedium && iso);
+        bool isGood(mu.p4.Pt()>60 && std::abs(mu.p4.Eta())<2.4 && isMedium && iso);
         if (!isGood) continue;
 
         mu.charge = (*m_mu_charge)->at(i);
@@ -656,7 +658,7 @@ void Event::initialize_leptons(){
 
         bool iso = customIsolation(el);    // 2D isolation cut between leptons & AK4 (need AK4 initialized first!)
 
-        bool isGood(el.p4.Pt()>50 && std::abs(el.p4.Eta())<2.4 && isTightNoIso && iso);
+        bool isGood(el.p4.Pt()>60 && std::abs(el.p4.Eta())<2.4 && isTightNoIso && iso);
         if (!isGood) continue;
 
         el.charge = (*m_el_charge)->at(i);

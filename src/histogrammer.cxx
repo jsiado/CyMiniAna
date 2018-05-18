@@ -203,7 +203,23 @@ void histogrammer::bookHists( std::string name ){
     init_hist("st_"+name,     5000,  0.0, 5000);
 
 
-/*  VLQ/Wprime
+    //  VLQ/Wprime
+    if (m_config->useTruth()) {
+        init_hist("jet_pt_truth_quark_Wprime_"+name,  2000, 0., 2000.);
+        init_hist("jet_bdisc_truth_quark_Wprime_"+name,100, 0.,    1.);
+
+        init_hist("truth_wprime_mass_"+name,  5000, 0, 5000 );
+        init_hist("truth_vlq_mass_"+name,     5000, 0, 5000 );
+
+        init_hist("truth_quark_pt_"+name,     2000, 0, 2000 );
+        init_hist("truth_vlq_boson_pt_"+name, 2000, 0, 2000 );
+        init_hist("truth_vlq_quark_pt_"+name, 2000, 0, 2000 );
+
+        init_hist("truth_deltaR_wprime_quark-vlq_"+name, 500, 0, 5 );  // deltaR( VLQ, quark ) from Wprime decay
+        init_hist("truth_deltaR_vlq_boson-quark_"+name,  500, 0, 5 );  // deltaR( boson, quark ) from VLQ decay
+        init_hist("truth_deltaR_boson_decays_"+name,     500, 0, 5 );  // deltaR( child0, child1 ) from boson decay
+    }
+/*
     init_hist("wprime_mass_"+name,  6000, 0.0, 6000);
     init_hist("vlq_mass_"+name,     5000, 0.0, 5000);
 */
@@ -375,18 +391,18 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
         fill("nu_phi_"+name, nu.p4.Phi(), event_weight);
         fill("nu_eta_smp_"+name, tmp_nu.Eta(), event_weight);
 
-        for (const auto pz : nu.pz_samplings)
-            fill("nu_pz_samples_"+name, pz, 1.0);   // look at the distribution of pz
+//        for (const auto pz : nu.pz_samplings)
+//            fill("nu_pz_samples_"+name, pz, 1.0);   // look at the distribution of pz
 
         if (m_config->useTruth()){
+            cma::DEBUG("HISTOGRAMMER : Fill neutrinos -- truth info");
+            TruthWprime wp = event.truth_wprime();
+
             float tru_pz(-999.);
             float tru_eta(-999.);
-            for (const auto& p : partons){
-                if (p.isNeutrino){
-                    tru_pz  = p.p4.Pz();
-                    tru_eta = p.p4.Eta();
-                }
-            }
+            Parton p = (wp.BosonChildren[0].isNeutrino) ? wp.BosonChildren[0] : wp.BosonChildren[1];
+            tru_pz  = p.p4.Pz();
+            tru_eta = p.p4.Eta();
 
             float deltaPz     = tru_pz - nu.p4.Pz();
             float deltaPz_smp = tru_pz - nu.pz_sampling;
@@ -412,6 +428,44 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
     fill("met_phi_"+name, met.p4.Phi(), event_weight);
     fill("ht_"+name,      event.HT(),   event_weight);
     fill("st_"+name,      event.ST(),   event_weight);
+
+    if (m_config->useTruth()){
+        cma::DEBUG("HISTOGRAMMER : Fill truth information");
+
+        TruthWprime wp = event.truth_wprime();
+
+        float ptmin(0.0);
+        float drmin(0.4);
+        int j_index(-1);
+        for (const auto& j : jets) {
+            if (j.p4.DeltaR(wp.quark.p4)<drmin && j.p4.Pt()>ptmin) {
+                j_index = j.index;
+                drmin = j.p4.DeltaR(wp.quark.p4);
+                ptmin = j.p4.Pt();
+            }
+        }
+        if (j_index>=0) {
+            fill("jet_pt_truth_quark_Wprime_"+name,   jets.at(j_index).p4.Pt(), event_weight);
+            fill("jet_bdisc_truth_quark_Wprime_"+name,jets.at(j_index).bdisc,   event_weight);
+        }
+
+        TLorentzVector wp_quark = wp.quark.p4;
+        TLorentzVector wp_vlq   = wp.vlq.p4;
+        TLorentzVector wp_vlq_quark = wp.vlq_quark.p4;
+        TLorentzVector wp_vlq_boson = wp.vlq_boson.p4;
+        TLorentzVector wp_boson_child0 = wp.BosonChildren[0].p4;  // first child from boson (boson from VLQ)
+        TLorentzVector wp_boson_child1 = wp.BosonChildren[1].p4;  // second child from boson (boson from VLQ)
+
+        fill("truth_wprime_mass_"+name,  wp.wprime.p4.M(), event_weight );
+        fill("truth_vlq_mass_"+name,     wp_vlq.M(),    event_weight );
+        fill("truth_quark_pt_"+name,     wp_quark.Pt(), event_weight );
+        fill("truth_vlq_boson_pt_"+name, wp_vlq_boson.Pt(), event_weight );
+        fill("truth_vlq_quark_pt_"+name, wp_vlq_quark.Pt(), event_weight );
+
+        fill("truth_deltaR_wprime_quark-vlq_"+name, wp_quark.DeltaR( wp_vlq ), event_weight );            // deltaR( VLQ, quark ) from Wprime decay
+        fill("truth_deltaR_vlq_boson-quark_"+name,  wp_vlq_boson.DeltaR( wp_vlq_quark ), event_weight );  // deltaR( boson, quark ) from VLQ decay
+        fill("truth_deltaR_boson_decays_"+name,     wp_boson_child0.DeltaR( wp_boson_child1 ), event_weight );  // deltaR( child0, child1 ) from boson decay
+    }
 
 /*
     cma::DEBUG("HISTOGRAMMER : Fill VLQ/Wprime");

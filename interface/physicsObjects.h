@@ -76,6 +76,7 @@ struct TruthTop {
 };
 
 struct TruthWprime {
+    Parton wprime;
     Parton vlq;
     Parton quark;
     Parton vlq_boson;                   // boson from VLQ
