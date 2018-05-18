@@ -29,7 +29,12 @@ class Variable(object):
 
 
 def sample_labels():
-    """Dictionaries that contain Samples objects."""
+    """Dictionaries that contain Samples objects.
+       > The key values match those in config/sampleMetadata.txt.
+         (The functions in util.py are setup to read the information this way.)
+         If you want something unique, then you may need to specify 
+         it manually in your plotting script
+    """
     ## Sample information
     samples = {}
 
@@ -53,6 +58,37 @@ def sample_labels():
 
     # Signal
     samples['zprime_1000'] = Sample(label=r'm$_{\text{Z}^\prime}$=1.0 TeV',color='r')
+    wprime_nar = r'm$_{\text{W}^\prime_\text{n}}$'
+    wprime_wid = r'm$_{\text{W}^\prime_\text{w}}$'
+    vlq_nar    = r'm$_{\text{T}_\text{n}}$'
+    vlq_wid    = r'm$_{\text{T}_\text{w}}$'
+    samples['Wp1500NarTp1200NarLH'] = Sample(label=r'{0}=1.5 TeV,{1}=1.2 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp1500NarTp700NarLH']  = Sample(label=r'{0}=1.5 TeV,{1}=0.7 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp1500NarTp700NarRH']  = Sample(label=r'{0}=1.5 TeV,{1}=0.7 TeV (RH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp1500NarTp700WidLH']  = Sample(label=r'{0}=1.5 TeV,{1}=0.7 TeV (LH)'.format(wprime_nar,vlq_wid),color='r')
+    samples['Wp1500NarTp900NarLH']  = Sample(label=r'{0}=1.5 TeV,{1}=0.9 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp1500WidTp1200WidLH'] = Sample(label=r'{0}=1.5 TeV,{1}=1.2 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp1500WidTp700NarLH']  = Sample(label=r'{0}=1.5 TeV,{1}=0.7 TeV (LH)'.format(wprime_wid,vlq_nar),color='r')
+    samples['Wp1500WidTp700WidLH']  = Sample(label=r'{0}=1.5 TeV,{1}=0.7 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp1500WidTp900WidLH']  = Sample(label=r'{0}=1.5 TeV,{1}=0.9 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp2000NarTp1200NarLH'] = Sample(label=r'{0}=2.0 TeV,{1}=1.2 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2000NarTp1200NarRH'] = Sample(label=r'{0}=2.0 TeV,{1}=1.2 TeV (RH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2000NarTp1200WidLH'] = Sample(label=r'{0}=2.0 TeV,{1}=1.2 TeV (LH)'.format(wprime_nar,vlq_wid),color='r')
+    samples['Wp2000NarTp1500NarLH'] = Sample(label=r'{0}=2.0 TeV,{1}=1.5 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2000NarTp900NarLH']  = Sample(label=r'{0}=2.0 TeV,{1}=0.9 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2000WidTp1200NarLH'] = Sample(label=r'{0}=2.0 TeV,{1}=1.2 TeV (LH)'.format(wprime_wid,vlq_nar),color='r')
+    samples['Wp2000WidTp1200WidLH'] = Sample(label=r'{0}=2.0 TeV,{1}=1.2 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp2000WidTp1500WidLH'] = Sample(label=r'{0}=2.0 TeV,{1}=1.5 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp2000WidTp900WidLH']  = Sample(label=r'{0}=2.0 TeV,{1}=0.9 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp2500NarTp1200NarLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.2 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2500NarTp1500NarLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.5 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2500NarTp1900NarLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.9 TeV (LH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2500NarTp1900NarRH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.9 TeV (RH)'.format(wprime_nar,vlq_nar),color='r')
+    samples['Wp2500NarTp1900WidLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.9 TeV (LH)'.format(wprime_nar,vlq_wid),color='r')
+    samples['Wp2500WidTp1200WidLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.2 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp2500WidTp1500WidLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.5 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
+    samples['Wp2500WidTp1900NarLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.9 TeV (LH)'.format(wprime_wid,vlq_nar),color='r')
+    samples['Wp2500WidTp1900WidLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.9 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
 
     # Generic
     samples['mu']        = Sample(label=r'$\mu$+jets',color='k')

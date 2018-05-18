@@ -14,6 +14,14 @@ to be called from other python scripts.
 import ROOT
 import numpy as np
 
+
+class Sample(object):
+    """Class for organizing metadata information about physics samples"""
+    def __init__(self,label='',color=''):
+        self.sampleType     = ""
+        self.primaryDataset = ""
+
+
 def getHistSeparation( S, B ):
     """Compare TH1* S and B -- need same dimensions
        Copied from : https://root.cern.ch/doc/master/MethodBase_8cxx_source.html#l02740
@@ -127,13 +135,55 @@ def str2bool(param):
         return False
 
 
-
 def file2list(filename):
     """Load text file and dump contents into a list"""
     listOfFiles = open( filename,'r').readlines()
     listOfFiles = [i.rstrip('\n') for i in listOfFiles]
 
     return listOfFiles
+
+
+def loadMetadata(file):
+    """Load metadata"""
+    data    = file2list(file)
+    samples = {}
+    for i in data:
+        items = i.split(" ")
+        s = Sample()
+        s.sampleType     = items[0]
+        s.primaryDataset = items[1]
+
+        samples[items[1]] = s
+
+    data = Sample()
+    data.sampleType = 'data'
+    data.primaryDataset = 'data'
+
+    mujets = Sample()
+    mujets.sampleType = 'mujets'
+    mujets.primaryDataset = 'SingleMuon'
+
+    ejets = Sample()
+    ejets.sampleType = 'ejets'
+    ejets.primaryDataset = 'SingleElectron'
+
+    samples['data'] = data
+    samples['SingleMuon'] = mujets
+    samples['SingleElectron'] = ejets
+
+    return samples
+
+
+def getPrimaryDataset(root_file):
+    """Get the sample type given the root file"""
+    try:
+        md = root_file.Get("tree/metadata")
+        md.GetEntry(0)
+        pd = md.primaryDataset
+    except:
+        pd = None
+
+    return name
 
 
 
