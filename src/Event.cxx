@@ -434,20 +434,25 @@ void Event::initialize_truth(){
         parton.status = status;
 
         // simple booleans for type
+        parton.isWprime = ( abs_pdgId==9900213 );
+        parton.isVLQ    = ( abs_pdgId==8000001 || abs_pdgId==7000001 );
         parton.isTop = ( abs_pdgId==6 );
         parton.isW   = ( abs_pdgId==24 );
+        parton.isZ   = ( abs_pdgId==23 );
+        parton.isHiggs  = ( abs_pdgId==25 );
+
         parton.isLepton = ( abs_pdgId>=11 && abs_pdgId<=16 );
         parton.isQuark  = ( abs_pdgId<7 );
 
         if (parton.isLepton){
-            parton.isTau  = ( abs_pdgId==15 ) ? 1 : 0;
-            parton.isMuon = ( abs_pdgId==13 ) ? 1 : 0;
-            parton.isElectron = ( abs_pdgId==11 ) ? 1 : 0;
-            parton.isNeutrino = ( abs_pdgId==12 || abs_pdgId==14 || abs_pdgId==16 ) ? 1 : 0;
+            parton.isTau  = ( abs_pdgId==15 );
+            parton.isMuon = ( abs_pdgId==13 );
+            parton.isElectron = ( abs_pdgId==11 );
+            parton.isNeutrino = ( abs_pdgId==12 || abs_pdgId==14 || abs_pdgId==16 );
         }
         else if (parton.isQuark){
-            parton.isLight  = ( abs_pdgId<5 ) ? 1 : 0;
-            parton.isBottom = ( abs_pdgId==5 ) ? 1 : 0;
+            parton.isLight  = ( abs_pdgId<5 );
+            parton.isBottom = ( abs_pdgId==5 );
         }
 
         parton.index      = p_idx;                    // index in vector of truth_partons
@@ -474,18 +479,22 @@ void Event::initialize_jets(){
      */
     unsigned int nJets = (*m_jet_pt)->size();
     m_jets.clear();
+    m_jets_iso.clear();    // jet collection for lepton 2D isolation
 
     for (const auto& btagWP : m_config->btagWkpts() ){
         m_btag_jets[btagWP].clear();
     }
 
     unsigned int idx(0);
+    unsigned int idx_iso(0);
     for (unsigned int i=0; i<nJets; i++){
         Jet jet;
         jet.p4.SetPtEtaPhiM( (*m_jet_pt)->at(i),(*m_jet_eta)->at(i),(*m_jet_phi)->at(i),(*m_jet_m)->at(i));
 
         bool isGood(jet.p4.Pt()>50 && std::abs(jet.p4.Eta())<2.4);
-        if (!isGood) continue;
+        bool isGoodIso( jet.p4.Pt()>15 && std::abs(jet.p4.Eta())<2.4);
+
+        if (!isGood && !isGoodIso) continue;
 
         jet.bdisc    = (*m_jet_bdisc)->at(i);
         jet.deepCSV  = (*m_jet_deepCSV)->at(i);
@@ -496,10 +505,15 @@ void Event::initialize_jets(){
         jet.index  = idx;
         jet.isGood = isGood;
 
-        getBtaggedJets(jet);
-
-        m_jets.push_back(jet);
-        idx++;
+        if (isGood){
+            m_jets.push_back(jet);
+            getBtaggedJets(jet);          // only care about b-tagging for 'real' AK4
+            idx++;
+        }
+        if (isGoodIso){
+            m_jets_iso.push_back(jet);    // used for 2D isolation
+            idx_iso++;
+        }
     }
 
     m_btag_jets_default = m_btag_jets.at(m_config->jet_btagWkpt());
@@ -772,16 +786,16 @@ void Event::initialize_kinematics(){
 bool Event::customIsolation( Lepton& lep ){
     /* 2D isolation cut for leptons 
        - Check that the lepton and nearest AK4 jet satisfies
-         DeltaR() < 0.4 || pTrel>25
+         DeltaR() < 0.4 || pTrel>30
     */
     bool pass(false);
     //int min_index(-1);                    // index of AK4 closest to lep
     float drmin(100.0);                   // min distance between lep and AK4s
     float ptrel(0.0);                     // pTrel between lepton and AK4s
 
-    if (m_jets.size()<1) return false;    // no AK4 -- event will fail anyway
+    if (m_jets_iso.size()<1) return false;    // no AK4 -- event will fail anyway
 
-    for (const auto& jet : m_jets){
+    for (const auto& jet : m_jets_iso){
         float dr = lep.p4.DeltaR( jet.p4 );
         if (dr < drmin) {
             drmin = dr;
@@ -793,7 +807,7 @@ bool Event::customIsolation( Lepton& lep ){
     lep.drmin = drmin;
     lep.ptrel = ptrel;
 
-    if (drmin > 0.4 || ptrel > 25) pass = true;
+    if (drmin > 0.4 || ptrel > 30) pass = true;
 
     return pass;
 }

@@ -41,8 +41,13 @@ struct Parton : CmaBase {
     int top_index;   // index of parton in the truth_top vector
 
     // Heavy Object Booleans
+    bool isWprime;
+    bool isVLQ;
+
     bool isTop;
     bool isW;
+    bool isZ;
+    bool isHiggs;
     // Lepton Booleans
     bool isLepton;
     bool isTau;
@@ -70,6 +75,16 @@ struct TruthTop {
     bool isLeptonic;  // W decays to leptons
 };
 
+struct TruthWprime {
+    Parton vlq;
+    Parton quark;
+    Parton vlq_boson;                   // boson from VLQ
+    Parton vlq_quark;                   // quark from VLQ
+    std::vector<Parton> BosonChildren;  // decays of VLQ boson (W)
+
+    bool isLeptonic;
+    bool isHadronic;
+};
 
 
 // Struct for jets

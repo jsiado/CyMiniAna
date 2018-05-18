@@ -197,9 +197,10 @@ void histogrammer::bookHists( std::string name ){
     }
 
     // kinematics
-    init_hist("met_met_"+name, 500,  0.0,  500);
-    init_hist("met_phi_"+name, 6.4, -3.2,  3.2);
+    init_hist("met_met_"+name, 500,  0.0, 2000);
+    init_hist("met_phi_"+name,  64, -3.2,  3.2);
     init_hist("ht_"+name,     5000,  0.0, 5000);
+    init_hist("st_"+name,     5000,  0.0, 5000);
 
 
 /*  VLQ/Wprime
@@ -410,7 +411,7 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
     fill("met_met_"+name, met.p4.Pt(),  event_weight);
     fill("met_phi_"+name, met.p4.Phi(), event_weight);
     fill("ht_"+name,      event.HT(),   event_weight);
-
+    fill("st_"+name,      event.ST(),   event_weight);
 
 /*
     cma::DEBUG("HISTOGRAMMER : Fill VLQ/Wprime");

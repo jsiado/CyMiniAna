@@ -321,6 +321,7 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
         pass = true;
     }
 
+/*
     if (ljets){
         // Do the selection based on which lepton flavor we have in the event
         if (m_NElectrons==1) pass = ejetsSelection(cutflow_bin+3,lep);
@@ -330,6 +331,7 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
         // Only do the el (mu) selection if the user request e+jets (mu+jets)
         pass = (ejets) ? ejetsSelection(cutflow_bin+3,lep) : mujetsSelection(cutflow_bin+3);
     }
+*/
 
     return pass;
 }

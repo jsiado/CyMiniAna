@@ -41,6 +41,46 @@ void truthMatching::setTruthTops(const std::vector<TruthTop> truth_tops){
 }
 
 
+void truthMatching::buildWprimeSystem(){
+    /* Build the truth-level wprime system */
+    m_truth_wp = {};
+
+    for (const auto& p : m_truth_partons){
+        if (p.isWprime && p.child0_idx>=0 && p.child1_idx>=0){
+            Parton child0 = m_truth_partons.at( p.child0_idx );
+            Parton child1 = m_truth_partons.at( p.child1_idx );
+
+            if (child0.isVLQ && child1.isQuark){
+                m_truth_wp.vlq   = child0;
+                m_truth_wp.quark = child1;
+            }
+            else if (child1.isVLQ && child0.isQuark){
+                m_truth_wp.vlq   = child1;
+                m_truth_wp.quark = child0;
+            }
+        } // end Wprime with 2 children
+        else if (p.isVLQ && p.child0_idx>=0 && p.child1_idx>=0) {
+            Parton child0 = m_truth_partons.at( p.child0_idx );
+            Parton child1 = m_truth_partons.at( p.child1_idx );
+
+            m_truth_wp.vlq_boson = (child0.isW || child0.isZ || child0.isHiggs) ? child0 : child1;
+            m_truth_wp.vlq_quark = (child0.isQuark) ? child0 : child1;
+        }
+        else if (p.isW && p.child0_idx>=0 && p.child1_idx>=0) {
+            Parton child0 = m_truth_partons.at( p.child0_idx );
+            Parton child1 = m_truth_partons.at( p.child1_idx );
+
+            m_truth_wp.isLeptonic = (child0.isNeutrino || child0.isLepton);
+            m_truth_wp.isHadronic = (child0.isQuark && child1.isQuark);
+
+            m_truth_wp.BosonChildren.push_back( child0 );
+            m_truth_wp.BosonChildren.push_back( child1 );
+        }
+    } // end loop over truth partons
+
+    return;
+}
+
 void truthMatching::matchJetToTruthTop(Jet& jet){
     /* Match reconstructed or truth jets to partons
        Currently setup to process partons from top quarks (qqb)
