@@ -32,9 +32,37 @@ def gethistname(h):
 cmaDir   = os.environ["CMSSW_BASE"]+"/src/Analysis/CyMiniAna"
 metadata = util.loadMetadata(cmaDir+"/config/sampleMetaData.txt")  # dictionary of metadata; key=primary dataset
 
+
+
+def getHistograms(files,histograms):
+    """Aggregate histograms from many files"""
+    pd    = ''
+    name  = ''
+    hists = {}
+
+    for fi,file in enumerate(files):
+        f = ROOT.TFile.Open(file)
+
+        if fi==0:
+            pd   = util.getPrimaryDataset(f)
+            name = metadata[pd].sampleType     # compare primary dataset with metadatafile
+
+        for h in histograms:
+            try:
+                h_temp = getattr(f,h)
+                h_temp.SetDirectory(0)
+                hists[h].Add( h_temp )
+            except KeyError:
+                hists[h] = getattr(f,h)        # retrieve the histogram
+                hists[h].SetDirectory(0)
+
+    return {"hists":hists,"primaryDataset":pd,"name":name}
+
+
 ttbar_files   = util.file2list("config/samples_cyminiana/listOfTtbarFiles.txt")
 ttbar_files  += util.file2list("config/samples_cyminiana/listOfTtbarExtFiles.txt")
-signal_files  = util.file2list("config/samples_cyminiana/listOfWp1500NarTp1200NarLHFiles.txt")
+signal1_files  = util.file2list("config/samples_cyminiana/listOfWp1500NarTp1200NarLHFiles.txt")
+signal2_files  = util.file2list("config/samples_cyminiana/listOfWp2500NarTp1200NarLHFiles.txt")
 
 outpath  = 'plots/b2g-workshop'
 x_labels = hpl.variable_labels()
@@ -45,105 +73,94 @@ histograms = util.file2list("config/listOfHists.txt")
 histograms = [i.format(sel) for sel in selections for i in histograms]
 
 ## Add the data from each file
-h_hist_ttbar  = {}
-h_hist_signal = {}
-
-for h in histograms:
-    h_hist_ttbar[h]  = None
-    h_hist_signal[h] = None
-
-
 print " > ttbar "
-ttbar_pd   = None
-ttbar_name = ''
-for fi,file in enumerate(ttbar_files):
-    file = file.rstrip("\n")
-    f = ROOT.TFile.Open(file)
-    filename = file.split("/")[-1].split(".")[0]
+h_ttbar      = getHistograms(ttbar_files,histograms)
+h_hist_ttbar = h_ttbar['hists']
+ttbar_pd     = h_ttbar['primaryDataset']
+ttbar_name   = h_ttbar['name']
+ttbar_label  = sample_labels['ttbar'].label
 
-    if fi==0:
-        ttbar_pd   = util.getPrimaryDataset(f)
-        ttbar_name = metadata[ttbar_pd].sampleType      # compare primary dataset with metadatafile
+print " > signal 1 "
+h_signal1      = getHistograms(signal1_files,histograms)
+h_hist_signal1 = h_signal1['hists']
+wprime1_pd     = h_signal1['primaryDataset']
+wprime1_name   = h_signal1['name']
+wprime1_label  = sample_labels[wprime1_pd.split("_")[1]].label
+wprime1_label_short = r"W$^\prime$(1.5)"
 
-    for h in histograms:
-        if h_hist_ttbar[h] is None:
-            h_hist_ttbar[h] = getattr(f,h)       # retrieve the histogram
-            h_hist_ttbar[h].SetDirectory(0)
-        else:
-            h_temp = getattr(f,h)
-            h_temp.SetDirectory(0)
-            h_hist_ttbar[h].Add( h_temp )
-
-print " > signal "
-wprime_pd   = None
-wprime_name = 'wprime'
-for fi,file in enumerate(signal_files):
-    file = file.rstrip("\n")
-    f = ROOT.TFile.Open(file)
-    filename = file.split("/")[-1].split(".")[0]
-
-    if fi==0:
-        wprime_pd = util.getPrimaryDataset(f)
-        wprime_name = metadata[wprime_pd].sampleType      # compare primary dataset with metadatafile
-
-    for h in histograms:
-        if h_hist_signal[h] is None:
-            h_hist_signal[h] = getattr(f,h)       # retrieve the histogram
-            h_hist_signal[h].SetDirectory(0)
-        else:
-            h_temp = getattr(f,h)
-            h_temp.SetDirectory(0)
-            h_hist_signal[h].Add( h_temp )
-
-
+print " > signal 2 "
+h_signal2      = getHistograms(signal2_files,histograms)
+h_hist_signal2 = h_signal2['hists']
+wprime2_pd     = h_signal2['primaryDataset']
+wprime2_name   = h_signal2['name']
+wprime2_label  = sample_labels[wprime2_pd.split("_")[1]].label
+wprime2_label_short = r"W$^\prime$(2.5)"
 
 # Access data -- assumes you are plotting histograms from multiple sources in one figure
-for _ in range(1):
-    for hi,histogram in enumerate(histograms):
+for hi,histogram in enumerate(histograms):
 
-        if histogram.startswith("h_mu_") and histogram.endswith("ejets"): continue
-        if histogram.startswith("h_el_") and histogram.endswith("mujets"): continue
+    selection = "ejets" if histogram.endswith("ejets") else "mujets"
 
-        histogram = histogram.strip('\n')
-        histogramname = gethistname(histogram)
-        print "  :: Plotting "+histogram
+    if histogram.startswith("h_mu_") and selection=="ejets": continue
+    if histogram.startswith("h_el_") and selection=="mujets": continue
 
-        ## setup histogram
-        hist = HepPlotter("histogram",1)
+    histogram = histogram.strip('\n')
+    histogramname = gethistname(histogram)
+    print "  :: Plotting "+histogram
 
-        hist.ratio_plot  = True       # plot a ratio of things [e.g., Data/MC]
-        hist.ratio_type  = "significance"
-        hist.stacked     = False      # stack plots
-        hist.normed      = True
-        hist.rebin       = x_labels[histogramname].binning
-        hist.xlim        = None
-        hist.logplot     = False       # plot on log scale
-        hist.x_label     = x_labels[histogramname].label
-        hist.y_label     = "Arbitrary Units"
-        hist.y_ratio_label = r"S/$\sqrt{\text{B}}$"
-        hist.lumi          = ''   # in /fb
-        hist.format        = 'pdf'       # file format for saving image
-        hist.saveAs        = outpath+"/"+histogram # save figure with name
-        hist.CMSlabel       = 'top left'  # 'top left', 'top right'; hack code for something else
-        hist.CMSlabelStatus = 'Internal'  # ('Simulation')+'Internal' || 'Preliminary' 
-        hist.numLegendColumns = 1
-        if histogram.endswith('mujets'):
-            hist.extra_text.Add(sample_labels['mujets'].label,coords=[0.03,0.9])
-        elif histogram.endswith('ejets'):
-            hist.extra_text.Add(sample_labels['ejets'].label,coords=[0.03,0.9])
+    ## setup histogram
+    hist = HepPlotter("histogram",1)
 
-        hist.initialize()
+    hist.ratio_plot  = True       # plot a ratio of things [e.g., Data/MC]
+    hist.ratio_type  = "significance"
+    hist.ymaxScale   = 1.6
+    hist.stacked     = False      # stack plots
+    hist.normed      = True
+    hist.rebin       = x_labels[histogramname].binning
+    hist.xlim        = None
+    hist.logplot     = False       # plot on log scale
+    hist.x_label     = x_labels[histogramname].label
+    hist.y_label     = "Arbitrary Units"
+    hist.y_ratio_label = r"S/$\sqrt{\text{B}}$"
+    hist.lumi          = ''   # in /fb
+    hist.format        = 'pdf'       # file format for saving image
+    hist.saveAs        = outpath+"/{0}_multiSignal".format(histogram) # save figure with name
+    hist.CMSlabel       = 'top left'  # 'top left', 'top right'; hack code for something else
+    hist.CMSlabelStatus = 'Simulation Internal'  # ('Simulation')+'Internal' || 'Preliminary' 
+    hist.numLegendColumns = 1
 
+    if selection=='mujets':
+        hist.extra_text.Add(sample_labels['mujets'].label,coords=[0.03,0.9])
+    elif selection=='ejets':
+        hist.extra_text.Add(sample_labels['ejets'].label,coords=[0.03,0.9])
 
-        hist.Add(h_hist_ttbar[histogram],name="ttbar_"+histogram,linecolor='red',
-                 draw='step',label=sample_labels['ttbar'].label,ratio_den=True,ratio_partner='wprime_'+histogram)
+    # calculate separations
+    signal1 = h_hist_signal1[histogram].Clone() 
+    signal2 = h_hist_signal2[histogram].Clone()
+    tt      = h_hist_ttbar[histogram].Clone()
+    tt.Scale(1./tt.Integral())
+    signal1.Scale(1./signal1.Integral())
+    signal2.Scale(1./signal2.Integral())
+    sep_tt_wprime1 = util.getHistSeparation(signal1,tt)
+    sep_tt_wprime2 = util.getHistSeparation(signal2,tt)
+    hist.extra_text.Add("Separation({0},{1}) = {2:.2f}".format(ttbar_label,wprime1_label_short,sep_tt_wprime1), coords=[0.03,0.8])
+    hist.extra_text.Add("Separation({0},{1}) = {2:.2f}".format(ttbar_label,wprime2_label_short,sep_tt_wprime2), coords=[0.03,0.7])
 
-        hist.Add(h_hist_signal[histogram],name="wprime_"+histogram,linecolor='blue',color='blue',
-                 draw='step',label=sample_labels[wprime_pd.split("_")[1]].label,ratio_num=True,ratio_partner='ttbar_'+histogram)
+    hist.initialize()
 
+    hist.Add(h_hist_ttbar[histogram],name="ttbar_"+histogram,linecolor='red',
+             draw='step',label=ttbar_label,ratio_den=True,ratio_partner=['wprime1_'+histogram,'wprime2_'+histogram])
 
-        plot = hist.execute()
-        hist.savefig()
-        print "  :: Saved plot to "+hist.saveAs+"\n"
+    # 1 signal sample
+    hist.Add(h_hist_signal1[histogram],name="wprime1_"+histogram,linecolor='blue',color='blue',
+             draw='step',label=wprime1_label,ratio_num=True,ratio_partner='ttbar_'+histogram)
+
+    # 2 signal sample
+    hist.Add(h_hist_signal2[histogram],name="wprime2_"+histogram, linecolor='green',color='green',
+             draw='step',label=wprime2_label,ratio_num=True,ratio_partner='ttbar_'+histogram)
+
+    plot = hist.execute()
+    hist.savefig()
+    print "  :: Saved plot to "+hist.saveAs+"\n"
 
 ## THE END ##

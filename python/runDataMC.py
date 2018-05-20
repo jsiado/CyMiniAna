@@ -23,6 +23,7 @@ from array import array
 from argparse import ArgumentParser
 
 import util
+from Analysis.CyMiniAna.hepPlotter.hepPlotter import HepPlotter
 from Analysis.CyMiniAna.hepPlotter.hepPlotterDataMC import HepPlotterDataMC
 from Analysis.CyMiniAna.hepPlotter.hepPlotterSystematics import HepPlotterSystematics
 import Analysis.CyMiniAna.hepPlotter.hepPlotterTools as hpt
@@ -82,8 +83,8 @@ histograms = [i.format(sel) for sel in selections for i in histograms]
 
 # Load information
 ttbar_files   = util.file2list("config/samples_cyminiana/listOfTtbarFiles.txt")
-ttbar_files  += util.file2list("config/samples_cyminiana/listOfTtbarExtFiles.txt")
-signal_files  = util.file2list("config/samples_cyminiana/listOfWp1500NarTp1200NarLHFiles.txt")
+#ttbar_files  += util.file2list("config/samples_cyminiana/listOfTtbarExtFiles.txt")
+#signal_files  = util.file2list("config/samples_cyminiana/listOfWp1500NarTp1200NarLHFiles.txt")
 
 #wjets
 #zjets
@@ -105,16 +106,18 @@ h_data   = {'ejets':h_ejets,'mujets':h_mujets}
 ## Make histograms
 for histogram in histograms:
 
-    histogram = histogram.rstrip('\n')
     selection = 'ejets' if histogram.endswith('ejets') else 'mujets'
+    if histogram.startswith("h_mu_") and selection=="ejets": continue
+    if histogram.startswith("h_el_") and selection=="mujets": continue
 
     # CyMiniAna saves histograms with extra text in the name, remove that here
     histogramName = histogram.replace("h_","").replace("_"+selection,"")
 
-    print "  :: Plotting "+histogram+"\n"
+    print "  :: Plotting "+histogram
 
     ## setup histogram
-    hist = HepPlotterDataMC()
+    #hist = HepPlotterDataMC()
+    hist = HepPlotter("histogram",1)
 
     hist.drawStatUncertainty = True      # draw stat uncertainty separately
     hist.drawSystUncertainty = False     # draw syst uncertainty separately
@@ -136,15 +139,24 @@ for histogram in histograms:
     hist.numLegendColumns = 1
     hist.y_ratio_label    = "Data/Pred."
     hist.format           = 'pdf'       # file format for saving image
-    hist.saveAs           = outpath+"/datamc_"+histogramName # save figure with name
+    hist.saveAs           = outpath+"/datamc_{0}_{1}".format(histogramName,selection) # save figure with name
+
+    if selection=='mujets':
+        hist.extra_text.Add(samples['mujets'].label,coords=[0.03,0.9])
+    elif selection=='ejets':
+        hist.extra_text.Add(samples['ejets'].label,coords=[0.03,0.9])
 
     hist.initialize()
 
     # ttbar
-    hist.Add(h_ttbar['hists'], name=h_ttbar['name'], sampleType='background')
+#    hist.Add(h_ttbar['hists'][histogram], name=h_ttbar['name'], sampleType='background')
+    hist.Add(h_ttbar['hists'][histogram],name="ttbar_"+histogram,linecolor='red',
+             draw='step',label=samples['ttbar'].label,ratio_den=True,ratio_partner='data_'+histogram)
 
     # data
-    hist.Add(h_data[selection]['hists'], name='data', sampleType='data')
+#    hist.Add(h_data[selection]['hists'][histogram], name='data', sampleType='data')
+    hist.Add(h_data[selection]['hists'][histogram],name="data_"+histogram,linecolor='black',color='black',
+             draw='errorbar',label=samples['data'].label,ratio_num=True,ratio_partner='ttbar_'+histogram)
 
     # make the plot
     plot = hist.execute()
