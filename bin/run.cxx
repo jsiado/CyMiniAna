@@ -148,12 +148,13 @@ int main(int argc, char** argv) {
         if (std::find(fileKeys.begin(), fileKeys.end(), metadata_treename) == fileKeys.end())
             metadata_treename = "";  // metadata TTree doesn't exist, set this so "config" won't look for it
         config.inspectFile( *file,metadata_treename );      // check the type of file being processed
-
+        std::cout << " INSTPECTED FILE " << std::endl;
         // Clone/write metadata tree
         TTree * original_metadata_ttree;
         metadataTree metadata_ttree(config);
 
         if (metadata_treename.size()>0){
+            std::cout << " METADATA " << std::endl;
             original_metadata_ttree = (TTree*)file->Get(metadata_treename.c_str());
             // Setup subdirectory, if necessary
             std::string subdir;
@@ -162,14 +163,13 @@ int main(int argc, char** argv) {
                 if (!outputFile->GetDirectory(subdir.c_str())) gDirectory->mkdir(subdir.c_str());
             }
             // clone if metadata is okay, rewrite if bad
-            bool recalculateMetadata = config.recalculateMetadata();    // call after 'inspectFile()'
             Sample s = config.sample();
-            metadata_ttree.initialize(original_metadata_ttree,*outputFile,subdir,recalculateMetadata);
+            metadata_ttree.initialize(original_metadata_ttree,*outputFile,subdir);
             metadata_ttree.saveMetaData(s);
         }
         else{
             cma::INFO("RUN : TTree '"+metadata_treename+"' is not present in this file");
-            metadata_ttree.initialize(original_metadata_ttree,*outputFile,"",0);
+            metadata_ttree.initialize(original_metadata_ttree,*outputFile,"");
         }
 
         // Setup outputs

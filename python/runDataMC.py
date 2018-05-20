@@ -16,51 +16,97 @@ This can be modified or extended by whomever.
 To run:
  python python/runDataMC.py --files <files.txt> --hists <histogramNames.txt> -o <output_path>
 """
+import os
 import sys
 import ROOT
 from array import array
 from argparse import ArgumentParser
 
-from hepPlotterDataMC import HepPlotterDataMC
-from hepPlotterSystematics import HepPlotterSystematics
-import hepPlotterTools as hpt
-import hepPlotterLabels as hpl
+import util
+from Analysis.CyMiniAna.hepPlotter.hepPlotterDataMC import HepPlotterDataMC
+from Analysis.CyMiniAna.hepPlotter.hepPlotterSystematics import HepPlotterSystematics
+import Analysis.CyMiniAna.hepPlotter.hepPlotterTools as hpt
+import Analysis.CyMiniAna.hepPlotter.hepPlotterLabels as hpl
+
+cmaDir   = os.environ["CMSSW_BASE"]+"/src/Analysis/CyMiniAna"
+metadata = util.loadMetadata(cmaDir+"/config/sampleMetaData.txt")  # dictionary of metadata; key=primary dataset
+
+def getHistograms(files,histograms):
+    """Aggregate histograms from many files"""
+    pd    = ''
+    name  = ''
+    hists = {}
+
+    for fi,file in enumerate(files):
+        f = ROOT.TFile.Open(file)
+
+        if fi==0:
+            print file
+            pd   = util.getPrimaryDataset(f)
+            name = metadata[pd].sampleType     # compare primary dataset with metadatafile
+
+        for h in histograms:
+            try:
+                h_temp = getattr(f,h)
+                h_temp.SetDirectory(0)
+                hists[h].Add( h_temp )
+            except KeyError:
+                hists[h] = getattr(f,h)        # retrieve the histogram
+                hists[h].SetDirectory(0)
+
+    return {"hists":hists,"primaryDataset":pd,"name":name}
+
 
 
 parser = ArgumentParser(description="DataMC Plotter")
 
-parser.add_argument('-f','--files', action='store',dest='listOfFiles',
-                    default='examples/share/listOfFilesDataMC.txt',
-                    help='Name of file that contains root files from which to plot')
 parser.add_argument('--hists', action='store',dest='listOfHists',
-                    default='examples/share/listOfHistsDataMC.txt',
+                    default='config/listOfHists.txt',
                     help='Name of file that contains histograms to plot')
 parser.add_argument('--systs', action='store',dest='listOfSysts',
                     default='share/listOfSytsDataMC.txt',
                     help='Name of file that contains detector systematics to plot')
-parser.add_argument('-o','--outpath', action='store',default='./',
+parser.add_argument('-o','--outpath', action='store',default='plots/datamc/',
                     dest='outpath',
                     help='Directory for storing output plots')
-parser.add_argument('-s','--selection', action='store',default='',
-                    dest='selection',
-                    help='Selection used in CyMiniAna to make histograms')
 results = parser.parse_args()
 
+
+detectorSystematics = [] 
 outpath    = results.outpath
-files      = util.file2list(results.listOfFiles)
+samples    = hpl.sample_labels()     # labels and binnings for samples
+variables  = hpl.variable_labels()   # labels and binnings for variables
+selections = ['ejets','mujets']
 histograms = util.file2list(results.listOfHists)
-detectorSystematics = util.file2list(results.listOfSysts) # just detector systematics
+histograms = [i.format(sel) for sel in selections for i in histograms]
 
-variables = hpl.variable_labels()   # label and binning
+# Load information
+ttbar_files   = util.file2list("config/samples_cyminiana/listOfTtbarFiles.txt")
+ttbar_files  += util.file2list("config/samples_cyminiana/listOfTtbarExtFiles.txt")
+signal_files  = util.file2list("config/samples_cyminiana/listOfWp1500NarTp1200NarLHFiles.txt")
+
+#wjets
+#zjets
+#singletop
+#diboson
+ttbar_files = util.file2list("config/samples_cyminiana/listOfTtbarFiles.txt") + util.file2list("config/samples_cyminiana/listOfTtbarExtFiles.txt")
+ejets_files  = []
+mujets_files = []
+for d in ['B','C','D','E','F','G','H','Hv3']:
+    ejets_files  += util.file2list("config/samples_cyminiana/listOfSingleElectron{0}Files.txt".format(d))
+    mujets_files += util.file2list("config/samples_cyminiana/listOfSingleMuon{0}Files.txt".format(d))
 
 
-# For DataMC plots, one histogram with each sample goes on a single plot
-# so I have this structured to loop over the histograms, then the ROOT files
-# with lots of histograms, it is probably better to open root files only once,
-# load all the histograms, then do the plotting, but oh well
+h_ttbar = getHistograms(ttbar_files,histograms)
+h_ejets = getHistograms(ejets_files,histograms)
+h_mujets = getHistograms(mujets_files,histograms)
+h_data   = {'ejets':h_ejets,'mujets':h_mujets}
+
+## Make histograms
 for histogram in histograms:
 
     histogram = histogram.rstrip('\n')
+    selection = 'ejets' if histogram.endswith('ejets') else 'mujets'
 
     # CyMiniAna saves histograms with extra text in the name, remove that here
     histogramName = histogram.replace("h_","").replace("_"+selection,"")
@@ -80,65 +126,25 @@ for histogram in histograms:
     hist.ratio_plot  = True        # plot a ratio of things [Data/MC]
     hist.ratio_type  = "ratio"     # "ratio"
     hist.stacked     = True        # stack backgrounds
-    hist.binning     = None
     hist.rebin       = variables[histogramName].binning # rebin per histogram
     hist.logplot     = False
     hist.x_label     = variables[histogramName].label
     hist.y_label     = "Events"
-    hist.lumi        = 'XY.Z'
+    hist.lumi        = '35.9'
     hist.CMSlabel    = 'top left'  # 'top left', 'top right'; hack code for something else
     hist.CMSlabelStatus   = 'Internal'  # ('Simulation')+'Internal' || 'Preliminary' 
     hist.numLegendColumns = 1
     hist.y_ratio_label    = "Data/Pred."
     hist.format           = 'pdf'       # file format for saving image
-    hist.saveAs           = outpath+"/datamc_newHists_zprime_"+histogramName # save figure with name
+    hist.saveAs           = outpath+"/datamc_"+histogramName # save figure with name
 
     hist.initialize()
 
-    ## -- Add the data from each file
-    for file in files:
-        file = file.rstrip("\n")
-        f = ROOT.TFile.Open(file)
+    # ttbar
+    hist.Add(h_ttbar['hists'], name=h_ttbar['name'], sampleType='background')
 
-        print "     > Opening data from ",file
-
-        h_name       = file.split("/")[-1].split(".root")[0]  # retrieve the name ('ttbar','wjets',etc.)
-        h_sampleType = hpt.getSampleType(h_name)  # retrieve the sample type ('background','data','signal')
-
-        h_hist = None
-        if h_sampleType=='background' and h_name=='multijet':
-            h_hist = getattr(f,histogram.replace("nominal","signal_nominal"))  #calcQCD(f,histogram)
-        else:
-            h_hist = getattr(f,"h_"+histogram.replace("nominal","signal_nominal"))  # retrieve the histogram
-
-
-        ## -- Get all the systematics for this histogram
-        totsyst = None
-
-        if (hist.drawSystUncertainty or hist.drawStatSystUncertainty) and sampleType=='background':
-            hpSysts = HepPlotterSystematics()
-            hpSysts.sampleName = h_name
-            hpSysts.variable = histogramName
-            hpSysts.outpath  = "./"                  # directory for individual syst plots
-            hpSysts.rebin    = rebins[histogramName] # rebin histogram
-            hpSysts.plotSystematics = True           # make individual plots of systematics
-
-            hpSysts.initialize(h_hist)               # setup some systematic variables
-
-            # loop over detector systematics (e.g., JES,JER,btagging,etc.)
-            for detSyst in detectorSystematics:
-                detSyst = detSyst.rstrip('\n')
-                detSyst = detSyst.split(",")    # for systematics that are "up,down"; 
-                                                # returns 1 item list if only one systematics
-                h_systs = [getattr( f,d ) for d in detSyst] # stored in same file as nominal
-                hpSysts.execute(histogram=h_systs,systematic=detSyst)
-
-            # loop over other uncertainties here
-            # may need to specify different root file (modeling, XSection, theory, etc.)
-
-            totsyst = hpSysts.getTotalSystematicUncertainty()
-
-        hist.Add(h_hist,name=h_name,sampleType=h_sampleType,file=file,systematics=totsyst)
+    # data
+    hist.Add(h_data[selection]['hists'], name='data', sampleType='data')
 
     # make the plot
     plot = hist.execute()

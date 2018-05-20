@@ -91,9 +91,11 @@ def sample_labels():
     samples['Wp2500WidTp1900WidLH'] = Sample(label=r'{0}=2.5 TeV,{1}=1.9 TeV (LH)'.format(wprime_wid,vlq_wid),color='r')
 
     # Generic
-    samples['mu']        = Sample(label=r'$\mu$+jets',color='k')
-    samples['el']        = Sample(label=r'e+jets',color='k')
-    samples['muel']      = Sample(label=r'$\ell$+jets',color='k')
+    samples['mujets'] = Sample(label=r'$\mu$+jets',color='k')
+    samples['ejets']  = Sample(label=r'e+jets',color='k')
+    samples['mu']     = Sample(label=r'$\mu$+jets',color='k')
+    samples['el']     = Sample(label=r'e+jets',color='k')
+    samples['muel']   = Sample(label=r'$\ell$+jets',color='k')
 
     # Machine Learning (AK8+AK4)
     samples['QB'] = Sample(label=ttbar+' (QB)',color='white')
@@ -131,26 +133,33 @@ def variable_labels():
     variables['ljet_jet_m']      = Variable(binning=hist1d(50,0.,5000.), label=r'Large-R Jet + Small-R Jet '+_mass)
     variables['ljet_jet_deltaR'] = Variable(binning=hist1d(10,0.,5.),    label=r'$\Delta$R(Large-R Jet,Small-R Jet)')
 
-    variables['jet_pt']  =   Variable(binning=hist1d(10,25., 500.),  label=r'Small-R Jet p'+_T)
+    variables['jet_pt']  =   Variable(binning=hist1d(40,  0.,2000.), label=r'Small-R Jet p'+_T)
     variables['jet_eta'] =   Variable(binning=hist1d(10,-2.5,  2.5), label=r'Small-R Jet '+_eta)
     variables['btags_n'] =   Variable(binning=hist1d(4, -0.5,  3.5), label=r'Number of b-tags')
+    variables['n_btags'] =   Variable(binning=hist1d(4, -0.5,  3.5), label=r'Number of b-tags')
     variables['jet_bdisc'] = Variable(binning=hist1d(10, 0.,   1.),  label=r'Small-R Jet b-disc.')
 
     variables['lep_eta'] = Variable(binning=hist1d(10,-2.5,   2.5),label=r'Lepton '+_eta)
     variables['lep_pt']  = Variable(binning=hist1d(10, 25.,  300.),label=r'Lepton p'+_T)
+    variables['el_eta']  = Variable(binning=hist1d(10,-2.5,   2.5),label=r'Electron '+_eta)
+    variables['el_pt']   = Variable(binning=hist1d(10,  0.,  500.),label=r'Electron p'+_T)
+    variables['mu_eta']  = Variable(binning=hist1d(10,-2.5,   2.5),label=r'Muon '+_eta)
+    variables['mu_pt']   = Variable(binning=hist1d(10,  0.,  500.),label=r'Muon p'+_T)
     variables['lepton_eta'] = variables['lep_eta']
     variables['lepton_pt']  = variables['lep_pt']
 
-    variables['nu_phi']  = Variable(binning=hist1d(10,-2.5,   2.5), label=r'$\nu$ '+_phi)
-    variables['nu_eta']  = Variable(binning=hist1d(10,-2.5,   2.5), label=r'$\nu$ '+_eta)
-    variables['nu_pt']   = Variable(binning=hist1d(20, 25.,  600.),  label=r'$\nu$ p'+_T)
+    variables['nu_pt']  = Variable(binning=hist1d(50,0,1000.),label=r'Neutrino p'+_T)
+    variables['nu_phi'] = Variable(binning=hist1d(10,-2.5,   2.5), label=r'Neutrino '+_phi)
+    variables['nu_eta'] = Variable(binning=hist1d(10,-2.5,   2.5), label=r'Neutrino '+_eta+" (Standard)")
+    variables['nu_eta_smp'] = Variable(binning=hist1d(10,-2.5,   2.5), label=r'Neutrino '+_eta+" (Sampling)")
     variables['nu_pz_sampling'] = Variable(binning=hist1d(30,-3000,3000), label=r'Neutrin p$_\text{z}$ (Sampling)')
     variables['nu_pz_standard'] = Variable(binning=hist1d(30,-3000,3000), label=r'Neutrin p$_\text{z}$ (Standard)')
 
-    variables['HT']      = Variable(binning=hist1d(50,0.,5000.), label=r'H'+_T)
-    variables['mtw']     = Variable(binning=hist1d(12,  0.,  120.),    label=r'$\mathsf{m_T^W}$ [GeV]')
+    variables['ht']      = Variable(binning=hist1d(50,0.,5000.), label=r'H'+_T)
+    variables['st']      = Variable(binning=hist1d(50,0.,5000.), label=r'S'+_T)
+    variables['mtw']     = Variable(binning=hist1d(12,  0.,  120.),label=r'$\mathsf{m_T^W}$ [GeV]')
     variables['mass_lb'] = Variable(binning=hist1d(32,  0.,  800.),label=r'm$_{\ell\text{b}}$')
-    variables['met_met'] = Variable(binning=hist1d(29, 20.,  500.),label=r'E$_{\text{T}}^{\text{miss}}$ [GeV]')
+    variables['met_met'] = Variable(binning=hist1d(50,    0,1000), label=r'E$_{\text{T}}^{\text{miss}}$ [GeV]')
     variables['met_phi'] = Variable(binning=hist1d(16, -3.2, 3.2), label=r'$\phi^{\text{miss}}$ [GeV]')
 
     variables['deltaPhi_lep_met']    = Variable(binning=hist1d(8,0.0,3.2), label=r'$\Delta\phi$(Lepton,E$_{\text{T}}^{\text{miss}}$)')

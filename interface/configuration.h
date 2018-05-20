@@ -92,7 +92,7 @@ class configuration {
     // information for event weights
     std::string metadataFile() {return m_metadataFile;}
     std::map<std::string,Sample> mapOfSamples(){return m_mapOfSamples;}
-    Sample sample() {return m_mapOfSamples.at(m_primaryDataset);}
+    Sample sample() {return m_sample;}
     virtual double LUMI() {return m_LUMI;}
 
     double XSectionMap ( std::string mcChannelNumber);

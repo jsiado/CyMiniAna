@@ -148,6 +148,8 @@ def loadMetadata(file):
     data    = file2list(file)
     samples = {}
     for i in data:
+        if i.startswith("#"): continue
+
         items = i.split(" ")
         s = Sample()
         s.sampleType     = items[0]
@@ -179,11 +181,11 @@ def getPrimaryDataset(root_file):
     try:
         md = root_file.Get("tree/metadata")
         md.GetEntry(0)
-        pd = md.primaryDataset
+        pd = str(md.primaryDataset)
     except:
         pd = None
 
-    return name
+    return pd
 
 
 
