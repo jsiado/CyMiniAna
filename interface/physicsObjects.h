@@ -190,6 +190,7 @@ struct Neutrino : CmaBase{
     // extra neutrino attributes
     float pz_sampling;
     std::vector<float> pz_samplings;
+    bool isImaginary;
 };
 
 struct MET : CmaBase{

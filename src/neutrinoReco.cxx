@@ -23,6 +23,8 @@ NeutrinoReco::NeutrinoReco( configuration& cmaConfig ) :
     //m_wmass_hist = (TH1D*)wmass_hists.Get("");
     r = new TRandom3();
     m_sampling = 10000;
+
+    m_isImaginary = false;   // keep track of real/imaginary solutions
   }
 
 NeutrinoReco::~NeutrinoReco() {
@@ -104,8 +106,10 @@ void NeutrinoReco::nu_pz(float wmass){
 
     float discriminant = pow(B,2) - A*C;      // radicand
 
+    m_isImaginary = false;
     if (discriminant<0) {
         // Imaginary! Take the real part of the solution for pz
+        m_isImaginary = true;
         m_pz_solutions.push_back(-B/A);
     }
     else {

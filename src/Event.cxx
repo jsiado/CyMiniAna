@@ -700,6 +700,7 @@ void Event::initialize_neutrinos(){
         float pz  = m_neutrinoRecoTool->execute(true);        // standard reco; tool assumes 1-lepton final state
         float nuE = sqrt( pow(m_met.p4.Px(),2) + pow(m_met.p4.Py(),2) + pow(pz,2));
         nu1.p4.SetPxPyPzE( m_met.p4.Px(), m_met.p4.Py(), pz, nuE );
+        nu1.isImaginary = m_neutrinoRecoTool->isImaginary();
 
         float pz_samp   = m_neutrinoRecoTool->execute(false);
         nu1.pz_sampling = pz_samp;
@@ -927,23 +928,21 @@ void Event::deepLearningPrediction(){
             int n_wdecays2leptons(0);
 
             for (const auto& p : m_truth_partons){
-                // only look for neutrinos from W decays
-                if (p.isW && p.child0_idx>=0 && p.child1_idx>=0){
+                if (p.isW && p.child0_idx>=0 && p.child1_idx>=0) {
                     Parton child0 = m_truth_partons.at( p.child0_idx );
                     Parton child1 = m_truth_partons.at( p.child1_idx );
-
-                    if (child0.isNeutrino && child1.isLepton){
+                    if (child0.isNeutrino) {
+                        n_wdecays2leptons++;
                         true_nu = child0;
-                        n_wdecays2leptons++;
                     }
-                    else if (child1.isNeutrino && child0.isLepton){
+                    else if (child1.isNeutrino) {
+                        n_wdecays2leptons++;
                         true_nu = child1;
-                        n_wdecays2leptons++;
                     }
-                } // end if parton is W with two defined children
-            } // end loop over truth partons
+                }
+            }
 
-            // only want to train on single lepton events
+            // only want to train on single lepton events (reco & truth-level)
             if (n_wdecays2leptons==1){
                 m_deepLearningTool->setNeutrino( m_neutrinos.at(0) );
                 m_deepLearningTool->setTrueNeutrino( true_nu );

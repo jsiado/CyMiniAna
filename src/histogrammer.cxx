@@ -140,6 +140,11 @@ void histogrammer::bookHists( std::string name ){
         init_hist("n_jets_"+name,   31, -0.5,  30.5);
         init_hist("n_btags_"+name,  11, -0.5,  10.5);
 
+        init_hist("jet0_pt_"+name,    2000,  0.0, 2000.0);
+        init_hist("jet1_pt_"+name,    2000,  0.0, 2000.0);
+        init_hist("jet0_bdisc_"+name,  100,  0.0,    1.0);
+        init_hist("jet1_bdisc_"+name,  100,  0.0,    1.0);
+
         init_hist("jet_pt_"+name,     2000,  0.0, 2000.0);
         init_hist("jet_eta_"+name,      50, -2.5,    2.5);
         init_hist("jet_phi_"+name,      64, -3.2,    3.2);
@@ -197,6 +202,7 @@ void histogrammer::bookHists( std::string name ){
     }
 
     // kinematics
+    init_hist("mtw_"+name,     500,  0.0, 2000);
     init_hist("met_met_"+name, 500,  0.0, 2000);
     init_hist("met_phi_"+name,  64, -3.2,  3.2);
     init_hist("ht_"+name,     5000,  0.0, 5000);
@@ -324,7 +330,17 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
         fill("n_btags_"+name, event.btag_jets().size(), event_weight );
         fill("n_jets_"+name, jets.size(), event_weight );
 
+        if (jets.size()>1){
+            Jet jet0 = jets.at(0);
+            Jet jet1 = jets.at(1);
+            fill("jet0_pt_"+name,  jet0.p4.Pt(),   event_weight);
+            fill("jet0_bdisc_"+name, jet0.bdisc,   event_weight);
+            fill("jet1_pt_"+name,  jet1.p4.Pt(),   event_weight);
+            fill("jet1_bdisc_"+name, jet1.bdisc,   event_weight);
+        }
+
         for (const auto& jet : jets){
+            if (!jet.isGood) continue;
             fill("jet_pt_"+name,  jet.p4.Pt(),   event_weight);
             fill("jet_eta_"+name, jet.p4.Eta(),  event_weight);
             fill("jet_phi_"+name, jet.p4.Phi(),  event_weight);
@@ -424,6 +440,7 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
 
     // kinematics
     cma::DEBUG("HISTOGRAMMER : Fill kinematics");
+    fill("mtw_"+name,     met.mtw,      event_weight);
     fill("met_met_"+name, met.p4.Pt(),  event_weight);
     fill("met_phi_"+name, met.p4.Phi(), event_weight);
     fill("ht_"+name,      event.HT(),   event_weight);

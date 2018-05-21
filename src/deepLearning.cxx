@@ -109,11 +109,11 @@ void DeepLearning::loadFeatures(){
     unsigned int n_jets  = m_jets.size();
     m_features["n_jets"] = n_jets;
 
-    // DeltaPhi(j,nu) = pi (default value if j doesn't exist)
-    m_features["deltaPhi_j0_met_phi"] = M_PI;
-    m_features["deltaPhi_j1_met_phi"] = M_PI;
-    m_features["deltaPhi_j2_met_phi"] = M_PI;
-    m_features["deltaPhi_j3_met_phi"] = M_PI;
+    // DeltaPhi(j,nu) = 2pi (default value if j doesn't exist)
+    m_features["deltaPhi_j0_met_phi"] = 2*M_PI;
+    m_features["deltaPhi_j1_met_phi"] = 2*M_PI;
+    m_features["deltaPhi_j2_met_phi"] = 2*M_PI;
+    m_features["deltaPhi_j3_met_phi"] = 2*M_PI;
     // jets b-disc = -1 (default if it doesn't exist)
     m_features["jet0_bdisc"] = -1;
     m_features["jet1_bdisc"] = -1;
@@ -149,7 +149,8 @@ void DeepLearning::loadFeatures(){
     m_features["pz_standard"] = m_neutrino.p4.Pz();
     m_features["pz_sampling"] = m_neutrino.pz_sampling;
 
-    m_features["target"] = m_true_neutrino.p4.Pz();
+    m_features["target_pz"] = m_true_neutrino.p4.Pz();
+    m_features["target"] = m_true_neutrino.p4.Eta();
     cma::DEBUG("EVENT : Set DNN input values ");
 
     return;

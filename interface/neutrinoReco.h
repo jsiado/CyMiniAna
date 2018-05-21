@@ -27,6 +27,8 @@ class NeutrinoReco {
     void nu_pz(float wmass);              // calculate the pz  
     void sampling();                      // wrapper around nu_pz() to build pz with different wmass values
 
+    bool isImaginary(){ return m_isImaginary;}
+
     std::vector<float> pzSolutions();
 
   protected:
@@ -40,6 +42,8 @@ class NeutrinoReco {
     TRandom3* r;
     TH1D* m_wmass_hist;
     unsigned int m_sampling;
+
+    bool m_isImaginary;
 
     std::vector<float> m_pz_solutions;
 };

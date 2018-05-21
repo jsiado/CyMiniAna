@@ -7,10 +7,10 @@ neutrinoReco true
 useWprime false
 wprimeReco false
 kinematicReco true
-isExtendedSample false
+isExtendedSample true
 useDNN false
 DNNinference false
-DNNtraining false
+DNNtraining true
 jet_btag_wkpt M
 makeTTree true
 makeHistograms true
