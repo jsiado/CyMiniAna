@@ -498,10 +498,10 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
                 fill("nu_deltaR_smp_"+name,   deltaR_smp,   event_weight);
                 fill("nu_deltaR_viper_"+name, deltaR_viper, event_weight);
 
-                fill("nu_truth_pz_deltaPz_"+name,     tru_pz, deltaPz,     event_weight);
-                fill("nu_truth_pz_deltaPz_smp_"+name, tru_pz, deltaPz_smp, event_weight);
-                fill("nu_truth_eta_deltaEta_"+name,     tru_eta, deltaEta, event_weight);
-                fill("nu_truth_eta_deltaEta_smp_"+name, tru_eta, deltaEta_smp, event_weight);
+//                fill("nu_truth_pz_deltaPz_"+name,     tru_pz, deltaPz,     event_weight);
+//                fill("nu_truth_pz_deltaPz_smp_"+name, tru_pz, deltaPz_smp, event_weight);
+//                fill("nu_truth_eta_deltaEta_"+name,     tru_eta, deltaEta, event_weight);
+//                fill("nu_truth_eta_deltaEta_smp_"+name, tru_eta, deltaEta_smp, event_weight);
             } // end if truth_leptons == 1
         } // end truth
     } // end use neutrinos

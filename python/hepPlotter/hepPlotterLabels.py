@@ -136,10 +136,14 @@ def variable_labels():
     variables['ljet_jet_deltaR'] = Variable(binning=hist1d(10,0.,5.),    label=r'$\Delta$R(Large-R Jet,Small-R Jet)')
 
     variables['jet_pt']  =   Variable(binning=hist1d(40,  0.,2000.), label=r'Small-R Jet p'+_T)
+    variables['jet0_pt'] =   Variable(binning=hist1d(40,  0.,2000.), label=r'Leading Small-R Jet p'+_T)
+    variables['jet1_pt'] =   Variable(binning=hist1d(40,  0.,2000.), label=r'Sub-leading Small-R Jet p'+_T)
     variables['jet_eta'] =   Variable(binning=hist1d(10,-2.5,  2.5), label=r'Small-R Jet '+_eta)
     variables['btags_n'] =   Variable(binning=hist1d(4, -0.5,  3.5), label=r'Number of b-tags')
     variables['n_btags'] =   Variable(binning=hist1d(4, -0.5,  3.5), label=r'Number of b-tags')
-    variables['jet_bdisc'] = Variable(binning=hist1d(10, 0.,   1.),  label=r'Small-R Jet b-disc.')
+    variables['jet_bdisc']  = Variable(binning=hist1d(10, 0.,   1.),  label=r'Small-R Jet b-disc.')
+    variables['jet0_bdisc'] = Variable(binning=hist1d(10, 0.,   1.),  label=r'Leading Small-R Jet b-disc.')
+    variables['jet1_bdisc'] = Variable(binning=hist1d(10, 0.,   1.),  label=r'Sub-leading Small-R Jet b-disc.')
 
     variables['lep_eta'] = Variable(binning=hist1d(10,-2.5,   2.5),label=r'Lepton '+_eta)
     variables['lep_pt']  = Variable(binning=hist1d(10, 25.,  300.),label=r'Lepton p'+_T)
@@ -182,6 +186,17 @@ def variable_labels():
     variables['jet1_ptrel'] = Variable(binning=hist1d(20,0,1), label=r'2$^{\text{nd}}$ Leading-p$_{\text{T}}$ Small-R Jet Relative p$_{\text{T}}$')
     variables['jet2_ptrel'] = Variable(binning=hist1d(20,0,1), label=r'3$^{\text{rd}}$ Leading-p$_{\text{T}}$ Small-R Jet Relative p$_{\text{T}}$')
     variables['jet3_ptrel'] = Variable(binning=hist1d(20,0,1), label=r'4$^{\text{th}}$ Leading-p$_{\text{T}}$ Small-R Jet Relative p$_{\text{T}}$')
+
+    variables['wprimeMass']       = Variable(binning=hist1d(50,0,5000), label=r'm$_{\text{W}^\prime}$ [GeV] (Neutrino Standard)')
+    variables['wprimeMass_nusmp'] = Variable(binning=hist1d(50,0,5000), label=r'm$_{\text{W}^\prime}$ [GeV] (Neutrino Sampling)')
+    variables['vlqMass']          = Variable(binning=hist1d(50,0,5000), label=r'm$_\text{T}$ [GeV] (Neutrino Standard)')
+    variables['vlqMass_nusmp']    = Variable(binning=hist1d(50,0,5000), label=r'm$_\text{T}$ [GeV] (Neutrino Sampling)')
+
+    variables['w_mass']     = Variable(binning=hist1d(40,0,200), label=r'm$_\text{W}$ (Neutrino Standard)')
+    variables['w_mass_smp'] = Variable(binning=hist1d(40,0,200), label=r'm$_\text{W}$ (Neutrino Sampling)')
+    variables['w_pt']       = Variable(binning=hist1d(20,0,1000),label=r'W p$_{\text{T}}$ (Neutrino Standard)')
+    variables['w_pt_smp']   = Variable(binning=hist1d(20,0,1000),label=r'W p$_{\text{T}}$ (Neutrino Sampling)')
+
 
     return variables
 
