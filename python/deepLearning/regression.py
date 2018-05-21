@@ -14,6 +14,7 @@ import json
 import util
 import datetime
 
+import ROOT
 import uproot
 import numpy as np
 import pandas as pd
@@ -85,12 +86,6 @@ class Regression(DeepLearning):
         for ind,(train,test) in enumerate(kfold.split(X)):
             self.msg_svc.DEBUG("DL :   - Fitting K-Fold {0}".format(ind))
 
-            # store test/train data from each k-fold to compare later
-            self.test_data['X'].append(X[test])
-            self.test_data['Y'].append(Y[test])
-            self.train_data['X'].append(X[train])
-            self.train_data['Y'].append(Y[train])
-
             # Fit the model to training data & save the history
             Y_train = Y[train]
             Y_test  = Y[test]
@@ -121,12 +116,38 @@ class Regression(DeepLearning):
             self.msg_svc.DEBUG("DL :       {0}: {1:.2f}%".format(self.model.metrics_names[1], predictions[1]*100))
 
             # Evaluate training sample
+            #self.train_predictions.append( train_predictions ) # memory error
             train_predictions = self.predict(X[train])
-            self.train_predictions.append( train_predictions )
+            h_train_predictions = ROOT.TH1D("train_predictions","train_predictions",200,-10,10)
+            h_train_predictions.SetDirectory(0)
+            h_train_target = ROOT.TH1D("train_target","train_target",200,-10,10)
+            h_train_target.SetDirectory(0)
+            h_train_resolution = ROOT.TH1D("train_resolution","train_resolution",200,-10,10)
+            h_train_resolution.SetDirectory(0)
+            for tp,tt in zip(train_predictions,Y[train]):
+                h_train_predictions.Fill(tp)
+                h_train_target.Fill(tt)
+                h_train_resolution.Fill(tp-tt)
 
             # Evaluate test sample
-            test_predictions  = self.predict(X[test])
-            self.test_predictions.append( test_predictions )
+            #self.test_predictions.append( test_predictions )   # memory error
+            test_predictions = self.predict(X[test])
+            h_test_predictions = ROOT.TH1D("test_predictions","test_predictions",200,-10,10)
+            h_test_predictions.SetDirectory(0)
+            h_test_target = ROOT.TH1D("test_target","test_target",200,-10,10)
+            h_test_target.SetDirectory(0)
+            h_test_resolution = ROOT.TH1D("test_resolution","test_resolution",200,-10,10)
+            h_test_resolution.SetDirectory(0)
+            for tp,tt in zip(test_predictions,Y[test]):
+                h_test_predictions.Fill(tp)
+                h_test_target.Fill(tt)
+                h_test_resolution.Fill(tp-tt)
+
+            # Compare training and testing in plots
+            self.msg_svc.INFO("DL : -- post-training :: PREDICTIONS {0}".format(ind))
+            train = {'prediction':h_train_predictions,'target':h_train_target,'resolution':h_train_resolution}
+            test  = {'prediction':h_test_predictions, 'target':h_test_target, 'resolution':h_test_resolution}
+            self.plotter.prediction(train,test,ind)   # compare DNN prediction for different targets
 
         self.msg_svc.INFO("DL :   Finished K-Fold cross-validation: ")
         self.accuracy = {'mean':np.mean(cvpredictions),'std':np.std(cvpredictions)}
@@ -152,11 +173,6 @@ class Regression(DeepLearning):
         # post training/testing
         if postTraining:
             self.msg_svc.INFO("DL : -- post-training")
-
-            self.msg_svc.INFO("DL : -- post-training :: PREDICTIONS ")
-            train = {'X':self.train_predictions,'Y':self.train_data['Y']}
-            test  = {'X':self.test_predictions,'Y':self.test_data['Y']}
-            self.plotter.prediction(train,test)   # compare DNN prediction for different targets
 
             self.msg_svc.INFO("DL : -- post-training :: History")
             self.plotter.loss(self.histories)     # loss as a function of epoch

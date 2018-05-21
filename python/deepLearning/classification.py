@@ -157,8 +157,8 @@ class Classification(DeepLearning):
             self.msg_svc.INFO("DL : -- post-training")
 
             self.msg_svc.INFO("DL : -- post-training :: PREDICTIONS ")
-            train = {'X':self.train_predictions,'Y':self.train_data['Y']}
-            test  = {'X':self.test_predictions,'Y':self.test_data['Y']}
+            train = {'prediction':self.train_predictions,'target':self.train_data['Y']}
+            test  = {'prediction':self.test_predictions, 'target':self.test_data['Y']}
             self.plotter.prediction(train,test)                   # compare DNN prediction for different targets
 
             self.msg_svc.INFO("DL : -- post-training :: ROC")

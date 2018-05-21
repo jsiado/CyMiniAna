@@ -215,12 +215,17 @@ class DeepLearningPlotter(object):
 
         for c,target in enumerate(self.targets):
 
+            saveAs = "{0}/correlations_{1}_{2}".format(self.output_dir,target.name,self.date)
+
             allkeys = target.df.keys()
             keys = []
             for key in allkeys:
                 if key!='target': keys.append(key)
             t_ = target.df[keys]
             corrmat = t_.corr()
+
+            # Save correlation matrix to CSV file
+            corrmat.to_csv("{0}.csv".format(saveAs))
 
             # Use matplotlib directly
             fig,ax = plt.subplots()
@@ -231,15 +236,14 @@ class DeepLearningPlotter(object):
             cbar.ax.set_yticklabels( [i.get_text().strip('$') for i in cbar.ax.get_yticklabels()], **fontProperties )
 
             labels = corrmat.columns.values
-            labels = [i.replace('_','\_') for i in labels]
+            labels = [self.variable_labels[i].label for i in labels]
+
             # shift location of ticks to center of the bins
             ax.set_xticks(np.arange(len(labels))+0.5, minor=False)
-            ax.set_xticklabels(labels, fontProperties, fontsize=18, minor=False, ha='right', rotation=70)
-            ax.xaxis.set_major_formatter(FormatStrFormatter('%g'))
+            ax.set_xticklabels(labels, fontProperties, fontsize=14, minor=False, ha='right', rotation=70)
 
             ax.set_yticks(np.arange(len(labels))+0.5, minor=False)
-            ax.set_yticklabels(labels, fontProperties, fontsize=18, minor=False)
-            ax.yaxis.set_major_formatter(FormatStrFormatter('%g'))
+            ax.set_yticklabels(labels, fontProperties, fontsize=14, minor=False)
 
             ## CMS/COM Energy Label + Signal name
             cms_stamp = hpl.CMSStamp(self.CMSlabelStatus)
@@ -259,71 +263,75 @@ class DeepLearningPlotter(object):
 
             ax.text(0.03,0.93,target.label,fontsize=16,ha='left',va='top',transform=ax.transAxes)
 
-            plt.savefig(self.output_dir+"/correlations_{0}_{1}.{2}".format(target.name,self.date,self.image_format),
+
+            plt.savefig("{0}.{1}".format(saveAs,self.image_format),
                         format=self.image_format,dpi=300,bbox_inches='tight')
             plt.close()
 
         return
 
 
-    def prediction(self,train_data={},test_data={}):
+    def prediction(self,train_data={},test_data={},kfold=-1):
         """Plot the training and testing predictions"""
         self.msg_svc.INFO("DL : Plotting DNN prediction. ")
-        if self.classification: self.predictionClassification(train_data,test_data)
-        elif self.regression:   self.predictionRegression(train_data,test_data)
+        if self.classification: self.predictionClassification(train_data,test_data,kfold)
+        elif self.regression:   self.predictionRegression(train_data,test_data,kfold)
         return
 
 
-    def predictionRegression(self,train_data={},test_data={}):
+    def predictionRegression(self,train_data={},test_data={},kfold=-1):
         """Plot the training and testing predictions for all k-fold cross-validation results"""
-        for i,(train,trainY,test,testY) in enumerate(zip(train_data['X'],train_data['Y'],test_data['X'],test_data['Y'])):
+        train  = train_data['prediction']
+        trainY = train_data['target']
+        train_res = train_data['resolution']
+        test   = test_data['prediction']
+        testY  = test_data['target']
+        test_res = test_data['resolution']
 
-            hist = HepPlotter("histogram",1)
+        hist = HepPlotter("histogram",1)
 
-            hist.ratio_plot = True
-            hist.ratio_type = "ratio"
-            hist.y_ratio_label = "Test/Train"
-            hist.label_size = 14
-            hist.normed  = True
-            hist.format  = self.image_format
-            hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(i,self.date)
-            hist.binning = array('d',[-3000+300*i for i in range(21)])
-            hist.stacked = False
-            hist.logplot = False
-            hist.x_label = "Residual"
-            hist.y_label = "Arbitrary Units"
-            hist.CMSlabel = 'top left'
-            hist.CMSlabelStatus   = self.CMSlabelStatus
-            hist.numLegendColumns = 1
+        hist.ratio_plot = True
+        hist.ratio_type = "ratio"
+        hist.y_ratio_label = "Test/Train"
+        hist.label_size = 14
+        hist.normed  = True
+        hist.format  = self.image_format
+        hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(kfold,self.date)
+        hist.binning = array('d',[-3000+300*i for i in range(21)])
+        hist.stacked = False
+        hist.logplot = False
+        hist.x_label = "Residual"
+        hist.y_label = "Arbitrary Units"
+        hist.CMSlabel = 'top left'
+        hist.CMSlabelStatus   = self.CMSlabelStatus
+        hist.numLegendColumns = 1
 
-            if self.processlabel: hist.extra_text.Add(self.processlabel,coords=[0.03,0.80],fontsize=14)
+        if self.processlabel: hist.extra_text.Add(self.processlabel,coords=[0.03,0.80],fontsize=14)
 
-            # Plotting the difference between the prediction and 'true' value; could change this to do something else
-            train_res = train-trainY
-            test_res  = test-testY
-            hist.extra_text.Add(r"Train = {0:.2f}$\pm${1:.2f}".format(np.mean(train_res),np.std(train_res)),coords=[0.03,0.80],fontsize=14)
-            hist.extra_text.Add(r"Test  = {0:.2f}$\pm${1:.2f}".format(np.mean(test_res),np.std(test_res)),coords=[0.03,0.73],fontsize=14)
+        # Plotting the difference between the prediction and 'true' value; could change this to do something else
+        hist.extra_text.Add(r"Train = {0:.2f}$\pm${1:.2f}".format(train_res.GetMean(),train_res.GetStdDev()),coords=[0.03,0.80],fontsize=14)
+        hist.extra_text.Add(r"Test  = {0:.2f}$\pm${1:.2f}".format(test_res.GetMean(), test_res.GetStdDev()),coords=[0.03,0.73],fontsize=14)
 
-            hist.initialize()
+        hist.initialize()
 
-            ## Training Prediction
-            hist.Add(train_res, name='train', linecolor='red',
-                     linewidth=2, draw='step', label="Train Residual",
-                     ratio_den=True,ratio_num=False,ratio_partner='test')
+        ## Training Prediction
+        hist.Add(train_res, name='train', linecolor='red',
+                 linewidth=2, draw='step', label="Train Residual",
+                 ratio_den=True,ratio_num=False,ratio_partner='test')
 
-            ## Testing Prediction
-            hist.Add(test_res, name='test', linecolor='blue',
-                     linewidth=2, draw='step', label="Test Residual",
-                     ratio_den=False,ratio_num=True,ratio_partner='train')
+        ## Testing Prediction
+        hist.Add(test_res, name='test', linecolor='blue',
+                 linewidth=2, draw='step', label="Test Residual",
+                 ratio_den=False,ratio_num=True,ratio_partner='train')
 
-            p = hist.execute()
-            hist.savefig()
+        p = hist.execute()
+        hist.savefig()
 
         return
 
 
 
-    def predictionClassification(self,train_data={},test_data={}):
+    def predictionClassification(self,train_data={},test_data={},kfold=-1):
         """Plot the training and testing predictions for all k-fold cross-validation results"""
         for i,(train,trainY,test,testY) in enumerate(zip(train_data['X'],train_data['Y'],test_data['X'],test_data['Y'])):
 
@@ -335,7 +343,7 @@ class DeepLearningPlotter(object):
             hist.label_size    = 14
             hist.normed  = True  # compare shape differences (likely don't have the same event yield)
             hist.format  = self.image_format
-            hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(i,self.date)
+            hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(kfold,self.date)
             hist.binning = 1
             hist.stacked = False
             hist.logplot = False
@@ -401,7 +409,7 @@ class DeepLearningPlotter(object):
 
         energy_stamp    = hpl.EnergyStamp()
         energy_stamp.ha = 'right'
-        energy_stamp.coords = [0.03,0.97]
+        energy_stamp.coords = [0.99,1.00]
         energy_stamp.fontsize = 16
         ax.text(energy_stamp.coords[0],energy_stamp.coords[1],energy_stamp.text, 
                 fontsize=energy_stamp.fontsize,ha=energy_stamp.ha, va=energy_stamp.va, transform=ax.transAxes)

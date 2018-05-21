@@ -243,6 +243,8 @@ class DeepLearning(object):
         file    = uproot.open(self.hep_data)
         data    = file[self.treename]
         self.df = data.pandas.df( self.features+['target']+variables2plot )
+        #self.df = df.sample(frac=0.2)
+        print self.df.dtypes
 
         self.metadata = file['metadata']   # names of samples, target values, etc.
 
