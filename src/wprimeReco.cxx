@@ -114,7 +114,7 @@ void WprimeReco::getWprime( const Jet& j0, const Jet& j1 ){
     Wprime0.p4  = j0.p4 + VLQ0.p4;
     Wprime0.vlq = VLQ0;
     Wprime0.jet = j0;
-    Wprime0.A_energy = (VLQ0.p4.E() - j0.p4.E()) / (VLQ0.p4.E() + j0.p4.E());
+    Wprime0.A_energy = (VLQ0.p4.Pt() - j0.p4.Pt()) / (VLQ0.p4.Pt() + j0.p4.Pt());
     bool massComp0   = (Wprime0.p4.M() > VLQ0.p4.M());
 
     // Test1: VLQ = j0+lepton+neutrino
@@ -122,7 +122,7 @@ void WprimeReco::getWprime( const Jet& j0, const Jet& j1 ){
     Wprime1.p4  = j1.p4 + VLQ1.p4;
     Wprime1.vlq = VLQ1;
     Wprime1.jet = j1;
-    Wprime1.A_energy = (VLQ1.p4.E() - j1.p4.E()) / (VLQ1.p4.E() + j1.p4.E());
+    Wprime1.A_energy = (VLQ1.p4.Pt() - j1.p4.Pt()) / (VLQ1.p4.Pt() + j1.p4.Pt());
     bool massComp1   = (Wprime1.p4.M() > VLQ1.p4.M());
 
     // Set the Wprime system

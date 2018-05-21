@@ -148,13 +148,12 @@ int main(int argc, char** argv) {
         if (std::find(fileKeys.begin(), fileKeys.end(), metadata_treename) == fileKeys.end())
             metadata_treename = "";  // metadata TTree doesn't exist, set this so "config" won't look for it
         config.inspectFile( *file,metadata_treename );      // check the type of file being processed
-        std::cout << " INSTPECTED FILE " << std::endl;
+
         // Clone/write metadata tree
         TTree * original_metadata_ttree;
         metadataTree metadata_ttree(config);
 
         if (metadata_treename.size()>0){
-            std::cout << " METADATA " << std::endl;
             original_metadata_ttree = (TTree*)file->Get(metadata_treename.c_str());
             // Setup subdirectory, if necessary
             std::string subdir;

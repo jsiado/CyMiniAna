@@ -220,6 +220,8 @@ void histogrammer::bookHists( std::string name ){
 
     init_hist("wprimeMass_"+name, 5000, 0, 5000);
     init_hist("vlqMass_"+name,    5000, 0, 5000);
+    init_hist("wprimeMass_nusmp_"+name, 5000, 0, 5000);
+    init_hist("vlqMass_nusmp_"+name,    5000, 0, 5000);
 
     //  VLQ/Wprime
     if (m_config->useTruth() && m_config->isSignal()){
@@ -228,6 +230,10 @@ void histogrammer::bookHists( std::string name ){
 
         init_hist("truth_wprime_mass_"+name,  5000, 0, 5000 );
         init_hist("truth_vlq_mass_"+name,     5000, 0, 5000 );
+
+        init_hist("truth_quark_vlq_energy_"+name, 5000,0,5000,5000,0,5000); // quark vs vlq energy
+        init_hist("truth_quark_vlq_energy_diff_"+name,  5000,-5000,5000);   // quark vs vlq energy
+        init_hist("truth_quark_vlq_energy_asymm_"+name,  100,-1,1);         // quark vs vlq energy
 
         init_hist("truth_quark_pt_"+name,     2000, 0, 2000 );
         init_hist("truth_vlq_boson_pt_"+name, 2000, 0, 2000 );
@@ -244,6 +250,12 @@ void histogrammer::bookHists( std::string name ){
         init_hist("wprime_massResolution_"+name,      5000, -5000, 5000);             // truth-reco
         init_hist("wprime_massResolution_norm_"+name,  100, -1, 1);                   // (truth-reco)/truth
         init_hist("wprimeMass_truth_vs_reco_"+name,   5000, 0, 5000, 5000, 0, 5000);  // truth vs reco
+
+        // Mass resolution with neutrino sampling
+        init_hist("vlq_massResolution_norm_nusmp_"+name,     100, -1, 1);                   // (truth-reco)/truth
+        init_hist("vlqMass_truth_vs_reco_nusmp_"+name,      5000, 0, 5000, 5000, 0, 5000);  // truth vs reco
+        init_hist("wprime_massResolution_norm_nusmp_"+name,  100, -1, 1);                   // (truth-reco)/truth
+        init_hist("wprimeMass_truth_vs_reco_nusmp_"+name,   5000, 0, 5000, 5000, 0, 5000);  // truth vs reco
     }
 /*
     init_hist("wprime_mass_"+name,  6000, 0.0, 6000);
@@ -345,6 +357,7 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
     MET met = event.met();
     std::vector<Parton> partons = event.truth_partons();
     Wprime wpreco = event.wprime();
+    Wprime wpreco_smp = event.wprime_sampling();
 
     if (m_useJets){
         cma::DEBUG("HISTOGRAMMER : Fill small-R jets");
@@ -502,8 +515,12 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
     fill("ht_"+name,      event.HT(),   event_weight);
     fill("st_"+name,      event.ST(),   event_weight);
 
-    fill("wprimeMass_"+name, wpreco.p4.M(),     event_weight);
-    fill("vlqMass_"+name,    wpreco.vlq.p4.M(), event_weight);
+    if (m_config->useWprime()){
+        fill("wprimeMass_"+name, wpreco.p4.M(),     event_weight);
+        fill("vlqMass_"+name,    wpreco.vlq.p4.M(), event_weight);
+        fill("wprimeMass_nusmp_"+name, wpreco_smp.p4.M(),     event_weight);
+        fill("vlqMass_nusmp_"+name,    wpreco_smp.vlq.p4.M(), event_weight);
+    }
 
     if (m_config->useTruth() && m_config->isSignal()){
         cma::DEBUG("HISTOGRAMMER : Fill truth information");
@@ -538,6 +555,10 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
         fill("truth_vlq_boson_pt_"+name, wp_vlq_boson.Pt(), event_weight );
         fill("truth_vlq_quark_pt_"+name, wp_vlq_quark.Pt(), event_weight );
 
+        fill("truth_quark_vlq_energy_"+name,       wp_quark.Pt(), wp_vlq.Pt(), event_weight); // quark vs vlq energy
+        fill("truth_quark_vlq_energy_diff_"+name,  (wp_quark.Pt()-wp_vlq.Pt()),event_weight); // quark vs vlq energy
+        fill("truth_quark_vlq_energy_asymm_"+name, (wp_quark.Pt()-wp_vlq.Pt())/(wp_quark.Pt()+wp_vlq.Pt()),event_weight); // quark vs vlq energy
+
         fill("truth_deltaR_wprime_quark-vlq_"+name, wp_quark.DeltaR( wp_vlq ), event_weight );            // deltaR( VLQ, quark ) from Wprime decay
         fill("truth_deltaR_vlq_boson-quark_"+name,  wp_vlq_boson.DeltaR( wp_vlq_quark ), event_weight );  // deltaR( boson, quark ) from VLQ decay
         fill("truth_deltaR_boson_decays_"+name,     wp_boson_child0.DeltaR( wp_boson_child1 ), event_weight );  // deltaR( child0, child1 ) from boson decay
@@ -549,6 +570,11 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
         fill("wprime_massResolution_"+name,      wp.wprime.p4.M() -wpreco.p4.M(), event_weight);         // truth-reco
         fill("wprime_massResolution_norm_"+name, (wp.wprime.p4.M()-wpreco.p4.M())/wp.wprime.p4.M(),event_weight); // (truth-reco)/truth
         fill("wprimeMass_truth_vs_reco_"+name,   wp.wprime.p4.M(), wpreco.p4.M(), event_weight);         // truth vs reco
+        // Mass resolution with sampling neutrino
+        fill("vlq_massResolution_norm_nusmp_"+name,    (wp_vlq.M()-wpreco_smp.vlq.p4.M())/wp_vlq.M(), event_weight);
+        fill("vlqMass_truth_vs_reco_nusmp_"+name,      wp_vlq.M(), wpreco_smp.vlq.p4.M(), event_weight);
+        fill("wprime_massResolution_norm_nusmp_"+name, (wp.wprime.p4.M()-wpreco_smp.p4.M())/wp.wprime.p4.M(),event_weight);
+        fill("wprimeMass_truth_vs_reco_nusmp_"+name,   wp.wprime.p4.M(), wpreco_smp.p4.M(), event_weight);
     }
 
 /*
