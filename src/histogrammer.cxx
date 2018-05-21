@@ -204,10 +204,10 @@ void histogrammer::bookHists( std::string name ){
             init_hist("nu_deltaR_viper_"+name,   50, 0,5);
 
             // 2D histograms
-            init_hist("nu_truth_pz_deltaPz_"+name,     500,-2000,2000, 500,-2000,2000);
-            init_hist("nu_truth_pz_deltaPz_smp_"+name, 500,-2000,2000, 500,-2000,2000);
-            init_hist("nu_truth_eta_deltaEta_"+name,     50,-5,5, 50,-5,5);
-            init_hist("nu_truth_eta_deltaEta_smp_"+name, 50,-5,5, 50,-5,5);
+//            init_hist("nu_truth_pz_deltaPz_"+name,     500,-2000,2000, 500,-2000,2000);
+//            init_hist("nu_truth_pz_deltaPz_smp_"+name, 500,-2000,2000, 500,-2000,2000);
+//            init_hist("nu_truth_eta_deltaEta_"+name,     50,-5,5, 50,-5,5);
+//            init_hist("nu_truth_eta_deltaEta_smp_"+name, 50,-5,5, 50,-5,5);
         }
     }
 
@@ -228,34 +228,34 @@ void histogrammer::bookHists( std::string name ){
         init_hist("jet_pt_truth_quark_Wprime_"+name,  2000, 0., 2000.);
         init_hist("jet_bdisc_truth_quark_Wprime_"+name,100, 0.,    1.);
 
-        init_hist("truth_wprime_mass_"+name,  5000, 0, 5000 );
-        init_hist("truth_vlq_mass_"+name,     5000, 0, 5000 );
+        init_hist("truth_wprime_mass_"+name,  1000, 0, 5000 );
+        init_hist("truth_vlq_mass_"+name,     1000, 0, 5000 );
 
-        init_hist("truth_quark_vlq_energy_"+name, 5000,0,5000,5000,0,5000); // quark vs vlq energy
-        init_hist("truth_quark_vlq_energy_diff_"+name,  5000,-5000,5000);   // quark vs vlq energy
+        init_hist("truth_quark_vlq_energy_"+name, 1000,0,5000,1000,0,5000); // quark vs vlq energy
+        init_hist("truth_quark_vlq_energy_diff_"+name,  2000,-5000,5000);   // quark vs vlq energy
         init_hist("truth_quark_vlq_energy_asymm_"+name,  100,-1,1);         // quark vs vlq energy
 
-        init_hist("truth_quark_pt_"+name,     2000, 0, 2000 );
-        init_hist("truth_vlq_boson_pt_"+name, 2000, 0, 2000 );
-        init_hist("truth_vlq_quark_pt_"+name, 2000, 0, 2000 );
+        init_hist("truth_quark_pt_"+name,     1000, 0, 2000 );
+        init_hist("truth_vlq_boson_pt_"+name, 1000, 0, 2000 );
+        init_hist("truth_vlq_quark_pt_"+name, 1000, 0, 2000 );
 
         init_hist("truth_deltaR_wprime_quark-vlq_"+name, 500, 0, 5 );  // deltaR( VLQ, quark ) from Wprime decay
         init_hist("truth_deltaR_vlq_boson-quark_"+name,  500, 0, 5 );  // deltaR( boson, quark ) from VLQ decay
         init_hist("truth_deltaR_boson_decays_"+name,     500, 0, 5 );  // deltaR( child0, child1 ) from boson decay
 
         // Mass resolution
-        init_hist("vlq_massResolution_"+name,         5000, -5000, 5000);             // truth-reco
+        init_hist("vlq_massResolution_"+name,         2000, -5000, 5000);             // truth-reco
         init_hist("vlq_massResolution_norm_"+name,     100, -1, 1);                   // (truth-reco)/truth
-        init_hist("vlqMass_truth_vs_reco_"+name,      5000, 0, 5000, 5000, 0, 5000);  // truth vs reco
-        init_hist("wprime_massResolution_"+name,      5000, -5000, 5000);             // truth-reco
+        init_hist("vlqMass_truth_vs_reco_"+name,      1000, 0, 5000, 1000, 0, 5000);  // truth vs reco
+        init_hist("wprime_massResolution_"+name,      2000, -5000, 5000);             // truth-reco
         init_hist("wprime_massResolution_norm_"+name,  100, -1, 1);                   // (truth-reco)/truth
-        init_hist("wprimeMass_truth_vs_reco_"+name,   5000, 0, 5000, 5000, 0, 5000);  // truth vs reco
+        init_hist("wprimeMass_truth_vs_reco_"+name,   1000, 0, 5000, 1000, 0, 5000);  // truth vs reco
 
         // Mass resolution with neutrino sampling
         init_hist("vlq_massResolution_norm_nusmp_"+name,     100, -1, 1);                   // (truth-reco)/truth
-        init_hist("vlqMass_truth_vs_reco_nusmp_"+name,      5000, 0, 5000, 5000, 0, 5000);  // truth vs reco
+        init_hist("vlqMass_truth_vs_reco_nusmp_"+name,      1000, 0, 5000, 1000, 0, 5000);  // truth vs reco
         init_hist("wprime_massResolution_norm_nusmp_"+name,  100, -1, 1);                   // (truth-reco)/truth
-        init_hist("wprimeMass_truth_vs_reco_nusmp_"+name,   5000, 0, 5000, 5000, 0, 5000);  // truth vs reco
+        init_hist("wprimeMass_truth_vs_reco_nusmp_"+name,   1000, 0, 5000, 1000, 0, 5000);  // truth vs reco
     }
 /*
     init_hist("wprime_mass_"+name,  6000, 0.0, 6000);
