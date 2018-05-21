@@ -50,6 +50,7 @@ class eventSelection{
     bool oneLeptonSelection(double cutflow_bin);
     bool ejetsSelection(double cutflow_bin, const Lepton& lep);
     bool mujetsSelection(double cutflow_bin);
+    bool oneLeptonSignalSelection(double cutflow_bin);
 
     // Helper functions: Provide external access to information in this class
     void fillCutflows(double cutflow_bin);                                // fill cutflow histograms
@@ -85,6 +86,7 @@ class eventSelection{
     // booleans for each selection
     bool m_dummySelection;
     bool m_isOneLeptonAnalysis;
+    bool m_isOneLeptonSignalAnalysis;
 
     // physics information
     float m_nominal_weight;

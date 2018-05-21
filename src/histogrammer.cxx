@@ -189,11 +189,16 @@ void histogrammer::bookHists( std::string name ){
         init_hist("nu_pz_samples_"+name, 500, -2000,2000);
 
         if (m_config->useTruth()) {
+            // compare reco neutrinos to truth neutrinos
             init_hist("nu_deltaPz_"+name,      1000,-2000,2000);
             init_hist("nu_deltaPz_smp_"+name,  1000,-2000,2000);
             init_hist("nu_deltaEta_"+name,       50,-5,5);
             init_hist("nu_deltaEta_smp_"+name,   50,-5,5);
+            init_hist("nu_deltaR_"+name,         50, 0,5);
+            init_hist("nu_deltaR_smp_"+name,     50, 0,5);
+            init_hist("nu_deltaR_viper_"+name,   50, 0,5);
 
+            // 2D histograms
             init_hist("nu_truth_pz_deltaPz_"+name,     500,-2000,2000, 500,-2000,2000);
             init_hist("nu_truth_pz_deltaPz_smp_"+name, 500,-2000,2000, 500,-2000,2000);
             init_hist("nu_truth_eta_deltaEta_"+name,     50,-5,5, 50,-5,5);
@@ -412,30 +417,55 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
 
         if (m_config->useTruth()){
             cma::DEBUG("HISTOGRAMMER : Fill neutrinos -- truth info");
-            TruthWprime wp = event.truth_wprime();
+            std::vector<Parton> truth_partons = event.truth_partons();
 
             float tru_pz(-999.);
             float tru_eta(-999.);
-            Parton p = (wp.BosonChildren[0].isNeutrino) ? wp.BosonChildren[0] : wp.BosonChildren[1];
-            tru_pz  = p.p4.Pz();
-            tru_eta = p.p4.Eta();
+            Parton p;
+            unsigned int n_wdecays2leptons(0);
+            // Get truth neutrino
+            for (const auto& pa : truth_partons){
+                if (pa.isW && pa.child0_idx>=0 && pa.child1_idx>=0) {
+                    Parton child0 = truth_partons.at( pa.child0_idx );
+                    Parton child1 = truth_partons.at( pa.child1_idx );
+                    if (child0.isNeutrino) {
+                        n_wdecays2leptons++;
+                        p = child0;
+                    }
+                    else if (child1.isNeutrino) {
+                        n_wdecays2leptons++;
+                        p = child1;
+                    }
+                }
+            }
+            if (n_wdecays2leptons==1){
+                tru_pz  = p.p4.Pz();
+                tru_eta = p.p4.Eta();
 
-            float deltaPz     = tru_pz - nu.p4.Pz();
-            float deltaPz_smp = tru_pz - nu.pz_sampling;
-            fill("nu_deltaPz_"+name, deltaPz, event_weight);           // standard reconstruction
-            fill("nu_deltaPz_smp_"+name, deltaPz_smp, event_weight);   // sampling reconstruction
+                float deltaPz     = tru_pz - nu.p4.Pz();
+                float deltaPz_smp = tru_pz - nu.pz_sampling;
+                fill("nu_deltaPz_"+name, deltaPz, event_weight);           // standard reconstruction
+                fill("nu_deltaPz_smp_"+name, deltaPz_smp, event_weight);   // sampling reconstruction
 
-            float deltaEta     = tru_eta - nu.p4.Eta();
-            float deltaEta_smp = tru_eta - tmp_nu.Eta();
-            fill("nu_deltaEta_"+name,     deltaEta,     event_weight);
-            fill("nu_deltaEta_smp_"+name, deltaEta_smp, event_weight);
+                float deltaEta     = tru_eta - nu.p4.Eta();
+                float deltaEta_smp = tru_eta - tmp_nu.Eta();
+                float deltaR       = p.p4.DeltaR(nu.p4);
+                float deltaR_smp   = p.p4.DeltaR(tmp_nu);
+                float deltaR_viper(0.0);  // not here yet
 
-            fill("nu_truth_pz_deltaPz_"+name,     tru_pz, deltaPz,     event_weight);
-            fill("nu_truth_pz_deltaPz_smp_"+name, tru_pz, deltaPz_smp, event_weight);
-            fill("nu_truth_eta_deltaEta_"+name,     tru_eta, deltaEta, event_weight);
-            fill("nu_truth_eta_deltaEta_smp_"+name, tru_eta, deltaEta_smp, event_weight);
-        }
-    }
+                fill("nu_deltaEta_"+name,     deltaEta,     event_weight);
+                fill("nu_deltaEta_smp_"+name, deltaEta_smp, event_weight);
+                fill("nu_deltaR_"+name,       deltaR,       event_weight);
+                fill("nu_deltaR_smp_"+name,   deltaR_smp,   event_weight);
+                fill("nu_deltaR_viper_"+name, deltaR_viper, event_weight);
+
+                fill("nu_truth_pz_deltaPz_"+name,     tru_pz, deltaPz,     event_weight);
+                fill("nu_truth_pz_deltaPz_smp_"+name, tru_pz, deltaPz_smp, event_weight);
+                fill("nu_truth_eta_deltaEta_"+name,     tru_eta, deltaEta, event_weight);
+                fill("nu_truth_eta_deltaEta_smp_"+name, tru_eta, deltaEta_smp, event_weight);
+            } // end if truth_leptons == 1
+        } // end truth
+    } // end use neutrinos
 
 
     // kinematics

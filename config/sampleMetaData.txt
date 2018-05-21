@@ -18,6 +18,8 @@ qcd QCD_Pt_250toInf_bcToE_TuneCUETP8M1_13TeV_pythia8 711.925875 1 1 1
 ttbar TT_TuneCUETP8M1_13TeV-powheg-pythia8 831.76 77229341 1 77229341
 ttbar TT_TuneCUETP8M2T4_13TeV-powheg-pythia8 831.76 77229341 1 77229341
 ttbar TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-ext 831.76 77709140 1 77709140
+ttbar TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8 1 1 1 1
+ttbar TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8 1 1 1 1
 singletop ST_s-channel_4f_InclusiveDecays_13TeV-amcatnlo-pythia8 136 5993570 1 5993570
 singletop ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1 3.36 9651642 1 9651642
 singletop ST_t-channel_top_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin 136.02 67240808 1 67240808

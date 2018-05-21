@@ -7,7 +7,7 @@ neutrinoReco true
 useWprime false
 wprimeReco false
 kinematicReco true
-isExtendedSample true
+isExtendedSample false
 useDNN false
 DNNinference false
 DNNtraining true
@@ -23,6 +23,8 @@ weightVectorSystematicsFile config/weightVectorSystematics.txt
 calcWeightSystematics false
 selection mujets,ejets
 cutsfile config/cuts_mujets.txt,config/cuts_ejets.txt
+#selection signal_mujets,signal_ejets
+#cutsfile config/cuts_signal_mujets.txt,config/cuts_signal_ejets.txt
 treenames config/treenames.txt
 inputfile config/listOfAllSamples.txt
 NEvents -1

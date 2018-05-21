@@ -33,7 +33,8 @@ eventSelection::eventSelection(configuration &cmaConfig, const std::string &leve
   m_cutsfile("SetMe"),
   m_numberOfCuts(0),
   m_dummySelection(false),
-  m_isOneLeptonAnalysis(false){
+  m_isOneLeptonAnalysis(false),
+  m_isOneLeptonSignalAnalysis(false){
     m_cuts.resize(0);
     m_cutflowNames.clear();
   }
@@ -91,7 +92,8 @@ void eventSelection::identifySelection(){
     m_dummySelection       = m_selection.compare("none")==0;          // no selection
 
     // Analysis cuts :: e/mu/l+jets
-    m_isOneLeptonAnalysis  = (m_selection.compare("ejets")==0 || m_selection.compare("mujets")==0 || m_selection.compare("ljets")==0);
+    m_isOneLeptonAnalysis       = (m_selection.compare("ejets")==0 || m_selection.compare("mujets")==0 || m_selection.compare("ljets")==0);
+    m_isOneLeptonSignalAnalysis = m_selection.compare("signal_ejets")==0 || m_selection.compare("signal_mujets")==0;
 
     return;
 }
@@ -204,6 +206,10 @@ bool eventSelection::applySelection(const Event &event) {
         passSelection = oneLeptonSelection(first_bin+2);
     }
 
+    else if (m_isOneLeptonSignalAnalysis){
+        passSelection = oneLeptonSignalSelection(first_bin+2);
+    }
+
     return passSelection;
 }
 
@@ -278,9 +284,9 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
     // only do selection if the user requested a specific
     // lepton flavor
     // e.g., if user selected "ejets", don't do mu+jets selection!
-    bool ljets  = m_selection.compare("ljets")==0;    // general "lepton+jets" selection
-    bool ejets  = m_selection.compare("ejets")==0;
-    bool mujets = m_selection.compare("mujets")==0;
+    bool ljets  = m_selection.find("ljets")!=std::string::npos;    // general "lepton+jets" selection
+    bool ejets  = m_selection.find("ejets")!=std::string::npos;
+    bool mujets = m_selection.find("mujets")!=std::string::npos;
 
     // cut0 :: One lepton
     bool nLeptons(false);
@@ -313,7 +319,7 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
     }
 
 
-    // cut3 :: >=2 jets (bblv final state)
+    // cut2 :: >=2 jets (bblv final state)
     if ( m_NJets < 2 )
         return false;  // exit the function now; no need to test other cuts!
     else{
@@ -337,6 +343,24 @@ bool eventSelection::oneLeptonSelection(double cutflow_bin){
 }
 
 
+bool eventSelection::oneLeptonSignalSelection(double cutflow_bin){
+    /* */
+    bool pass(false);
+
+    // cut0 :: single lepton
+    pass = oneLeptonSelection(cutflow_bin);  // should be 3 cuts (trigger, lepton, AK4)
+    if (!pass) return pass;
+
+    // cut1 :: ST > 800 GeV
+    if (m_st<800)
+        return false;
+    else{
+        fillCutflows(cutflow_bin+3);
+        pass = true;
+    }
+
+    return pass;
+}
 
 // -- Helper functions
 

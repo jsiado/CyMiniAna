@@ -1,9 +1,9 @@
 date today
 output_dir eos
-eos_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018/Wp2500NarTp1200NarLH
-subdir Wp2500NarTp1200NarLH
+eos_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018/Ttbar1L2017
+subdir ttbar1L2017
 eos_tarball_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018
-files config/samples_ttbarAC_skim/listOfWp2500NarTp1200NarLH.txt
+files config/samples_ttbarAC_skim/listOfTtbar1L2017Files.txt
 username demarley
 executable run
 test False
