@@ -111,6 +111,7 @@ class eventSelection{
     unsigned int m_NMuons;
     unsigned int m_NJets;
     unsigned int m_NLjets;
+    unsigned int m_Nbtags;
 };
 
 #endif

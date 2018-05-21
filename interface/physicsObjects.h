@@ -207,6 +207,7 @@ struct VLQ : CmaBase{
 struct Wprime : CmaBase{
     VLQ vlq;
     Jet jet;
+    float A_energy;
 };
 
 

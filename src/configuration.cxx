@@ -52,7 +52,6 @@ configuration::configuration(const std::string &configFile) :
   m_calcWeightSystematics(false),
   m_listOfWeightSystematicsFile("SetMe"),
   m_listOfWeightVectorSystematicsFile("SetMe"),
-  m_kinematicReco(true),
   m_neutrinoReco(false){
     m_selections.clear();
     m_cutsfiles.clear();
@@ -161,7 +160,6 @@ void configuration::initialize() {
     m_DNNtraining      = cma::str2bool( getConfigOption("DNNtraining") );
     m_DNNinference     = cma::str2bool( getConfigOption("DNNinference") );
     m_doRecoEventLoop  = cma::str2bool( getConfigOption("doRecoEventLoop") );
-    m_kinematicReco    = cma::str2bool( getConfigOption("kinematicReco") );
     m_metadataFile     = getConfigOption("metadataFile");
     m_calcWeightSystematics             = cma::str2bool( getConfigOption("calcWeightSystematics") );
     m_listOfWeightSystematicsFile       = getConfigOption("weightSystematicsFile");

@@ -81,6 +81,8 @@ class Event {
     std::vector<Neutrino> neutrinos() const {return m_neutrinos;}
     std::vector<Ljet> ljets() const {return m_ljets;}
     std::vector<Jet>  jets() const {return m_jets;}
+    Wprime wprime() const {return m_wprime;}
+    Wprime wprime_sampling() const {return m_wprime_smp;}
 
     // Get truth physics information 
     void truth();
@@ -177,6 +179,8 @@ class Event {
     std::vector<Jet>  m_jets;
     std::vector<Jet>  m_jets_iso;
     MET m_met;
+    Wprime m_wprime;
+    Wprime m_wprime_smp;
 
     // truth physics object information
     std::vector<Parton> m_truth_partons;

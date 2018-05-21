@@ -171,7 +171,8 @@ bool eventSelection::applySelection(const Event &event) {
     m_filters  = event.filters();
     // add more objects as needed
 
-
+    std::vector<int> btags = event.btag_jets();
+    m_Nbtags     = btags.size();
     m_NLjets     = m_ljets.size();
     m_NJets      = m_jets.size();
     m_NLeptons   = m_leptons.size();
@@ -351,11 +352,19 @@ bool eventSelection::oneLeptonSignalSelection(double cutflow_bin){
     pass = oneLeptonSelection(cutflow_bin);  // should be 3 cuts (trigger, lepton, AK4)
     if (!pass) return pass;
 
-    // cut1 :: ST > 800 GeV
-    if (m_st<800)
+    // cut1 :: >= 1 b-tag
+    if (m_Nbtags<1)
         return false;
     else{
         fillCutflows(cutflow_bin+3);
+        pass = true;
+    }
+
+    // cut2 :: ST > 600 GeV
+    if (m_st<600)
+        return false;
+    else{
+        fillCutflows(cutflow_bin+4);
         pass = true;
     }
 

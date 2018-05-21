@@ -1,9 +1,9 @@
 date today
 output_dir eos
-eos_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018/Ttbar1L2017
-subdir ttbar1L2017
+eos_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018/hists/ttbar
+subdir ttbar
 eos_tarball_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018
-files config/samples_ttbarAC_skim/listOfTtbar1L2017Files.txt
+files config/samples_ttbarAC_skim/listOfTtbarFiles.txt
 username demarley
 executable run
 test False

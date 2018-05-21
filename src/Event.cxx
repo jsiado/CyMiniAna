@@ -35,7 +35,6 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     m_useNeutrinos = m_config->useNeutrinos();      // use neutrinos in analysis
     m_useWprime    = m_config->useWprime();         // use reconstructed Wprime in analysis
 
-    m_kinematicReco = m_config->kinematicReco();
     m_neutrinoReco  = m_config->neutrinoReco();      // reconstruct neutrino
     m_wprimeReco    = m_config->wprimeReco();        // reconstruct Wprime
     m_DNNinference  = m_config->DNNinference();      // use DNN to predict values
@@ -166,17 +165,11 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
       m_mu_id_tight  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"MUtightID");
     }
 
-    if (!m_kinematicReco && m_useNeutrinos){
+    if (!m_neutrinoReco && m_useNeutrinos){
         // Neutrinos aren't stored in the baseline ntuples, requires 'kinematicReco' to create
         m_nu_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_pt");
         m_nu_eta = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_eta");
         m_nu_phi = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_phi");
-    }
-
-    if (!m_kinematicReco && m_getDNN){
-        // Load ttbar variables from file
-        m_leptop_jet  = new TTreeReaderValue<int>(m_ttree, "leptop_jet");
-        m_hadtop_ljet = new TTreeReaderValue<int>(m_ttree, "hadtop_ljet");
     }
 
     m_met_met  = new TTreeReaderValue<float>(m_ttree,"METpt");
@@ -235,9 +228,9 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     if (!m_getDNN && m_useDNN)
         m_dnn_score = new TTreeReaderValue<float>(m_ttree,"ljet_CWoLa");
 
-
     // Kinematic reconstruction algorithms
     m_neutrinoRecoTool = new NeutrinoReco(cmaConfig);
+    m_wprimeTool = new WprimeReco(cmaConfig);
 } // end constructor
 
 Event::~Event() {}
@@ -367,6 +360,7 @@ void Event::execute(Long64_t entry){
 
     // Kinematic reconstruction (if they values aren't in the root file)
     if (m_useWprime){
+        wprimeReconstruction();
     }
 
     deepLearningPrediction();   // store features in map (easily access later)
@@ -717,6 +711,7 @@ void Event::initialize_neutrinos(){
 }
 
 
+
 void Event::initialize_weights(){
     /* Event weights */
     m_nominal_weight = 1.0;
@@ -816,12 +811,33 @@ bool Event::customIsolation( Lepton& lep ){
 }
 
 
-/*** GETTER FUNCTIONS ***/
 
+void Event::wprimeReconstruction(){
+    /* Access Wprime reconstruction tool */
+    m_wprime = {};
+    m_wprime_smp = {};
 
-//BUILD VLQ / WPrime
-//    USE ROOT FILE INFORMATION IF "m_kinematicReco"==false
-//    ELSE USE ALGORITHM
+    if (m_wprimeReco){
+        if (m_leptons.size()>0 && m_jets.size()>1){
+            Neutrino nu = m_neutrinos.at(0);
+            m_wprimeTool->setLepton( m_leptons.at(0) );
+            m_wprimeTool->setNeutrino( nu );
+            m_wprimeTool->setJets( m_jets );
+            m_wprimeTool->setBtagJets( m_btag_jets_default );
+            m_wprime = m_wprimeTool->execute();
+
+            Neutrino nu_smp;
+            float nuE = sqrt( pow(nu.p4.Px(),2) + pow(nu.p4.Py(),2) + pow(nu.pz_sampling,2));
+            nu_smp.p4.SetPxPyPzE( nu.p4.Px(), nu.p4.Py(), nu.pz_sampling, nuE );
+            m_wprimeTool->setNeutrino( nu_smp );
+            m_wprime_smp = m_wprimeTool->execute();
+        }
+    }
+    else{
+    }
+
+    return;
+}
 
 
 void Event::getBtaggedJets( Jet& jet ){

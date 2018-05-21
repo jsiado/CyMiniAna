@@ -33,6 +33,7 @@ class configuration {
     // Type of File(s) being processed
     virtual bool isMC() {return m_isMC;}              // must call "inspectFile(file)" or "isMC(file)" first!
     virtual bool isMC( TFile& file );
+    bool isSignal() {return m_isSignal;}
     bool isGridFile() {return m_isGridFile;}
     bool isExtendedSample(){ return m_isExtendedSample;}
 
@@ -118,8 +119,7 @@ class configuration {
     bool matchTruthToReco() {return m_matchTruthToReco;} // true  -- match truth events to reco events (loop over reco events)
     void setMatchTruthToReco(bool truthToReco);
 
-    // misc. for dilepton ttbar
-    bool kinematicReco() {return m_kinematicReco;}
+    // reconstruction techniques
     bool neutrinoReco(){ return m_neutrinoReco;}
     bool wprimeReco(){ return m_wprimeReco;}
 
@@ -229,7 +229,6 @@ class configuration {
     double m_minDNN  = 0.0;   // min. value in the DNN discriminant
     double m_maxDNN  = 1.0;   // max. value in the DNN discriminant
 
-    bool m_kinematicReco;
     bool m_neutrinoReco;
     bool m_wprimeReco;
 
