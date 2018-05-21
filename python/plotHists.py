@@ -69,7 +69,7 @@ x_labels = hpl.variable_labels()
 sample_labels = hpl.sample_labels()
 
 selections = ['mujets','ejets']
-histograms = util.file2list("config/listOfHists.txt")
+histograms = util.file2list("config/listOfHists_noReco.txt")
 histograms = [i.format(sel) for sel in selections for i in histograms]
 
 ## Add the data from each file
@@ -148,15 +148,16 @@ for hi,histogram in enumerate(histograms):
 
     hist.initialize()
 
-    hist.Add(h_hist_ttbar[histogram],name="ttbar_"+histogram,linecolor='red',
-             draw='step',label=ttbar_label,ratio_den=True,ratio_partner=['wprime1_'+histogram,'wprime2_'+histogram])
+
+    hist.Add(h_hist_ttbar[histogram],name="ttbar_"+histogram,linecolor='green',linewidth=0,alpha=0.5,color='green',
+             draw='stepfilled',label=ttbar_label,ratio_den=True,ratio_partner=['wprime1_'+histogram,'wprime2_'+histogram])
 
     # 1 signal sample
     hist.Add(h_hist_signal1[histogram],name="wprime1_"+histogram,linecolor='blue',color='blue',
              draw='step',label=wprime1_label,ratio_num=True,ratio_partner='ttbar_'+histogram)
 
     # 2 signal sample
-    hist.Add(h_hist_signal2[histogram],name="wprime2_"+histogram, linecolor='green',color='green',
+    hist.Add(h_hist_signal2[histogram],name="wprime2_"+histogram, linecolor='red',color='red',
              draw='step',label=wprime2_label,ratio_num=True,ratio_partner='ttbar_'+histogram)
 
     plot = hist.execute()

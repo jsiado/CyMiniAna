@@ -6,7 +6,6 @@ h_jet0_bdisc_signal_{0}
 h_jet1_bdisc_signal_{0}
 h_jet_pt_signal_{0}
 h_jet_eta_signal_{0}
-h_jet_phi_signal_{0}
 h_jet_bdisc_signal_{0}
 h_el_pt_signal_{0}
 h_el_eta_signal_{0}
@@ -16,10 +15,6 @@ h_nu_pt_signal_{0}
 h_nu_eta_signal_{0}
 h_nu_phi_signal_{0}
 h_nu_eta_smp_signal_{0}
-h_w_mass_signal_{0}
-h_w_pt_signal_{0}
-h_w_mass_smp_signal_{0}
-h_w_pt_smp_signal_{0}
 h_mtw_signal_{0}
 h_met_met_signal_{0}
 h_met_phi_signal_{0}
@@ -29,3 +24,7 @@ h_wprimeMass_signal_{0}
 h_vlqMass_signal_{0}
 h_wprimeMass_nusmp_signal_{0}
 h_vlqMass_nusmp_signal_{0}
+h_w_mass_signal_{0}
+h_w_pt_signal_{0}
+h_w_mass_smp_signal_{0}
+h_w_pt_smp_signal_{0}
