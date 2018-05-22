@@ -158,6 +158,7 @@ def variable_labels():
     variables['nu_phi'] = Variable(binning=hist1d(10,-2.5,   2.5), label=r'Neutrino '+_phi)
     variables['nu_eta'] = Variable(binning=hist1d(10,-2.5,   2.5), label=r'Neutrino '+_eta+" (Standard)")
     variables['nu_eta_smp'] = Variable(binning=hist1d(10,-2.5,   2.5), label=r'Neutrino '+_eta+" (Sampling)")
+    variables['nu_pz_samplings'] = Variable(binning=array('d',[-2000.,-100.]+[8.*i-100 for i in range(1,46)]+[268.,2000.]),label=r'Neutrino p$_\text{z}$ Samplings')
     variables['nu_pz_sampling'] = Variable(binning=hist1d(30,-3000,3000), label=r'Neutrino p$_\text{z}$ (Sampling)')
     variables['nu_pz_standard'] = Variable(binning=hist1d(30,-3000,3000), label=r'Neutrino p$_\text{z}$ (Standard)')
 

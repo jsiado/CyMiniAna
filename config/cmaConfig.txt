@@ -20,11 +20,12 @@ output_path ./
 weightSystematicsFile config/weightSystematics.txt
 weightVectorSystematicsFile config/weightVectorSystematics.txt
 calcWeightSystematics false
-#selection mujets,ejets
-#cutsfile config/cuts_mujets.txt,config/cuts_ejets.txt
-selection signal_mujets,signal_ejets
-cutsfile config/cuts_signal_mujets.txt,config/cuts_signal_ejets.txt
+selection mujets,ejets
+cutsfile config/cuts_mujets.txt,config/cuts_ejets.txt
+#selection signal_mujets,signal_ejets
+#cutsfile config/cuts_signal_mujets.txt,config/cuts_signal_ejets.txt
 treenames config/treenames.txt
 inputfile config/listOfAllSamples.txt
-NEvents -1
+NEvents 1
+firstEvent 8
 verboseLevel INFO

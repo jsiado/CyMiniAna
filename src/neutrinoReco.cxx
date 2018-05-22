@@ -22,7 +22,7 @@ NeutrinoReco::NeutrinoReco( configuration& cmaConfig ) :
     //TFile wmass_hists = TFile::Open("");       // sample directly from histogram
     //m_wmass_hist = (TH1D*)wmass_hists.Get("");
     r = new TRandom3();
-    m_sampling = 10000;
+    m_sampling = 10001;
 
     m_isImaginary = false;   // keep track of real/imaginary solutions
   }
@@ -116,7 +116,6 @@ void NeutrinoReco::nu_pz(float wmass){
         discriminant = sqrt(discriminant);
         float pz1 = (-B-discriminant) / A;
         float pz2 = (-B+discriminant) / A;
-
         m_pz_solutions.push_back(pz1);
         m_pz_solutions.push_back(pz2);
     }
