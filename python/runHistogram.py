@@ -17,9 +17,9 @@ To run:
 """
 import sys
 import ROOT
-import util
 from argparse import ArgumentParser
 
+import util
 from Analysis.CyMiniAna.hepPlotter.hepPlotter import HepPlotter
 import Analysis.CyMiniAna.hepPlotter.hepPlotterTools as hpt
 import Analysis.CyMiniAna.hepPlotter.hepPlotterLabels as hpl
@@ -49,6 +49,7 @@ treename   = results.treename
 betterColors  = hpt.betterColors()['linecolors']
 variables     = hpl.variable_labels()
 sample_labels = hpl.sample_labels()
+metadata = util.loadMetadata("config/sampleMetadata.txt")  # dictionary of metadata; key=primary dataset
 
 numberOfHists = 0
 # Access data -- assumes you are plotting histograms from multiple sources in one figure
@@ -79,15 +80,15 @@ for hi,histogram in enumerate(histograms):
 
     ## Add the data from each file
     for fi,file in enumerate(files):
-        f = ROOT.TFile.Open(file)
-        filename = file.split("/")[-1].split(".")[0]
+        f  = ROOT.TFile.Open(file)
+        pd = util.getPrimaryDataset(f)
+        name = metadata[pd].sampleType      # compare primary dataset with metadatafile 
 
         print "     > Opening data from ",file
-
         h_hist = getattr(f,histogram)       # retrieve the histogram
 
-        hist.Add(h_hist,name=filename+"_"+histogram,linecolor=betterColors[numberOfHists],
-                 draw='step',label=sample_labels[filename].label)
+        hist.Add(h_hist,name=name+"_"+histogram,linecolor=betterColors[numberOfHists],
+                 draw='step',label=sample_labels[name].label)
         numberOfHists+=1
 
     plot = hist.execute()

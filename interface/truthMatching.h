@@ -25,14 +25,19 @@ class truthMatching {
     void setTruthPartons(const std::vector<Parton> truth_partons);
     void setTruthTops(const std::vector<TruthTop> truth_tops);
 
+    void buildWprimeSystem();
+    TruthWprime wprime(){ return m_truth_wp;}
+
     void matchJetToTruthTop(Jet& jet);
     void matchJetToTruthJet(Jet& jet, const std::vector<Jet>& truth_jets);
+
     void parton_match(const Parton& p, Jet& r, double dR=-1.0);
 
   protected:
 
     configuration *m_config;
 
+    TruthWprime m_truth_wp;
     std::vector<TruthTop> m_truth_tops;
     std::vector<Parton> m_truth_partons;
 };

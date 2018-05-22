@@ -57,30 +57,33 @@ class flatTree4ML {
     float m_nominal_weight;
 
     // Deep learning features
-    unsigned int m_target;
+    float m_target;    // neutrino pz
 
-    unsigned int m_nDeepAK8;
-    std::vector<float> m_ljet_deepAK8;
+    float m_met_met;
+    float m_met_phi;
+    float m_mtw;
+    float m_lepton_pt;
+    float m_lepton_eta;
+    float m_deltaPhi_lep_met;
 
-    float m_ljet_SDmass;
-    float m_ljet_tau1;
-    float m_ljet_tau2;
-    float m_ljet_tau3;
-    float m_ljet_tau21;
-    float m_ljet_tau32;
+    int m_n_jets;
+    float m_deltaPhi_j0_met_phi;
+    float m_deltaPhi_j1_met_phi;
+    float m_deltaPhi_j2_met_phi;
+    float m_deltaPhi_j3_met_phi;
 
-    float m_ljet_subjet0_bdisc;
-    float m_ljet_subjet0_pTrel;
-    float m_ljet_subjet0_charge;
-    float m_ljet_subjet1_bdisc;
-    float m_ljet_subjet1_pTrel;
-    float m_ljet_subjet1_charge;
+    float m_jet0_bdisc;
+    float m_jet1_bdisc;
+    float m_jet2_bdisc;
+    float m_jet3_bdisc;
 
-    float m_jet_bdisc;
-    float m_jet_charge;
+    float m_jet0_ptrel;
+    float m_jet1_ptrel;
+    float m_jet2_ptrel;
+    float m_jet3_ptrel;
 
-    float m_ljet_jet_m;
-    float m_ljet_jet_deltaR;
+    float m_nu_pz_standard;
+    float m_nu_pz_sampling;
 
     /**** Metadata ****/
     // which sample has which target value

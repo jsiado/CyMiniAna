@@ -19,6 +19,11 @@ enum class jet_id  {LOOSE, MEDIUM, TIGHT, TIGHTLEPVETO, NONE};
 struct CmaBase {
     TLorentzVector p4;
     int isGood;
+
+    void clear(){
+        p4.SetPtEtaPhiE(0,0,0,0);
+        isGood=false;
+    }
 };
 
 
@@ -36,8 +41,13 @@ struct Parton : CmaBase {
     int top_index;   // index of parton in the truth_top vector
 
     // Heavy Object Booleans
+    bool isWprime;
+    bool isVLQ;
+
     bool isTop;
     bool isW;
+    bool isZ;
+    bool isHiggs;
     // Lepton Booleans
     bool isLepton;
     bool isTau;
@@ -65,6 +75,17 @@ struct TruthTop {
     bool isLeptonic;  // W decays to leptons
 };
 
+struct TruthWprime {
+    Parton wprime;
+    Parton vlq;
+    Parton quark;
+    Parton vlq_boson;                   // boson from VLQ
+    Parton vlq_quark;                   // quark from VLQ
+    std::vector<Parton> BosonChildren;  // decays of VLQ boson (W)
+
+    bool isLeptonic;
+    bool isHadronic;
+};
 
 
 // Struct for jets
@@ -167,6 +188,10 @@ struct Muon : Lepton{
 
 struct Neutrino : CmaBase{
     // extra neutrino attributes
+    float pz_sampling;
+    std::vector<float> pz_samplings;
+    bool isImaginary;
+    float viper;
 };
 
 struct MET : CmaBase{
@@ -183,6 +208,7 @@ struct VLQ : CmaBase{
 struct Wprime : CmaBase{
     VLQ vlq;
     Jet jet;
+    float A_energy;
 };
 
 
@@ -192,13 +218,15 @@ struct Wprime : CmaBase{
 // Struct to contain sample information (processing the input file)
 
 struct Sample {
-    std::string primaryDataset;
+    std::string sampleType;        // kind of sample, e.g., 'ttbar', 'qcd', 'signal', etc.
+    std::string primaryDataset;    // primary dataset (how to identify the sample & metadata)
     float XSection;
     float KFactor;
     float sumOfWeights;
     unsigned int NEvents;
 
     void clear(){
+        sampleType = "";
         primaryDataset = "";
         XSection = 1.;
         KFactor  = 1.;

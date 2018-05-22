@@ -81,6 +81,8 @@ class Event {
     std::vector<Neutrino> neutrinos() const {return m_neutrinos;}
     std::vector<Ljet> ljets() const {return m_ljets;}
     std::vector<Jet>  jets() const {return m_jets;}
+    Wprime wprime() const {return m_wprime;}
+    Wprime wprime_sampling() const {return m_wprime_smp;}
 
     // Get truth physics information 
     void truth();
@@ -88,6 +90,8 @@ class Event {
     std::vector<Neutrino> truth_neutrinos() const {return m_truth_neutrinos;}
     std::vector<Ljet> truth_ljets() const {return m_truth_ljets;}
     std::vector<Jet>  truth_jets() const {return m_truth_jets;}
+    std::vector<Parton> truth_partons() const {return m_truth_partons;}
+    TruthWprime truth_wprime() const {return m_truth_wprime;}
 
     virtual MET met() const {return m_met;}
     virtual float HT() const {return m_HT;}
@@ -113,6 +117,7 @@ class Event {
     void wprimeReconstruction();    // reconstructing Wprime (interface with tool)
     bool customIsolation( Lepton& lep );
     void deepLearningPrediction();
+    std::map<std::string,double> deepLearningFeatures();
 
     // Get weights
     virtual float nominal_weight() const {return m_nominal_weight;}
@@ -172,7 +177,10 @@ class Event {
     std::vector<Neutrino> m_neutrinos;
     std::vector<Ljet> m_ljets;
     std::vector<Jet>  m_jets;
+    std::vector<Jet>  m_jets_iso;
     MET m_met;
+    Wprime m_wprime;
+    Wprime m_wprime_smp;
 
     // truth physics object information
     std::vector<Parton> m_truth_partons;
@@ -180,6 +188,7 @@ class Event {
     std::vector<Neutrino> m_truth_neutrinos;
     std::vector<Ljet> m_truth_ljets;
     std::vector<Jet>  m_truth_jets;
+    TruthWprime m_truth_wprime;
 
     // b-tagged calo jets with various WP
     std::map<std::string, std::vector<int> > m_btag_jets;

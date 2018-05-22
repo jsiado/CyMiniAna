@@ -17,12 +17,23 @@ class WprimeReco {
     ~WprimeReco();
 
     void initialize();
-    void execute();
+    Wprime execute();
+    void getWprime( const Jet& j0, const Jet& j1 );
+
+    void setLepton(Lepton& lepton);
+    void setBtagJets(std::vector<int> bjets);
+    void setJets(std::vector<Jet>& jets);
+    void setNeutrino(Neutrino& nu);
 
   protected:
 
     configuration *m_config;
+
+    Lepton m_lepton;
+    Neutrino m_neutrino;
+    std::vector<Jet> m_jets;
+    std::vector<int> m_btag_jets;
+    Wprime m_wprime;
 };
 
 #endif
-

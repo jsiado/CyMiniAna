@@ -14,6 +14,14 @@ to be called from other python scripts.
 import ROOT
 import numpy as np
 
+
+class Sample(object):
+    """Class for organizing metadata information about physics samples"""
+    def __init__(self,label='',color=''):
+        self.sampleType     = ""
+        self.primaryDataset = ""
+
+
 def getHistSeparation( S, B ):
     """Compare TH1* S and B -- need same dimensions
        Copied from : https://root.cern.ch/doc/master/MethodBase_8cxx_source.html#l02740
@@ -127,13 +135,57 @@ def str2bool(param):
         return False
 
 
-
 def file2list(filename):
     """Load text file and dump contents into a list"""
     listOfFiles = open( filename,'r').readlines()
     listOfFiles = [i.rstrip('\n') for i in listOfFiles]
 
     return listOfFiles
+
+
+def loadMetadata(file):
+    """Load metadata"""
+    data    = file2list(file)
+    samples = {}
+    for i in data:
+        if i.startswith("#"): continue
+
+        items = i.split(" ")
+        s = Sample()
+        s.sampleType     = items[0]
+        s.primaryDataset = items[1]
+
+        samples[items[1]] = s
+
+    data = Sample()
+    data.sampleType = 'data'
+    data.primaryDataset = 'data'
+
+    mujets = Sample()
+    mujets.sampleType = 'mujets'
+    mujets.primaryDataset = 'SingleMuon'
+
+    ejets = Sample()
+    ejets.sampleType = 'ejets'
+    ejets.primaryDataset = 'SingleElectron'
+
+    samples['data'] = data
+    samples['SingleMuon'] = mujets
+    samples['SingleElectron'] = ejets
+
+    return samples
+
+
+def getPrimaryDataset(root_file):
+    """Get the sample type given the root file"""
+    try:
+        md = root_file.Get("tree/metadata")
+        md.GetEntry(0)
+        pd = str(md.primaryDataset)
+    except:
+        pd = None
+
+    return pd
 
 
 
@@ -144,7 +196,16 @@ class VERBOSE(object):
                            "INFO": 1,
                            "WARNING":2,
                            "ERROR":  3};
-        self.level = "WARNING"
+        self.level     = "WARNING"
+        self.level_int = 2
+
+    def initialize(self):
+        """Setup the integer level value"""
+        self.level_int = self.verboseMap[self.level]
+
+    def level_value(self):
+        """Return the integer value"""
+        return self.level_int
 
     def DEBUG(self,message):
         """Debug level - most verbose"""
@@ -166,10 +227,24 @@ class VERBOSE(object):
         self.verbose("ERROR",message)
         return
 
+    def compare(self,level1,level2=None):
+        """Compare two levels"""
+        if level2 is None:
+            return self.verboseMap[level1]>=self.level_int
+        else:
+            return self.verboseMap[level1]>=self.verboseMap[level2]
+
     def verbose(self,level,message):
-        if self.verboseMap[level] >= self.verboseMap[self.level]:
+        """Print message to the screen"""
+        if self.compare( level ):
             print " {0} :: {1}".format(level,message)
         return
 
+    def HELP(self):
+        """Help message"""
+        print " CyMiniAna Deep Learning "
+        print " To run, execute the command: "
+        print " $ python python/runDeepLearning.py <config> "
+        print " where <config> is a text file that outlines the configuration "
 
 ## THEN ##

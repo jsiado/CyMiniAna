@@ -41,16 +41,6 @@ rc('font', family='sans-serif')
 params = {'text.latex.preamble' : [r'\usepackage{amsmath}']}
 plt.rcParams.update(params)
 
-if mpl_version.startswith('1.5') or mpl_version.startswith('2'):
-    fontProperties = {}
-else:
-    fontProperties = {'family':'sans-serif','sans-serif':['Helvetica']}
-    import colormaps as cmaps
-    plt.register_cmap(name='viridis', cmap=cmaps.viridis)
-    plt.register_cmap(name='magma',   cmap=cmaps.magma)
-    plt.register_cmap(name='inferno', cmap=cmaps.inferno)
-    plt.register_cmap(name='plasma',  cmap=cmaps.plasma)
-
 # the following may not do anything, might be useful in non-CMSSW environments
 os.environ['PATH'] = os.environ['PATH']+':/usr/texbin'+':/Library/TeX/texbin' # LaTeX support
 ## ------------------------------ ##
@@ -345,7 +335,7 @@ class HepPlotter(object):
 
                 # Make the errorbar plot
                 if self.kwargs[name].get("normed") and self.kwargs[name]["normed"]:
-                    data, bin_edges = np.histogram(bin_center,bins=binning,weights=data,normed=True)
+                    data, bin_edges = np.histogram(bin_center,bins=binning,weights=data,density=True)
                     self.kwargs[name].pop("normed",None)
                 data  = np.array([i if i else float('NaN') for i in data])  # hide empty values
                 NaN_values = np.isnan(data)
@@ -405,11 +395,10 @@ class HepPlotter(object):
             self.ymaxScale = self.yMaxScaleValues[self.typeOfPlot]
         self.ax1.set_ylim(0.,self.ymaxScale*y_lim_value)
         self.ax1.set_yticks(self.ax1.get_yticks()[1:])
-        self.ax1.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         self.setYAxis(self.ax1)
+        self.ax1.yaxis.set_major_formatter(FormatStrFormatter('%g'))
 
         # x-axis
-        self.ax1.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
         if self.xlim is not None:
             plt.xlim(self.xlim)
         if self.ratio_plot:
@@ -418,6 +407,7 @@ class HepPlotter(object):
         else:
             x_axis = self.ax1
         self.setXAxis(x_axis)
+        self.ax1.xaxis.set_major_formatter(FormatStrFormatter('%g'))
 
 
         # axis ticks
@@ -484,7 +474,7 @@ class HepPlotter(object):
         if self.logplot:
             cbar.ax.set_yticklabels( [r"10$^{\text{%s}}$"%(hpt.extract(i.get_text())) for i in cbar.ax.get_yticklabels()] )
         else:
-            cbar.ax.set_yticklabels( [r"$\text{%s}$"%(i.get_text().replace(r'$','')) for i in cbar.ax.get_yticklabels()],fontProperties )
+            cbar.ax.set_yticklabels( [r"$\text{%s}$"%(i.get_text().replace(r'$','')) for i in cbar.ax.get_yticklabels()] )
         if self.colorbar_title != None:
             cbar.ax.set_ylabel(self.colorbar_title)
 
@@ -569,7 +559,7 @@ class HepPlotter(object):
         self.ax2.xaxis.set_major_formatter(FormatStrFormatter('%g'))
 
         self.ax2.set_yticks(self.ax2.get_yticks()[::2])
-        self.ax2.set_yticklabels(self.ax2.get_yticks(),fontProperties,fontsize=self.label_size)
+        self.ax2.set_yticklabels(self.ax2.get_yticks(),fontsize=self.label_size)
         self.ax2.set_ylabel(self.y_ratio_label,fontsize=self.label_size,ha='center',va='bottom')
 
         return
@@ -632,12 +622,13 @@ class HepPlotter(object):
 
         if self.logplot:
             logTickLabels = [r"10$^{\text{%s}}$"%(int(np.log10(i)) ) for i in axis_yticks]
-            y_axis.set_yticklabels(logTickLabels,fontProperties,fontsize=self.label_size)
+            y_axis.set_yticklabels(logTickLabels,fontsize=self.label_size)
         else:
             if len(set(axis_yticks.astype(int)))==len(axis_yticks):
-                y_axis.set_yticklabels(axis_yticks.astype(int),fontProperties,fontsize=self.label_size)
+                y_axis.set_yticklabels(axis_yticks.astype(int),fontsize=self.label_size)
             else:
-                y_axis.set_yticklabels(axis_yticks[0:-1],fontProperties,fontsize=self.label_size)
+                ticks2plot = [str(i) for i in axis_yticks]
+                y_axis.set_yticklabels(ticks2plot,fontsize=self.label_size)
 
         return
 
@@ -649,9 +640,10 @@ class HepPlotter(object):
         x_axis_xticks = x_axis.get_xticks()
 
         if len(set(x_axis_xticks.astype(int)))==len(x_axis_xticks):
-            x_axis.set_xticklabels(x_axis_xticks.astype(int),fontProperties,fontsize=self.label_size)
+            x_axis.set_xticklabels(x_axis_xticks.astype(int),fontsize=self.label_size)
         else:
-            x_axis.set_xticklabels(x_axis_xticks,fontProperties,fontsize=self.label_size)
+            ticks2plot = [str(i) for i in x_axis_xticks]
+            x_axis.set_xticklabels(ticks2plot,fontsize=self.label_size)
 
         return
 
@@ -691,17 +683,14 @@ class HepPlotter(object):
         energy_stamp = hpl.EnergyStamp()
 
         cms_stamp.coords    = [text['x'][0], text['y'][0]]
-        lumi_stamp.coords   = [text['x'][1], text['y'][1]]  # not used right now, always drawn with the energy
-        energy_stamp.coords = [text['x'][1], text['y'][1]]
+        lumi_stamp.coords   = [0.99,1.0]
+        energy_stamp.coords = [0.99,1.0]
 
         # modify defaults
         if self.CMSlabel == 'top right':
-            cms_stamp.ha = 'right'
+            cms_stamp.ha    = 'right'    # move text labels appropriately
         if self.dimensions==2:
-            cms_stamp.va  = 'bottom'   # change alignment for 2d labels
-            lumi_stamp.ha = 'right'
-            energy_stamp.ha = 'right'
-
+            cms_stamp.va    = 'bottom'   # change alignment for 2d labels
 
         self.ax1.text(cms_stamp.coords[0],cms_stamp.coords[1],cms_stamp.text,fontsize=cms_stamp.fontsize,
                       ha=cms_stamp.ha,va=cms_stamp.va,transform=self.ax1.transAxes)

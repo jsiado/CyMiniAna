@@ -32,7 +32,7 @@ class metadataTree : public miniTree {
     virtual ~metadataTree();
 
     // Run once at the start of the job;
-    virtual void initialize(TTree * t, TFile& outputFile, const std::string directory, const bool recalculateMetadata=true);
+    virtual void initialize(TTree * t, TFile& outputFile, const std::string directory);
     virtual void createBranches();
 
     bool branch_exists(const std::string& br);

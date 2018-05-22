@@ -35,7 +35,6 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     m_useNeutrinos = m_config->useNeutrinos();      // use neutrinos in analysis
     m_useWprime    = m_config->useWprime();         // use reconstructed Wprime in analysis
 
-    m_kinematicReco = m_config->kinematicReco();
     m_neutrinoReco  = m_config->neutrinoReco();      // reconstruct neutrino
     m_wprimeReco    = m_config->wprimeReco();        // reconstruct Wprime
     m_DNNinference  = m_config->DNNinference();      // use DNN to predict values
@@ -166,17 +165,11 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
       m_mu_id_tight  = new TTreeReaderValue<std::vector<unsigned int>>(m_ttree,"MUtightID");
     }
 
-    if (!m_kinematicReco && m_useNeutrinos){
+    if (!m_neutrinoReco && m_useNeutrinos){
         // Neutrinos aren't stored in the baseline ntuples, requires 'kinematicReco' to create
         m_nu_pt  = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_pt");
         m_nu_eta = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_eta");
         m_nu_phi = new TTreeReaderValue<std::vector<float>>(m_ttree, "nu_phi");
-    }
-
-    if (!m_kinematicReco && m_getDNN){
-        // Load ttbar variables from file
-        m_leptop_jet  = new TTreeReaderValue<int>(m_ttree, "leptop_jet");
-        m_hadtop_ljet = new TTreeReaderValue<int>(m_ttree, "hadtop_ljet");
     }
 
     m_met_met  = new TTreeReaderValue<float>(m_ttree,"METpt");
@@ -235,9 +228,9 @@ Event::Event( TTreeReader &myReader, configuration &cmaConfig ) :
     if (!m_getDNN && m_useDNN)
         m_dnn_score = new TTreeReaderValue<float>(m_ttree,"ljet_CWoLa");
 
-
     // Kinematic reconstruction algorithms
     m_neutrinoRecoTool = new NeutrinoReco(cmaConfig);
+    m_wprimeTool = new WprimeReco(cmaConfig);
 } // end constructor
 
 Event::~Event() {}
@@ -367,6 +360,12 @@ void Event::execute(Long64_t entry){
 
     // Kinematic reconstruction (if they values aren't in the root file)
     if (m_useWprime){
+        wprimeReconstruction();
+    }
+
+   if (m_useNeutrinos){
+       deepLearningPrediction();   // store features in map (easily access later)
+       cma::DEBUG("EVENT : Deep learning ");
     }
 
     cma::DEBUG("EVENT : Setup Event ");
@@ -432,20 +431,25 @@ void Event::initialize_truth(){
         parton.status = status;
 
         // simple booleans for type
+        parton.isWprime = ( abs_pdgId==9900213 );
+        parton.isVLQ    = ( abs_pdgId==8000001 || abs_pdgId==7000001 );
         parton.isTop = ( abs_pdgId==6 );
         parton.isW   = ( abs_pdgId==24 );
+        parton.isZ   = ( abs_pdgId==23 );
+        parton.isHiggs  = ( abs_pdgId==25 );
+
         parton.isLepton = ( abs_pdgId>=11 && abs_pdgId<=16 );
         parton.isQuark  = ( abs_pdgId<7 );
 
         if (parton.isLepton){
-            parton.isTau  = ( abs_pdgId==15 ) ? 1 : 0;
-            parton.isMuon = ( abs_pdgId==13 ) ? 1 : 0;
-            parton.isElectron = ( abs_pdgId==11 ) ? 1 : 0;
-            parton.isNeutrino = ( abs_pdgId==12 || abs_pdgId==14 || abs_pdgId==16 ) ? 1 : 0;
+            parton.isTau  = ( abs_pdgId==15 );
+            parton.isMuon = ( abs_pdgId==13 );
+            parton.isElectron = ( abs_pdgId==11 );
+            parton.isNeutrino = ( abs_pdgId==12 || abs_pdgId==14 || abs_pdgId==16 );
         }
         else if (parton.isQuark){
-            parton.isLight  = ( abs_pdgId<5 ) ? 1 : 0;
-            parton.isBottom = ( abs_pdgId==5 ) ? 1 : 0;
+            parton.isLight  = ( abs_pdgId<5 );
+            parton.isBottom = ( abs_pdgId==5 );
         }
 
         parton.index      = p_idx;                    // index in vector of truth_partons
@@ -458,6 +462,8 @@ void Event::initialize_truth(){
     }
 
     m_truthMatchingTool->setTruthPartons(m_truth_partons);
+    m_truthMatchingTool->buildWprimeSystem();
+    m_truth_wprime = m_truthMatchingTool->wprime();         // build the truth wprime decay chain
 
     return;
 }
@@ -472,18 +478,22 @@ void Event::initialize_jets(){
      */
     unsigned int nJets = (*m_jet_pt)->size();
     m_jets.clear();
+    m_jets_iso.clear();    // jet collection for lepton 2D isolation
 
     for (const auto& btagWP : m_config->btagWkpts() ){
         m_btag_jets[btagWP].clear();
     }
 
     unsigned int idx(0);
+    unsigned int idx_iso(0);
     for (unsigned int i=0; i<nJets; i++){
         Jet jet;
         jet.p4.SetPtEtaPhiM( (*m_jet_pt)->at(i),(*m_jet_eta)->at(i),(*m_jet_phi)->at(i),(*m_jet_m)->at(i));
 
         bool isGood(jet.p4.Pt()>50 && std::abs(jet.p4.Eta())<2.4);
-        if (!isGood) continue;
+        bool isGoodIso( jet.p4.Pt()>15 && std::abs(jet.p4.Eta())<2.4);
+
+        if (!isGood && !isGoodIso) continue;
 
         jet.bdisc    = (*m_jet_bdisc)->at(i);
         jet.deepCSV  = (*m_jet_deepCSV)->at(i);
@@ -494,10 +504,15 @@ void Event::initialize_jets(){
         jet.index  = idx;
         jet.isGood = isGood;
 
-        getBtaggedJets(jet);
-
-        m_jets.push_back(jet);
-        idx++;
+        if (isGood){
+            m_jets.push_back(jet);
+            getBtaggedJets(jet);          // only care about b-tagging for 'real' AK4
+            idx++;
+        }
+        if (isGoodIso){
+            m_jets_iso.push_back(jet);    // used for 2D isolation
+            idx_iso++;
+        }
     }
 
     m_btag_jets_default = m_btag_jets.at(m_config->jet_btagWkpt());
@@ -595,8 +610,6 @@ void Event::initialize_ljets(){
         idx++;
     }
 
-    deepLearningPrediction();   // store features in map (easily access later)
-
     return;
 }
 
@@ -617,7 +630,7 @@ void Event::initialize_leptons(){
 
         bool iso = customIsolation(mu);    // 2D isolation cut between leptons & AK4 (need AK4 initialized first!)
 
-        bool isGood(mu.p4.Pt()>50 && std::abs(mu.p4.Eta())<2.4 && isMedium && iso);
+        bool isGood(mu.p4.Pt()>60 && std::abs(mu.p4.Eta())<2.4 && isMedium && iso);
         if (!isGood) continue;
 
         mu.charge = (*m_mu_charge)->at(i);
@@ -642,7 +655,7 @@ void Event::initialize_leptons(){
 
         bool iso = customIsolation(el);    // 2D isolation cut between leptons & AK4 (need AK4 initialized first!)
 
-        bool isGood(el.p4.Pt()>50 && std::abs(el.p4.Eta())<2.4 && isTightNoIso && iso);
+        bool isGood(el.p4.Pt()>60 && std::abs(el.p4.Eta())<2.4 && isTightNoIso && iso);
         if (!isGood) continue;
 
         el.charge = (*m_el_charge)->at(i);
@@ -681,7 +694,15 @@ void Event::initialize_neutrinos(){
     m_neutrinoRecoTool->setObjects(m_leptons.at(0),m_met);
     if (m_neutrinoReco){
         // reconstruct neutrinos!
-        nu1 = m_neutrinoRecoTool->execute();        // tool assumes 1-lepton final state
+        float pz  = m_neutrinoRecoTool->execute(true);        // standard reco; tool assumes 1-lepton final state
+        float nuE = sqrt( pow(m_met.p4.Px(),2) + pow(m_met.p4.Py(),2) + pow(pz,2));
+        nu1.p4.SetPxPyPzE( m_met.p4.Px(), m_met.p4.Py(), pz, nuE );
+        nu1.isImaginary = m_neutrinoRecoTool->isImaginary();
+
+        float pz_samp   = m_neutrinoRecoTool->execute(false);
+        nu1.pz_sampling = pz_samp;
+        nu1.pz_samplings = m_neutrinoRecoTool->pzSolutions();
+
         m_neutrinos.push_back(nu1);
     }
     else{
@@ -691,6 +712,7 @@ void Event::initialize_neutrinos(){
 
     return;
 }
+
 
 
 void Event::initialize_weights(){
@@ -765,16 +787,16 @@ void Event::initialize_kinematics(){
 bool Event::customIsolation( Lepton& lep ){
     /* 2D isolation cut for leptons 
        - Check that the lepton and nearest AK4 jet satisfies
-         DeltaR() < 0.4 || pTrel>25
+         DeltaR() < 0.4 || pTrel>30
     */
     bool pass(false);
     //int min_index(-1);                    // index of AK4 closest to lep
     float drmin(100.0);                   // min distance between lep and AK4s
     float ptrel(0.0);                     // pTrel between lepton and AK4s
 
-    if (m_jets.size()<1) return false;    // no AK4 -- event will fail anyway
+    if (m_jets_iso.size()<1) return false;    // no AK4 -- event will fail anyway
 
-    for (const auto& jet : m_jets){
+    for (const auto& jet : m_jets_iso){
         float dr = lep.p4.DeltaR( jet.p4 );
         if (dr < drmin) {
             drmin = dr;
@@ -786,18 +808,39 @@ bool Event::customIsolation( Lepton& lep ){
     lep.drmin = drmin;
     lep.ptrel = ptrel;
 
-    if (drmin > 0.4 || ptrel > 25) pass = true;
+    if (drmin > 0.4 || ptrel > 30) pass = true;
 
     return pass;
 }
 
 
-/*** GETTER FUNCTIONS ***/
 
+void Event::wprimeReconstruction(){
+    /* Access Wprime reconstruction tool */
+    m_wprime = {};
+    m_wprime_smp = {};
 
-//BUILD VLQ / WPrime
-//    USE ROOT FILE INFORMATION IF "m_kinematicReco"==false
-//    ELSE USE ALGORITHM
+    if (m_wprimeReco){
+        if (m_leptons.size()>0 && m_jets.size()>1){
+            Neutrino nu = m_neutrinos.at(0);
+            m_wprimeTool->setLepton( m_leptons.at(0) );
+            m_wprimeTool->setNeutrino( nu );
+            m_wprimeTool->setJets( m_jets );
+            m_wprimeTool->setBtagJets( m_btag_jets_default );
+            m_wprime = m_wprimeTool->execute();
+
+            Neutrino nu_smp;
+            float nuE = sqrt( pow(nu.p4.Px(),2) + pow(nu.p4.Py(),2) + pow(nu.pz_sampling,2));
+            nu_smp.p4.SetPxPyPzE( nu.p4.Px(), nu.p4.Py(), nu.pz_sampling, nuE );
+            m_wprimeTool->setNeutrino( nu_smp );
+            m_wprime_smp = m_wprimeTool->execute();
+        }
+    }
+    else{
+    }
+
+    return;
+}
 
 
 void Event::getBtaggedJets( Jet& jet ){
@@ -887,19 +930,69 @@ std::vector<int> Event::btag_jets(const std::string &wkpt) const{
 }
 
 void Event::deepLearningPrediction(){
-    /* Deep learning for large-R jets -- CWoLa */
+    /* Deep learning for neutrino eta -- VIPER 
+       -- Call this after neutrinos are reconstructed
+    */
+    m_deepLearningTool->clear();
+
     if (m_DNNinference){
         cma::DEBUG("EVENT : Calculate DNN ");
-        m_deepLearningTool->inference();
+
+        if (m_neutrinos.size()<1 || m_leptons.size()<1)  // nothing to do
+            return;
+
+        m_deepLearningTool->clear();
+        m_deepLearningTool->setNeutrino( m_neutrinos.at(0) );
+        m_deepLearningTool->setMET( m_met );
+        m_deepLearningTool->setLepton( m_leptons.at(0) );
+        m_deepLearningTool->setJets( m_jets );
+        m_deepLearningTool->inference();      //m_leptons.at(0),m_met,m_jets
+        m_neutrinos.at(0).viper = m_deepLearningTool->prediction();
     }
     else if (m_DNNtraining){
-        m_deepLearningTool->training();
-        //ljet.features = m_deepLearningTool->features();  // store the features on the ljet to make easily accessible later
-    }
+        // train on events with 1 truth-level neutrino from W boson
+        // basic kinematic cuts on lepton, MET, jets
+        cma::DEBUG("EVENT : DNN Training ");
+        if (m_leptons.size()==1 && m_useTruth){
+            cma::DEBUG("EVENT : Begin loop over truth partons ");
+            Parton true_nu;
+            int n_wdecays2leptons(0);
+
+            for (const auto& p : m_truth_partons){
+                if (p.isW && p.child0_idx>=0 && p.child1_idx>=0) {
+                    Parton child0 = m_truth_partons.at( p.child0_idx );
+                    Parton child1 = m_truth_partons.at( p.child1_idx );
+                    if (child0.isNeutrino) {
+                        n_wdecays2leptons++;
+                        true_nu = child0;
+                    }
+                    else if (child1.isNeutrino) {
+                        n_wdecays2leptons++;
+                        true_nu = child1;
+                    }
+                }
+            }
+
+            // only want to train on single lepton events (reco & truth-level)
+            if (n_wdecays2leptons==1){
+                m_deepLearningTool->setNeutrino( m_neutrinos.at(0) );
+                m_deepLearningTool->setTrueNeutrino( true_nu );
+                m_deepLearningTool->setMET( m_met );
+                m_deepLearningTool->setLepton( m_leptons.at(0) );
+                m_deepLearningTool->setJets( m_jets );
+                m_deepLearningTool->training();
+            } // end training if truth-level neutrino found
+
+        } // end if at least 1 lepton and useTruth
+    } // end if training DNN
 
     return;
 }
 
+std::map<std::string,double> Event::deepLearningFeatures(){
+    /* Return the DNN features to the outside world -- call after deepLearningPrediction() */
+    return m_deepLearningTool->features();
+}
 
 /*** RETURN WEIGHTS ***/
 float Event::weight_mc(){

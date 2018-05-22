@@ -20,18 +20,20 @@ import os
 import sys
 import json
 import util
-from datetime import date
 import numpy as np
-
-import matplotlib.pyplot as plt
-from matplotlib import rc
-rc('font', family='sans-serif')
-from keras.utils.vis_utils import plot_model as keras_plot
-from sklearn.metrics import roc_curve, auc
+from array import array
+from datetime import date
 
 import hepPlotter.hepPlotterLabels as hpl
 import hepPlotter.hepPlotterTools as hpt
 from hepPlotter.hepPlotter import HepPlotter
+
+import matplotlib.pyplot as plt
+from matplotlib import rc
+rc('font', family='sans-serif')
+from matplotlib.ticker import AutoMinorLocator,FormatStrFormatter
+from keras.utils.vis_utils import plot_model as keras_plot
+from sklearn.metrics import roc_curve, auc
 
 
 
@@ -46,6 +48,7 @@ class Target(object):
         self.binning = 1
 
 
+
 class DeepLearningPlotter(object):
     """Plotting utilities for deep learning"""
     def __init__(self):
@@ -58,7 +61,7 @@ class DeepLearningPlotter(object):
         self.msg_svc      = util.VERBOSE()
         self.filename     = ""
         self.output_dir   = ''
-        self.image_format = 'png'
+        self.image_format = 'pdf'
         self.process_label = ''      # if a single process is used for all training, set this
 
         self.classification = False  # 'binary','multi',False
@@ -92,17 +95,12 @@ class DeepLearningPlotter(object):
                 tmp.color = self.betterColors[i]
                 self.targets.append(tmp)
         else: # regression
-            try:
-                tmp    = Target(target_names[0])
-                tmp.df = self.df.loc[self.df['target']==target_values[0]]
-                tmp.target_value = target_values[0]
-            except TypeError:
-                tmp    = Target(target_names)
-                tmp.df = self.df.loc[self.df['target']==target_values]
-                tmp.target_value = target_values
+            tmp    = Target(target_names)
+            tmp.df = self.df
+            tmp.target_value = None
 
             tmp.label = self.sample_labels[tmp.name].label
-            tmp.color = self.betterColors[i]
+            tmp.color = self.sample_labels[tmp.name].color
             self.targets.append(tmp)
 
         return
@@ -148,7 +146,7 @@ class DeepLearningPlotter(object):
 
             if self.classification=='binary':
                 separation = util.getSeparation(self.targets[0].df[feature],self.targets[1].df[feature])
-                hist.extra_text.Add("Separation = {0}".format(separation),coords=[0.03,0.73])
+                hist.extra_text.Add("Separation = {0:.2f}".format(separation),coords=[0.03,0.73])
 
             p = hist.execute()
             hist.savefig()
@@ -156,13 +154,68 @@ class DeepLearningPlotter(object):
         return
 
 
-    def feature_correlations(self):
+    def separations(self):
+        """Plot the separation between different samples for each target
+           1D: Bar graph showing the separation between S/B (0,1)
+               https://matplotlib.org/gallery/lines_bars_and_markers/barh.html
+           2D: Matrix (a la correlation matrix) with scale (0,1) showing separation between S/B in 2D plane
+        """
+        # 1D
+        fig, ax = plt.subplots()
+        data = {}
+
+        # calculate the separations
+        for feature in self.features:
+            separation = util.getSeparation(self.targets[0].df[feature],self.targets[1].df[feature])
+            data[feature] = separation
+
+        sorted_data_keys = sorted( data, key=data.get, reverse=True )  # sort by largest -> smallest separation
+        ticks = range(len(self.features))
+
+        ax.barh( ticks, [data[f] for f in sorted_data_keys], align='center' )
+
+        ax.set_yticks()
+        ax.set_yticklabels(sorted_data_keys)
+        ax.invert_yaxis()
+        ax.set_xlim([0,1])
+
+        ax.set_xlabel(r'Separation',fontsize=22,ha='right',va='top',position=(1,0))
+        ax.set_xticklabels(ax.get_xticks(),fontsize=22)
+        ax.xaxis.set_major_formatter(FormatStrFormatter('%g'))
+
+        ## CMS/COM Energy Label + Signal name
+        cms_stamp = hpl.CMSStamp(self.CMSlabelStatus)
+        cms_stamp.coords = [0.02,1.00]
+        cms_stamp.fontsize = 16
+        cms_stamp.va = 'bottom'
+        ax.text(0.02,1.00,cms_stamp.text,fontsize=cms_stamp.fontsize,
+                ha=cms_stamp.ha,va=cms_stamp.va,transform=ax.transAxes)
+
+        energy_stamp    = hpl.EnergyStamp()
+        energy_stamp.ha = 'right'
+        energy_stamp.coords = [0.99,1.00]
+        energy_stamp.fontsize = 16
+        energy_stamp.va = 'bottom'
+        ax.text(energy_stamp.coords[0],energy_stamp.coords[1],energy_stamp.text, 
+                fontsize=energy_stamp.fontsize,ha=energy_stamp.ha, va=energy_stamp.va, transform=ax.transAxes)
+
+        ax.text(0.03,0.93,target.label,fontsize=16,ha='left',va='top',transform=ax.transAxes)
+
+        plt.savefig(self.output_dir+"/separations1D_{0}_{1}.{2}".format(target.name,self.date,self.image_format),
+                    format=self.image_format,dpi=300,bbox_inches='tight')
+        plt.close()
+
+        return
+
+
+    def correlations(self):
         """Plot correlations between features of the NN"""
-        ## Correlation Matrices of Features (top/antitop) ##
         fontProperties = {'family':'sans-serif'}
         opts = {'cmap': plt.get_cmap("bwr"), 'vmin': -1, 'vmax': +1}
 
         for c,target in enumerate(self.targets):
+
+            saveAs = "{0}/correlations_{1}_{2}".format(self.output_dir,target.name,self.date)
 
             allkeys = target.df.keys()
             keys = []
@@ -171,32 +224,32 @@ class DeepLearningPlotter(object):
             t_ = target.df[keys]
             corrmat = t_.corr()
 
+            # Save correlation matrix to CSV file
+            corrmat.to_csv("{0}.csv".format(saveAs))
+
             # Use matplotlib directly
             fig,ax = plt.subplots()
 
-            # hide the upper part of the triangle
-            mask = np.zeros_like(corrmat, dtype=np.bool)    # return array of zeros with same shape as corrmat
-            mask[np.tril_indices_from(mask)] = True
-            corrmat_mask = np.ma.array(corrmat, mask=mask) 
-
-            heatmap1 = ax.pcolor(corrmat_mask, **opts)
+            heatmap1 = ax.pcolor(corrmat, **opts)
             cbar     = plt.colorbar(heatmap1, ax=ax)
 
             cbar.ax.set_yticklabels( [i.get_text().strip('$') for i in cbar.ax.get_yticklabels()], **fontProperties )
 
             labels = corrmat.columns.values
-            labels = [i.replace('_','\_') for i in labels]
+            labels = [self.variable_labels[i].label for i in labels]
+
             # shift location of ticks to center of the bins
             ax.set_xticks(np.arange(len(labels))+0.5, minor=False)
-            ax.set_yticks(np.arange(len(labels))+0.5, minor=False)
-            ax.set_xticklabels(labels, fontProperties, fontsize=18, minor=False, ha='right', rotation=70)
-            ax.set_yticklabels(labels, fontProperties, fontsize=18, minor=False)
+            ax.set_xticklabels(labels, fontProperties, fontsize=14, minor=False, ha='right', rotation=70)
 
+            ax.set_yticks(np.arange(len(labels))+0.5, minor=False)
+            ax.set_yticklabels(labels, fontProperties, fontsize=14, minor=False)
 
             ## CMS/COM Energy Label + Signal name
             cms_stamp = hpl.CMSStamp(self.CMSlabelStatus)
             cms_stamp.coords = [0.02,1.00]
             cms_stamp.fontsize = 16
+            cms_stamp.va = 'bottom'
             ax.text(0.02,1.00,cms_stamp.text,fontsize=cms_stamp.fontsize,
                     ha=cms_stamp.ha,va=cms_stamp.va,transform=ax.transAxes)
 
@@ -204,23 +257,82 @@ class DeepLearningPlotter(object):
             energy_stamp.ha = 'right'
             energy_stamp.coords = [0.99,1.00]
             energy_stamp.fontsize = 16
+            energy_stamp.va = 'bottom'
             ax.text(energy_stamp.coords[0],energy_stamp.coords[1],energy_stamp.text, 
                     fontsize=energy_stamp.fontsize,ha=energy_stamp.ha, va=energy_stamp.va, transform=ax.transAxes)
 
             ax.text(0.03,0.93,target.label,fontsize=16,ha='left',va='top',transform=ax.transAxes)
 
-            plt.savefig(self.output_dir+"/correlations_{0}_{1}.{2}".format(target.name,self.date,self.image_format),
+
+            plt.savefig("{0}.{1}".format(saveAs,self.image_format),
                         format=self.image_format,dpi=300,bbox_inches='tight')
             plt.close()
 
         return
 
 
-    def prediction(self,train_data={},test_data={}):
+    def prediction(self,train_data={},test_data={},kfold=-1):
         """Plot the training and testing predictions"""
         self.msg_svc.INFO("DL : Plotting DNN prediction. ")
+        if self.classification: self.predictionClassification(train_data,test_data,kfold)
+        elif self.regression:   self.predictionRegression(train_data,test_data,kfold)
+        return
 
-        # Plot all k-fold cross-validation results
+
+    def predictionRegression(self,train_data={},test_data={},kfold=-1):
+        """Plot the training and testing predictions for all k-fold cross-validation results"""
+        train  = train_data['prediction']
+        trainY = train_data['target']
+        train_res = train_data['resolution']
+        test   = test_data['prediction']
+        testY  = test_data['target']
+        test_res = test_data['resolution']
+
+        hist = HepPlotter("histogram",1)
+
+        hist.ratio_plot = True
+        hist.ratio_type = "ratio"
+        hist.y_ratio_label = "Test/Train"
+        hist.label_size = 14
+        hist.normed  = True
+        hist.format  = self.image_format
+        hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(kfold,self.date)
+        hist.binning = array('d',[-3000+300*i for i in range(21)])
+        hist.stacked = False
+        hist.logplot = False
+        hist.x_label = "Residual"
+        hist.y_label = "Arbitrary Units"
+        hist.CMSlabel = 'top left'
+        hist.CMSlabelStatus   = self.CMSlabelStatus
+        hist.numLegendColumns = 1
+
+        if self.processlabel: hist.extra_text.Add(self.processlabel,coords=[0.03,0.80],fontsize=14)
+
+        # Plotting the difference between the prediction and 'true' value; could change this to do something else
+        hist.extra_text.Add(r"Train = {0:.2f}$\pm${1:.2f}".format(train_res.GetMean(),train_res.GetStdDev()),coords=[0.03,0.80],fontsize=14)
+        hist.extra_text.Add(r"Test  = {0:.2f}$\pm${1:.2f}".format(test_res.GetMean(), test_res.GetStdDev()),coords=[0.03,0.73],fontsize=14)
+
+        hist.initialize()
+
+        ## Training Prediction
+        hist.Add(train_res, name='train', linecolor='red',
+                 linewidth=2, draw='step', label="Train Residual",
+                 ratio_den=True,ratio_num=False,ratio_partner='test')
+
+        ## Testing Prediction
+        hist.Add(test_res, name='test', linecolor='blue',
+                 linewidth=2, draw='step', label="Test Residual",
+                 ratio_den=False,ratio_num=True,ratio_partner='train')
+
+        p = hist.execute()
+        hist.savefig()
+
+        return
+
+
+
+    def predictionClassification(self,train_data={},test_data={},kfold=-1):
+        """Plot the training and testing predictions for all k-fold cross-validation results"""
         for i,(train,trainY,test,testY) in enumerate(zip(train_data['X'],train_data['Y'],test_data['X'],test_data['Y'])):
 
             hist = HepPlotter("histogram",1)
@@ -231,7 +343,7 @@ class DeepLearningPlotter(object):
             hist.label_size    = 14
             hist.normed  = True  # compare shape differences (likely don't have the same event yield)
             hist.format  = self.image_format
-            hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(i,self.date)
+            hist.saveAs  = self.output_dir+"/hist_DNN_prediction_kfold{0}_{1}".format(kfold,self.date)
             hist.binning = 1
             hist.stacked = False
             hist.logplot = False
@@ -297,7 +409,7 @@ class DeepLearningPlotter(object):
 
         energy_stamp    = hpl.EnergyStamp()
         energy_stamp.ha = 'right'
-        energy_stamp.coords = [0.03,0.97]
+        energy_stamp.coords = [0.99,1.00]
         energy_stamp.fontsize = 16
         ax.text(energy_stamp.coords[0],energy_stamp.coords[1],energy_stamp.text, 
                 fontsize=energy_stamp.fontsize,ha=energy_stamp.ha, va=energy_stamp.va, transform=ax.transAxes)
@@ -316,7 +428,12 @@ class DeepLearningPlotter(object):
         return
 
 
-    def loss_history(self,history,kfold=0,val_loss=0.0):
+    def metrics(self,history,kfold=0,val_loss=0.0):
+        """Plot different metrics as a function of epoch for model"""
+        pass
+
+
+    def loss(self,history,kfold=0,val_loss=0.0):
         """Plot loss as a function of epoch for model"""
         self.msg_svc.INFO("DL : Plotting loss as a function of epoch number.")
 
@@ -373,5 +490,5 @@ class DeepLearningPlotter(object):
         keras_plot(model,to_file='{0}/{1}_model.eps'.format(self.output_dir,name),show_shapes=True)
         return
 
-## THE END ##
 
+## THE END ##

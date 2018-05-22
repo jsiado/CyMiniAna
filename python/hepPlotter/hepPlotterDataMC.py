@@ -75,8 +75,8 @@ class HepPlotterDataMC(HepPlotter):
                             'signal':[],
                             'data':[],
                             'systematic':[]}  # systematic is for plotting single systematic uncertainties
-        self.sample_labels   = hpl.sample_lables()
-        self.variable_labels = hpl.variable_lables()
+        self.sample_labels   = hpl.sample_labels()
+        self.variable_labels = hpl.variable_labels()
         self.systematics     = OrderedDict()
 
         self.uncertainty_handles = []

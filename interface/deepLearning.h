@@ -18,6 +18,7 @@ class DeepLearning {
     DeepLearning( configuration& cmaConfig );
 
     ~DeepLearning();
+    void clear();
 
     void training();
     void inference();
@@ -29,10 +30,20 @@ class DeepLearning {
 
     std::map<std::string,double> features() const {return m_features;}
 
+    void setNeutrino(Neutrino& nu);
+    void setTrueNeutrino(Parton& nu);
+    void setLepton(Lepton& lep);
+    void setMET(MET& etmiss);
+    void setJets(std::vector<Jet> jets);
+
   protected:
 
     configuration *m_config;
 
+    Lepton m_lepton;
+    MET m_met;
+    Neutrino m_neutrino;
+    Parton m_true_neutrino;
     std::vector<Jet> m_jets;
     std::vector<Ljet> m_ljets;
 
@@ -42,9 +53,6 @@ class DeepLearning {
     std::map<std::string,double> m_predictions;  // map of DNN predictions
     std::string m_dnnKey;                        // default key for accessing map of values
     float m_DNN;                                 // DNN prediction for one key
-
-    std::map<std::string,double> m_discriminant; // map of DNN predictions
 };
 
 #endif
-

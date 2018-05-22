@@ -162,14 +162,13 @@ int main(int argc, char** argv) {
                 if (!outputFile->GetDirectory(subdir.c_str())) gDirectory->mkdir(subdir.c_str());
             }
             // clone if metadata is okay, rewrite if bad
-            bool recalculateMetadata = config.recalculateMetadata();    // call after 'inspectFile()'
             Sample s = config.sample();
-            metadata_ttree.initialize(original_metadata_ttree,*outputFile,subdir,recalculateMetadata);
+            metadata_ttree.initialize(original_metadata_ttree,*outputFile,subdir);
             metadata_ttree.saveMetaData(s);
         }
         else{
             cma::INFO("RUN : TTree '"+metadata_treename+"' is not present in this file");
-            metadata_ttree.initialize(original_metadata_ttree,*outputFile,"",0);
+            metadata_ttree.initialize(original_metadata_ttree,*outputFile,"");
         }
 
         // Setup outputs

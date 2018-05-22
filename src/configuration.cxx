@@ -52,7 +52,6 @@ configuration::configuration(const std::string &configFile) :
   m_calcWeightSystematics(false),
   m_listOfWeightSystematicsFile("SetMe"),
   m_listOfWeightVectorSystematicsFile("SetMe"),
-  m_kinematicReco(true),
   m_neutrinoReco(false){
     m_selections.clear();
     m_cutsfiles.clear();
@@ -161,7 +160,6 @@ void configuration::initialize() {
     m_DNNtraining      = cma::str2bool( getConfigOption("DNNtraining") );
     m_DNNinference     = cma::str2bool( getConfigOption("DNNinference") );
     m_doRecoEventLoop  = cma::str2bool( getConfigOption("doRecoEventLoop") );
-    m_kinematicReco    = cma::str2bool( getConfigOption("kinematicReco") );
     m_metadataFile     = getConfigOption("metadataFile");
     m_calcWeightSystematics             = cma::str2bool( getConfigOption("calcWeightSystematics") );
     m_listOfWeightSystematicsFile       = getConfigOption("weightSystematicsFile");
@@ -255,16 +253,9 @@ bool configuration::checkPrimaryDataset(const std::vector<std::string>& files){
     /* Check if filename is in list of files 
        6 April 2018: It is possible the ntuples have incorrect metadata information.
                      Keeping m_mapOfSamples/m_mapOfPrimaryDatasets in case something needs to be updated/fixed
+       18 May 2018:  No longer using this function
     */
-    bool inListOfFiles(false);
-    for (auto& x : files){
-        if (m_mapOfPrimaryDatasets.at(x)==m_sample.primaryDataset){
-            inListOfFiles = true;
-            break;
-        }
-    }
-
-    return inListOfFiles;
+    return false;
 }
 
 
@@ -322,6 +313,7 @@ void configuration::readMetadata(TFile& file,const std::string& metadataTreeName
     else{
         m_recalculateMetadata = false;    // first assume the information in the root file (metadata tree) is good to use
 
+        m_sample.sampleType = "data";     // not storing sample type in metadata tree, need metadata file (default: data)
         m_sample.primaryDataset = pd;
         m_sample.XSection = *xsection;
         m_sample.KFactor  = *kfactor;
@@ -329,8 +321,9 @@ void configuration::readMetadata(TFile& file,const std::string& metadataTreeName
         m_sample.sumOfWeights = *sumOfWeights;
 
         if (pd_in_map){
-            // check if the metadata in the file can be trusted (compare with the text file)
+            m_sample.sampleType = this_sample.sampleType;  // reset to value in the metadatafile (data not in metadata file)
 
+            // check if the metadata in the file can be trusted (compare with the text file)
             float xsec_diff = (this_sample.XSection - *xsection) / this_sample.XSection;
             float sumw_diff = (this_sample.sumOfWeights - *sumOfWeights) / this_sample.sumOfWeights;
             int nevents_diff = this_sample.NEvents - *NEvents;
@@ -364,16 +357,21 @@ void configuration::inspectFile( TFile& file, const std::string& metadataTreeNam
     m_primaryDataset = "";
     m_recalculateMetadata = false;
 
-    readMetadata(file,metadataTreeName);                    // access metadata; recalculate if necessary
+    readMetadata(file,metadataTreeName);               // access metadata; recalculate if necessary
 
-    m_isQCD   = checkPrimaryDataset(m_qcdFiles);            // check if file is QCD
-    m_isTtbar = checkPrimaryDataset(m_ttbarFiles);          // check if file is ttbar
-    m_isWjets = checkPrimaryDataset(m_wjetsFiles);          // check if file is wjets
-    m_isZjets = checkPrimaryDataset(m_zjetsFiles);          // check if file is wjets
-    m_isDiboson = checkPrimaryDataset(m_dibosonFiles);      // check if file is diboson
-    m_isSingleTop = checkPrimaryDataset(m_singleTopFiles);  // check if file is single top
+    m_isSignal = m_sample.sampleType=="signal";        // check if file is a signal sample
+    m_isQCD    = m_sample.sampleType=="qcd";           // check if file is QCD
+    m_isTtbar  = m_sample.sampleType=="ttbar";         // check if file is ttbar
+    m_isWjets  = m_sample.sampleType=="wjets";         // check if file is wjets
+    m_isZjets  = m_sample.sampleType=="zjets";         // check if file is wjets
+    m_isDiboson = m_sample.sampleType=="diboson";      // check if file is diboson
+    m_isSingleTop = m_sample.sampleType=="singletop";  // check if file is single top
 
-    m_isMC = (m_isQCD || m_isTtbar || m_isWjets || m_isZjets || m_isSingleTop || m_isDiboson);  // no other MC at this point
+    // check if 'isMC' by comparing primarydataset with datanames (quicker) -- should work for 2016 and 2017 names
+    //   > 'string::find() returns 0' is the equivalent of python 'str.startswith()'
+    bool isData = m_sample.primaryDataset.find("SingleElectron")==0 || m_sample.primaryDataset.find("SingleMuon")==0 || m_sample.primaryDataset.find("JetHT")==0;
+    m_isMC = !isData;
+        // (m_isQCD || m_isTtbar || m_isWjets || m_isZjets || m_isSingleTop || m_isDiboson || m_isSignal);
 
     // get the metadata
     cma::DEBUG("CONFIGURATION : Found primary dataset = "+m_primaryDataset);

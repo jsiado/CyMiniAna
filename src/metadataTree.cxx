@@ -20,16 +20,15 @@ metadataTree::~metadataTree() {}
 
 
 
-void metadataTree::initialize(TTree* t, TFile& outputFile, const std::string directory, const bool recalculateMetadata) {
+void metadataTree::initialize(TTree* t, TFile& outputFile, const std::string directory) {
     /* Setup the new tree
 
        @param t                    TTree from the original file
        @param directory            Directory the tree may be stored under
-       @param recalculateMetadata  Value used in cloning the tree 
-                                   (0=clone no events, just branch names; -1=clone all data)
     */
     outputFile.cd(directory.c_str());
     m_oldTTree = t;
+    bool recalculateMetadata = m_config->recalculateMetadata();
 
     if (!recalculateMetadata){
         cma::DEBUG("METADATA : Cloning metadata tree");

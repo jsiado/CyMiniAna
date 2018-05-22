@@ -116,20 +116,25 @@ void getListOfKeys( TFile* file, std::vector<std::string> &fileKeys ){
     while(TObject* obj = iter()){
         TKey* key = (TKey*)obj;
         std::string keyname( key->GetName() );
-
-        // Check if this is a directory that contains TTrees
-        try {
-            TDirectory* dir = (TDirectory*)file->Get(keyname.c_str());
-            TList* sublist  = dir->GetListOfKeys();
-            TIter subiter(sublist->MakeIterator());
-            while (TObject* subobj = subiter()){
-                TKey* key = (TKey*)subobj;
-                std::string subkeyname( key->GetName() );
-                fileKeys.push_back(keyname+"/"+subkeyname);
-            }
+        std::string classname( key->GetClassName() );
+        if (classname.find("TH1")!=std::string::npos || classname.find("TH2")!=std::string::npos){
+            fileKeys.push_back(keyname);  // just a histogram
         }
-        catch (...){
-            fileKeys.push_back(keyname);
+        else{
+            // Check if this is a directory that contains TTrees
+            try {
+                TDirectory* dir = (TDirectory*)file->Get(keyname.c_str());
+                TList* sublist  = dir->GetListOfKeys();
+                TIter subiter(sublist->MakeIterator());
+                while (TObject* subobj = subiter()){
+                    TKey* key = (TKey*)subobj;
+                    std::string subkeyname( key->GetName() );
+                    fileKeys.push_back(keyname+"/"+subkeyname);
+                }
+            }
+            catch (...){
+                fileKeys.push_back(keyname);
+            }
         }
     }
 
@@ -161,14 +166,18 @@ void getSampleWeights( std::string metadata_file,
     while( std::getline(in,line) ) {
 
         if (!line.empty() && line[0]!='#') {
+            std::string stype("");
             std::string dsid("");
-            unsigned int NEvents;
-            float xSect,kFact,sumWeights;
+            unsigned int NEvents(1);
+            float xSect(1);
+            float kFact(1);
+            float sumWeights(1);
 
             std::istringstream istr(line);
-            istr >> dsid >> xSect >> sumWeights >> kFact >> NEvents;
+            istr >> stype >> dsid >> xSect >> sumWeights >> kFact >> NEvents;
 
             Sample s;
+            s.sampleType     = stype;
             s.primaryDataset = dsid;
             s.XSection       = xSect;
             s.KFactor        = kFact;
