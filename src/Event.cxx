@@ -363,7 +363,10 @@ void Event::execute(Long64_t entry){
         wprimeReconstruction();
     }
 
-    deepLearningPrediction();   // store features in map (easily access later)
+   if (m_useNeutrinos){
+       deepLearningPrediction();   // store features in map (easily access later)
+       cma::DEBUG("EVENT : Deep learning ");
+    }
 
     cma::DEBUG("EVENT : Setup Event ");
 
@@ -927,12 +930,24 @@ std::vector<int> Event::btag_jets(const std::string &wkpt) const{
 }
 
 void Event::deepLearningPrediction(){
-    /* Deep learning for large-R jets -- CWoLa */
+    /* Deep learning for neutrino eta -- VIPER 
+       -- Call this after neutrinos are reconstructed
+    */
     m_deepLearningTool->clear();
 
     if (m_DNNinference){
         cma::DEBUG("EVENT : Calculate DNN ");
+
+        if (m_neutrinos.size()<1 || m_leptons.size()<1)  // nothing to do
+            return;
+
+        m_deepLearningTool->clear();
+        m_deepLearningTool->setNeutrino( m_neutrinos.at(0) );
+        m_deepLearningTool->setMET( m_met );
+        m_deepLearningTool->setLepton( m_leptons.at(0) );
+        m_deepLearningTool->setJets( m_jets );
         m_deepLearningTool->inference();      //m_leptons.at(0),m_met,m_jets
+        m_neutrinos.at(0).viper = m_deepLearningTool->prediction();
     }
     else if (m_DNNtraining){
         // train on events with 1 truth-level neutrino from W boson

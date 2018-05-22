@@ -53,9 +53,6 @@ class DeepLearning {
     std::map<std::string,double> m_predictions;  // map of DNN predictions
     std::string m_dnnKey;                        // default key for accessing map of values
     float m_DNN;                                 // DNN prediction for one key
-
-    std::map<std::string,double> m_discriminant; // map of DNN predictions
 };
 
 #endif
-

@@ -192,6 +192,8 @@ void histogrammer::bookHists( std::string name ){
         init_hist("w_pt_"+name,  1000,0,1000);
         init_hist("w_mass_smp_"+name, 200,0,200);
         init_hist("w_pt_smp_"+name,  1000,0,1000);
+        init_hist("w_mass_viper_"+name, 200,0,200);
+        init_hist("w_pt_viper_"+name,  1000,0,1000);
 
         if (m_config->useTruth()) {
             // compare reco neutrinos to truth neutrinos
@@ -433,9 +435,15 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
     if (m_config->useNeutrinos()){
         cma::DEBUG("HISTOGRAMMER : Fill neutrinos");
         Neutrino nu = neutrinos.at(0);
+
+        // Neutrino made from sampling
         TLorentzVector tmp_nu;
         float nuE = sqrt( pow(nu.p4.Px(),2) + pow(nu.p4.Py(),2) + pow(nu.pz_sampling,2));
         tmp_nu.SetPxPyPzE( nu.p4.Px(), nu.p4.Py(), nu.pz_sampling, nuE );
+
+        // Neutrino made from VIPER (neutrin eta prediction)
+        TLorentzVector viper_nu;
+        tmp_nu.SetPtEtaPhiM( nu.p4.Pt(), nu.viper, nu.p4.Phi(), 0.0 );
 
         fill("nu_pt_"+name,  nu.p4.Pt(),  event_weight);
         fill("nu_eta_"+name, nu.p4.Eta(), event_weight);
@@ -445,11 +453,14 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
         if (leptons.size()>0){
             TLorentzVector wBoson     = nu.p4 + leptons.at(0).p4;
             TLorentzVector wBoson_smp = tmp_nu+ leptons.at(0).p4;
+            TLorentzVector wBoson_viper = viper_nu+ leptons.at(0).p4;
 
             fill("w_mass_"+name, wBoson.M(),  event_weight);
             fill("w_pt_"+name,   wBoson.Pt(), event_weight);
             fill("w_mass_smp_"+name, wBoson_smp.M(),  event_weight);
             fill("w_pt_smp_"+name,   wBoson_smp.Pt(), event_weight);
+            fill("w_mass_viper_"+name, wBoson_viper.M(),  event_weight);
+            fill("w_pt_viper_"+name,   wBoson_viper.Pt(), event_weight);
         }
 //        for (const auto pz : nu.pz_samplings)
 //            fill("nu_pz_samples_"+name, pz, 1.0);   // look at the distribution of pz
@@ -490,7 +501,7 @@ void histogrammer::fill( const std::string& name, Event& event, double event_wei
                 float deltaEta_smp = tru_eta - tmp_nu.Eta();
                 float deltaR       = p.p4.DeltaR(nu.p4);
                 float deltaR_smp   = p.p4.DeltaR(tmp_nu);
-                float deltaR_viper(0.0);  // not here yet
+                float deltaR_viper = p.p4.DeltaR(viper_nu);
 
                 fill("nu_deltaEta_"+name,     deltaEta,     event_weight);
                 fill("nu_deltaEta_smp_"+name, deltaEta_smp, event_weight);

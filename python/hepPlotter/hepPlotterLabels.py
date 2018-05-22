@@ -193,6 +193,11 @@ def variable_labels():
     variables['vlqMass']          = Variable(binning=hist1d(50,0,5000), label=r'm$_\text{T}$ [GeV] (Neutrino Standard)')
     variables['vlqMass_nusmp']    = Variable(binning=hist1d(50,0,5000), label=r'm$_\text{T}$ [GeV] (Neutrino Sampling)')
 
+    variables['vlq_massResolution_norm']          = Variable(binning=hist1d(20,-1,1), label=r'Resolution m$_\text{T}$ (Nu Stand.)')
+    variables['vlq_massResolution_norm_nusmp']    = Variable(binning=hist1d(20,-1,1), label=r'Resolution m$_\text{T}$ (Nu Sampl.)')
+    variables['wprime_massResolution_norm']       = Variable(binning=hist1d(20,-1,1), label=r'Resolution m$_{\text{W}^\prime}$ (Nu Stand.)')
+    variables['wprime_massResolution_norm_nusmp'] = Variable(binning=hist1d(20,-1,1), label=r'Resolution m$_{\text{W}^\prime}$ (Nu Sampl.)')
+
     variables['w_mass']     = Variable(binning=hist1d(40,0,200), label=r'm$_\text{W}$ (Neutrino Standard)')
     variables['w_mass_smp'] = Variable(binning=hist1d(40,0,200), label=r'm$_\text{W}$ (Neutrino Sampling)')
     variables['w_pt']       = Variable(binning=hist1d(20,0,1000),label=r'W p$_{\text{T}}$ (Neutrino Standard)')

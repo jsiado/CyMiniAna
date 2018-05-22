@@ -54,7 +54,9 @@ void DeepLearning::training(){
 void DeepLearning::inference(){
     /* Obtain results from LWTNN */
     loadFeatures();
-    m_discriminant = m_lwnn->compute(m_features);
+    m_predictions = m_lwnn->compute(m_features);
+
+    m_DNN = m_predictions.at(m_dnnKey);
 
     return;
 }

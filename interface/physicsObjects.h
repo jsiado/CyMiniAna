@@ -191,6 +191,7 @@ struct Neutrino : CmaBase{
     float pz_sampling;
     std::vector<float> pz_samplings;
     bool isImaginary;
+    float viper;
 };
 
 struct MET : CmaBase{

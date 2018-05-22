@@ -8,8 +8,10 @@ useWprime true
 wprimeReco true
 isExtendedSample false
 useDNN false
-DNNinference false
+DNNinference true
 DNNtraining false
+dnnFile config/viper/model.json
+dnnKey dnn
 jet_btag_wkpt M
 makeTTree true
 makeHistograms true
@@ -26,6 +28,6 @@ cutsfile config/cuts_mujets.txt,config/cuts_ejets.txt
 #cutsfile config/cuts_signal_mujets.txt,config/cuts_signal_ejets.txt
 treenames config/treenames.txt
 inputfile config/listOfAllSamples.txt
-NEvents 1
-firstEvent 8
+NEvents -1
+firstEvent 0
 verboseLevel INFO
