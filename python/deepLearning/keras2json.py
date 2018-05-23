@@ -26,8 +26,9 @@ input variables in preprocessing. The "default" value is optional.
 The "miscellaneous" object is also optional and can contain (key,
 value) pairs of strings to pass to the application.
 
+To run:
+$ python python/deepLearning/keras2json.py <arch> <variables> <hdf5_file>  > config/viper/model.json
 """
-
 import argparse
 import json
 import h5py
