@@ -15,16 +15,9 @@ Dependencies (available in CMSSW):
 
 ## Overview
 
-CyMiniAna is built to process both EDM  
-(from the [B2GAnaFW](https://github.com/cmsb2g/B2GAnaFW/tree/CMSSW_8_0_X_V3)) and flat ntuples.  
-Flat ntuples are generally much easier to work with, so the framework is designed
-to process the EDM ntuples into flat ntuples, which can then be used for analysis studies.
-
-  1. EDMNtuples
-     - Generate flat ntuples based on an event/object selection with histograms
-  2. Flat ntuples
-     - Generate histograms, efficiency curves, and skimmed/slimmed flat ntuples
-     - Perform variaous analysis studies
+CyMiniAna is built to process flat ntuples.  
+ - Generate histograms, efficiency curves, and skimmed/slimmed flat ntuples
+ - Perform variaous analysis studies
 
 Additionally, it is possible to generate publication-quality figures using python:
 
