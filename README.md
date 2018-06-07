@@ -1,4 +1,4 @@
-21 January 2018  
+7 June 2018  
 Dan Marley  
 
 
@@ -63,30 +63,23 @@ This package has been developed within an environment that includes the most rec
 [B2GAnaFW](https://github.com/cmsb2g/B2GAnaFW/tree/CMSSW_8_0_X_V3).  
 It is not completely necessary to include it, but it is recommended.
 
-This package depends on the [EventCounter](https://github.com/dmajumder/EventCounter) 
-and [lwtnn](https://github.com/lwtnn/lwtnn) packages.  
+This package depends on the  [lwtnn](https://github.com/lwtnn/lwtnn) package.  
 To include the `lwtnn` package, please follow the steps
 [here](https://github.com/demarley/lwtnn/tree/CMSSW_8_0_X-compatible#cmssw-compatibility).
-The `lwtnn` package is not currently used, but the dependency exists for future use.
+The `lwtnn` package is only used for testing purposes.
 
 ```shell
 ## setup CMSSW (slc6_amd64_gcc530)
-cmsrel CMSSW_8_0_26_patch1
-cd CMSSW_8_0_26_patch1/src/
+cmsrel CMSSW_9_4_4
+cd CMSSW_9_4_4/src/
 cmsenv
 git cms-init
 
 ## add necessary packages
 # 1. Clone the lwtnn package 
-# 2. Add the "EventCounter" package
+# 2. Add our code
 mkdir Analysis
-cd Analysis/
-git clone https://github.com/dmajumder/EventCounter.git
-cd ..
-
-## add our code
-cd Analysis/
-git clone https://github.com/b2g-wprime-qQ/CyMiniAna.git
+git clone https://github.com/b2g-wprime-qQ/CyMiniAna.git Analysis/CyMiniAna
 ```
 
 Once everything is checked out, compile it all!
