@@ -36,8 +36,8 @@ parser.add_argument('--hists', action='store',default=None,
 parser.add_argument('-o','--outpath', action='store',default='.',
                     dest='outpath',
                     help='Directory for storing output plots')
-parser.add_argument('-t','--treename', action='store',default='events',
-                    dest='treename',
+parser.add_argument('-t','--selection', action='store',default='events',
+                    dest='selection',
                     help='Treename used for making histograms')
 results = parser.parse_args()
 
@@ -45,24 +45,27 @@ results = parser.parse_args()
 outpath    = results.outpath
 files      = util.file2list(results.listOfFiles)
 histograms = util.file2list(results.listOfHists)
-treename   = results.treename
+selection   = results.selection
 betterColors  = hpt.betterColors()['linecolors']
 variables     = hpl.variable_labels()
 sample_labels = hpl.sample_labels()
-metadata = util.loadMetadata("config/sampleMetadata.txt")  # dictionary of metadata; key=primary dataset
+metadata = util.loadMetadata("config/sampleMetaData.txt")  # dictionary of metadata; key=primary dataset
 
 numberOfHists = 0
 # Access data -- assumes you are plotting histograms from multiple sources in one figure
+h_el_pt_ejets
+h_el_pt_mujets
+
 for hi,histogram in enumerate(histograms):
 
-    histogramName = histogram.replace("h_","").replace("_"+treename,"") # turn "h_jet_pt_events" into "jet_pt"
+    histogramName = histogram.replace("h_","").replace("_"+selection,"") # turn "h_jet_pt_events" into "jet_pt"
 
     print "  :: Plotting "+histogram+"\n"
 
     ## setup histogram
     hist = HepPlotter("histogram",1)
 
-    hist.ratio_plot  = False       # plot a ratio of things [Data/MC]
+    hist.ratio_plot  = True       # plot a ratio of things [Data/MC]
     hist.ratio_type  = "ratio"     # "ratio"
     hist.stacked     = True        # stack plots
     hist.rebin       = variables[histogramName].binning
@@ -77,18 +80,21 @@ for hi,histogram in enumerate(histograms):
     hist.CMSlabelStatus = 'Internal'  # ('Simulation')+'Internal' || 'Preliminary' 
 
     hist.initialize()
-
+    
     ## Add the data from each file
     for fi,file in enumerate(files):
         f  = ROOT.TFile.Open(file)
         pd = util.getPrimaryDataset(f)
         name = metadata[pd].sampleType      # compare primary dataset with metadatafile 
-
+        if name == "signal":
+           name = pd.split("_")[1]
         print "     > Opening data from ",file
         h_hist = getattr(f,histogram)       # retrieve the histogram
-
-        hist.Add(h_hist,name=name+"_"+histogram,linecolor=betterColors[numberOfHists],
-                 draw='step',label=sample_labels[name].label)
+        ratio_partner="h_el_pt_ejets" if histogram=="h_mu_pt_mujets" else "h_mu_pt_mujets"
+        ratio_den = histogram=="h_el_pt_ejets"
+        ratio_num = histogram=="h_mu_pt_mujets"
+        hist.Add(h_hist,name=fi+"_"+histogram,linecolor=betterColors[numberOfHists],
+                 draw='step',label=sample_labels[name].label,ratio_partner=ratio_partner)
         numberOfHists+=1
 
     plot = hist.execute()
