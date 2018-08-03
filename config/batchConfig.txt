@@ -1,10 +1,10 @@
 date today
 output_dir eos
-eos_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018/wprime-reco/Wp2500NarTp1200NarLH
-subdir Wp2500NarTp1200NarLH
+eos_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/myfiles/Wp2000WidTp900WidLH
+subdir Wp2000WidTp900WidLH
 eos_tarball_path /store/group/lpctlbsm/wprime-qQ/CyMiniAna/b2g-workshop-spring2018/wprime-reco
-files config/samples_ttbarAC_skim/listOfWp2500NarTp1200NarLH.txt
-username demarley
+files config/samples_ttbarAC_skim/listOfWp2000WidTp900WidLH.txt
+username jsiado
 executable run
 test False
 submit True

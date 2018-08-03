@@ -8,7 +8,7 @@ useWprime true
 wprimeReco true
 isExtendedSample false
 useDNN false
-DNNinference true
+DNNinference false
 DNNtraining false
 dnnFile config/viper/model.json
 dnnKey dnn

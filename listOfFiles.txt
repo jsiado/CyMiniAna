@@ -1,1 +1,2 @@
-mujets-ejets_W25NT12NL.root
+root://cmseos.fnal.gov//store/user/lpctlbsm/wprime-qQ/CyMiniAna/myfiles/signal_mujets-ejets_W25N_T12N_LH.root
+root://cmseos.fnal.gov//store/user/lpctlbsm/wprime-qQ/CyMiniAna/myfiles/ttbarAC.root
